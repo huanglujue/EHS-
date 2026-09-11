@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - 对讲未应答记录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .shift-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+        .shift-day { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .shift-night { background: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+        .team-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+        .plain-btn {
+            background: white;
+            color: #475569;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .plain-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+        .filter-label {
+            font-size: 14px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .filter-input::placeholder { color: #9ca3af; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+        table.record-table th {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        table.record-table td {
+            font-size: 13px;
+            color: #334155;
+            padding: 13px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.record-table tbody tr { transition: background 0.15s; }
+        table.record-table tbody tr:hover { background: #f8fafc; }
+        .op-link {
+            font-size: 13px;
+            color: #3b82f6;
+            margin-right: 14px;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+        .op-link:hover { color: #2563eb; }
+        .op-link.danger { color: #f87171; }
+        .op-link.danger:hover { color: #ef4444; }
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-size-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 26px 6px 10px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+        .jump-input {
+            width: 44px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            outline: none;
+        }
+        .jump-input:focus { border-color: #3b82f6; }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="max-w-[1500px] mx-auto space-y-4">
+
+    <!-- 对讲未应答记录 -->
+    <section class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">对讲未应答记录</h2>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+            <div class="flex items-center gap-2">
+                <label class="filter-label">测试时间：</label>
+                <input type="text" placeholder="请选择日期" class="filter-input w-40">
+                <span class="text-slate-400 text-sm">-</span>
+                <input type="text" placeholder="请选择日期" class="filter-input w-40">
+                <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-500 border border-slate-200 rounded-md" title="选择日期">
+                    <i class="far fa-calendar text-sm"></i>
+                </button>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">班别：</label>
+                <select class="filter-input filter-select w-44">
+                    <option value="">请选择班别</option>
+                    <option>全班</option>
+                    <option>白班</option>
+                    <option>晚班</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">基地：</label>
+                <select class="filter-input filter-select w-52">
+                    <option>菏泽基地 (HZ)</option>
+                    <option>宁德基地 (ND)</option>
+                    <option>宜宾基地 (YB)</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">区域：</label>
+                <select class="filter-input filter-select w-52">
+                    <option value="">请选择区域</option>
+                    <option>M1阴极前工序</option>
+                    <option>M1阳极前工序</option>
+                    <option>M2-MP01</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">工号：</label>
+                <input type="text" placeholder="请输入工号" class="filter-input w-36">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">值班人员：</label>
+                <input type="text" placeholder="请输入值班人员" class="filter-input w-40">
+            </div>
+            <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn">重置</button>
+        </div>
+
+        <!-- 记录列表 -->
+        <div class="overflow-x-auto">
+            <table class="w-full record-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>班别</th>
+                        <th>基地</th>
+                        <th>所属ERT队伍</th>
+                        <th>区域</th>
+                        <th>值班人员</th>
+                        <th>记录人</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-07-24</td>
+                        <td><span class="shift-badge shift-day">白班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT一队</span></td>
+                        <td>M1阴极前工序</td>
+                        <td>胡艺阳</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026-07-23</td>
+                        <td><span class="shift-badge shift-day">白班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT一队</span></td>
+                        <td>M1阴极前工序</td>
+                        <td>胡艺阳</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026-07-21</td>
+                        <td><span class="shift-badge shift-night">晚班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT二队</span></td>
+                        <td>M2-MP01</td>
+                        <td>郑志煌</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026-07-21</td>
+                        <td><span class="shift-badge shift-day">白班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT三队</span></td>
+                        <td>M1阴极前工序</td>
+                        <td>黄璐珏</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026-05-15</td>
+                        <td><span class="shift-badge shift-day">白班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT二队</span></td>
+                        <td>M1阴极前工序</td>
+                        <td>郑志煌</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                    <tr>
+                        <td>2026-05-10</td>
+                        <td><span class="shift-badge shift-day">白班</span></td>
+                        <td>菏泽基地</td>
+                        <td><span class="team-badge">ERT一队</span></td>
+                        <td>M1阳极前工序</td>
+                        <td>吴佳欣</td>
+                        <td>admin</td>
+                        <td class="text-center"><a href="javascript:void(0)" class="op-link danger">删除</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">共 6 条数据</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="page-size-select">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+                <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
+                <span class="text-sm text-slate-500 ml-2">跳至</span>
+                <input type="text" class="jump-input" value="1">
+                <span class="text-sm text-slate-500">/ 1 页</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+</body>
+</html>

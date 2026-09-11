@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - ERC成员名单</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #eef2ff;
+            color: #4f46e5;
+            border: 1px solid #c7d2fe;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+
+        table.member-table th {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        table.member-table td {
+            font-size: 13px;
+            color: #334155;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.member-table tbody tr { transition: background 0.15s; }
+        table.member-table tbody tr:hover { background: #f8fafc; }
+
+        .del-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .del-btn:hover { background: #fee2e2; border-color: #fca5a5; }
+
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 8px;
+            width: 480px;
+            max-width: 90vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: modalIn 0.2s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-size: 20px;
+            line-height: 1;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #475569; }
+        .modal-body { padding: 24px; }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label {
+            width: 90px;
+            text-align: right;
+            padding-right: 16px;
+            font-size: 14px;
+            color: #374151;
+            flex-shrink: 0;
+        }
+        .form-label .required {
+            color: #ef4444;
+            margin-right: 4px;
+        }
+        .form-control {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 9px 12px;
+            font-size: 14px;
+            color: #374151;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:disabled,
+        .form-control.readonly-like {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+        .form-user-wrap {
+            position: relative;
+            flex: 1;
+        }
+        .form-user-wrap .form-control { padding-right: 36px; }
+        .form-user-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+            font-size: 13px;
+        }
+        .form-user-wrap .form-control { padding-left: 32px; }
+        .form-user-wrap select.form-control { color: #374151; }
+        .form-user-wrap select.form-control:has(option[value=""]:checked) { color: #9ca3af; }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 0 24px 24px;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-confirm {
+            background: #3b82f6;
+            color: white;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover { background: #2563eb; }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="max-w-[1500px] mx-auto space-y-4">
+
+    <!-- ERC成员名单 -->
+    <section class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">ERC成员名单 <span class="count-badge">共 8 名成员</span></h2>
+            <button class="primary-btn" onclick="openModal()"><i class="fas fa-plus text-xs"></i>新增</button>
+        </div>
+
+        <!-- 成员列表 -->
+        <div class="overflow-x-auto">
+            <table class="w-full member-table">
+                <thead>
+                    <tr>
+                        <th>工号</th>
+                        <th>姓名</th>
+                        <th>所属部门</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ERC001</td>
+                        <td>张明华</td>
+                        <td>应急指挥中心</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC002</td>
+                        <td>李建国</td>
+                        <td>安全环保部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC003</td>
+                        <td>王志强</td>
+                        <td>生产运营部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC004</td>
+                        <td>刘晓峰</td>
+                        <td>设备维护部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC005</td>
+                        <td>陈建华</td>
+                        <td>仓储物流部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC006</td>
+                        <td>赵卫东</td>
+                        <td>质量管理部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC007</td>
+                        <td>孙立新</td>
+                        <td>人力资源部</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>ERC008</td>
+                        <td>周明远</td>
+                        <td>应急指挥中心</td>
+                        <td class="text-center"><button class="del-btn"><i class="far fa-trash-can text-xs"></i>删除</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">显示第 1 到 8 条，共 8 条</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button class="pager-btn" disabled>上一页</button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn">2</button>
+                <button class="pager-btn">3</button>
+                <button class="pager-btn">下一页</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- 新增ERC成员弹窗 -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>新增ERC成员</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>系统用户</label>
+                <div class="form-user-wrap">
+                    <select class="form-control form-select">
+                        <option value="">请选择用户（工号、姓名将自动带出）</option>
+                        <option>HC34174895&nbsp;&nbsp;缪荔艺</option>
+                        <option>HC89849662&nbsp;&nbsp;苗健</option>
+                        <option>HC59153940&nbsp;&nbsp;西岚</option>
+                        <option>HC26533325&nbsp;&nbsp;黎奕蓉</option>
+                    </select>
+                    <i class="fas fa-magnifying-glass form-user-icon"></i>
+                </div>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>工号</label>
+                <input type="text" class="form-control" placeholder="选择用户后自动带出" disabled>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>姓名</label>
+                <input type="text" class="form-control" placeholder="选择用户后自动带出" disabled>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>所属部门</label>
+                <input type="text" class="form-control" placeholder="选择用户后自动带出，可修改" disabled>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>基地</label>
+                <select class="form-control form-select">
+                    <option>菏泽基地 (HZ)</option>
+                    <option>宁德基地 (ND)</option>
+                    <option>宜宾基地 (YB)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn-confirm">确定</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('addModal').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('addModal').classList.remove('active');
+    }
+    // 点击遮罩关闭
+    document.getElementById('addModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+
+</body>
+</html>

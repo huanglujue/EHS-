@@ -73,7 +73,7 @@
             </header>
 
             <main class="flex-1 bg-gray-50 overflow-hidden relative">
-                <div id="welcome-screen" class="absolute inset-0 flex-col items-center justify-center text-gray-400 hidden">
+                <div id="welcome-screen" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 hidden">
                     <i class="fa-solid fa-layer-group text-6xl mb-4 text-gray-300"></i>
                     <h2 class="text-xl font-medium text-gray-500 mb-1">欢迎使用 EHS 管理平台</h2>
                     <p class="text-sm">请从左侧菜单选择功能模块</p>
@@ -496,6 +496,50 @@
                 parent = parent.parentElement;
             }
         }
+
+        // ================= 供子页面调用的全局跳转函数 =================
+        window.navigateTo = function(targetPath, targetTitle) {
+            // 1. 找到目标菜单项（通过路径匹配）
+            let targetMenuElement = null;
+            document.querySelectorAll('.menu-item').forEach(el => {
+                const onclickAttr = el.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes(targetPath)) {
+                    targetMenuElement = el;
+                }
+            });
+
+            // 2. 切换 iframe 内容
+            const iframe = document.getElementById('content-frame');
+            const welcome = document.getElementById('welcome-screen');
+            welcome.classList.add('hidden');
+            iframe.classList.remove('hidden');
+            iframe.src = targetPath;
+            document.getElementById('breadcrumb-title').textContent = targetTitle;
+
+            // 3. 更新左侧菜单高亮
+            document.querySelectorAll('.menu-item').forEach(el => {
+                el.classList.remove('menu-item-active', 'text-white');
+                el.classList.add('text-gray-300');
+            });
+            if (targetMenuElement) {
+                targetMenuElement.classList.add('menu-item-active', 'text-white');
+                targetMenuElement.classList.remove('text-gray-300');
+
+                // 展开父级菜单
+                let parent = targetMenuElement.parentElement;
+                while (parent && parent !== sidebarMenu) {
+                    if (parent.classList.contains('submenu')) {
+                        parent.classList.add('open');
+                        const prevSibling = parent.previousElementSibling;
+                        if (prevSibling) {
+                            const arrow = prevSibling.querySelector('.arrow-rotate');
+                            if (arrow) arrow.classList.add('rotated');
+                        }
+                    }
+                    parent = parent.parentElement;
+                }
+            }
+        };
 
         // ================= 页面初始化：默认加载首页 =================
         window.addEventListener('DOMContentLoaded', () => {
