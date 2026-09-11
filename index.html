@@ -6,6 +6,8 @@
     <title>海辰储能EHS管理平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown 渲染库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
@@ -24,6 +26,31 @@
 
         .arrow-rotate { transition: transform 0.3s ease; }
         .arrow-rotate.rotated { transform: rotate(90deg); }
+
+        /* ================= 说明抽屉样式 ================= */
+        #desc-drawer {
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+        }
+        #desc-drawer.open {
+            transform: translateX(0);
+        }
+
+        /* Markdown 渲染样式 */
+        .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.75rem; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .markdown-body h2 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #2563eb; }
+        .markdown-body h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.4rem; color: #374151; }
+        .markdown-body p { margin: 0.5rem 0; line-height: 1.7; color: #4b5563; font-size: 0.875rem; }
+        .markdown-body ul { margin: 0.5rem 0; padding-left: 1.25rem; list-style: disc; }
+        .markdown-body ol { margin: 0.5rem 0; padding-left: 1.25rem; list-style: decimal; }
+        .markdown-body li { margin: 0.25rem 0; color: #4b5563; font-size: 0.875rem; line-height: 1.6; }
+        .markdown-body strong { color: #111827; font-weight: 600; }
+        .markdown-body code { background: #f3f4f6; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.8rem; color: #dc2626; }
+        .markdown-body blockquote { border-left: 4px solid #93c5fd; background: #eff6ff; padding: 0.5rem 1rem; margin: 0.75rem 0; color: #1e40af; font-size: 0.85rem; border-radius: 0 6px 6px 0; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.8rem; }
+        .markdown-body table th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 0.5rem; text-align: left; font-weight: 600; color: #374151; }
+        .markdown-body table td { border: 1px solid #e5e7eb; padding: 0.5rem; color: #4b5563; }
+        .markdown-body hr { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
@@ -50,7 +77,7 @@
         </aside>
 
         <!-- ================= 右侧主区域 ================= -->
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 relative">
             
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
                 <div class="flex items-center text-sm text-gray-500">
@@ -59,6 +86,12 @@
                 </div>
 
                 <div class="flex items-center space-x-4">
+                    <!-- 查看说明按钮 -->
+                    <button onclick="toggleDescDrawer()" class="flex items-center px-3 py-1.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200">
+                        <i class="fa-solid fa-circle-info mr-1.5"></i>
+                        查看说明
+                    </button>
+
                     <div class="flex items-center cursor-pointer">
                         <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold mr-2">
                             超
@@ -82,6 +115,25 @@
                 <iframe id="content-frame" class="w-full h-full border-0" src="about:blank"></iframe>
             </main>
 
+            <!-- ================= 说明抽屉 ================= -->
+            <div id="desc-drawer" class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col border-l border-gray-200">
+                <!-- 抽屉头部 -->
+                <div class="h-16 flex items-center justify-between px-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>
+                        <span class="font-semibold text-gray-700">页面说明</span>
+                        <span id="desc-page-name" class="ml-2 text-xs text-gray-400 truncate max-w-[180px]"></span>
+                    </div>
+                    <button onclick="toggleDescDrawer()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- 抽屉内容 -->
+                <div id="desc-content" class="flex-1 overflow-y-auto p-5 markdown-body">
+                    <p class="text-gray-400 text-sm">请从左侧菜单选择一个页面。</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -472,82 +524,4 @@
             
             document.getElementById('breadcrumb-title').textContent = title;
 
-            document.querySelectorAll('.menu-item').forEach(el => {
-                el.classList.remove('menu-item-active');
-                el.classList.remove('text-white');
-                el.classList.add('text-gray-300');
-            });
-            
-            element.classList.add('menu-item-active');
-            element.classList.add('text-white');
-            element.classList.remove('text-gray-300');
-
-            // 展开父级菜单
-            let parent = element.parentElement;
-            while (parent && parent !== sidebarMenu) {
-                if (parent.classList.contains('submenu')) {
-                    parent.classList.add('open');
-                    const prevSibling = parent.previousElementSibling;
-                    if (prevSibling) {
-                        const arrow = prevSibling.querySelector('.arrow-rotate');
-                        if (arrow) arrow.classList.add('rotated');
-                    }
-                }
-                parent = parent.parentElement;
-            }
-        }
-
-        // ================= 供子页面调用的全局跳转函数 =================
-        window.navigateTo = function(targetPath, targetTitle) {
-            // 1. 找到目标菜单项（通过路径匹配）
-            let targetMenuElement = null;
-            document.querySelectorAll('.menu-item').forEach(el => {
-                const onclickAttr = el.getAttribute('onclick');
-                if (onclickAttr && onclickAttr.includes(targetPath)) {
-                    targetMenuElement = el;
-                }
-            });
-
-            // 2. 切换 iframe 内容
-            const iframe = document.getElementById('content-frame');
-            const welcome = document.getElementById('welcome-screen');
-            welcome.classList.add('hidden');
-            iframe.classList.remove('hidden');
-            iframe.src = targetPath;
-            document.getElementById('breadcrumb-title').textContent = targetTitle;
-
-            // 3. 更新左侧菜单高亮
-            document.querySelectorAll('.menu-item').forEach(el => {
-                el.classList.remove('menu-item-active', 'text-white');
-                el.classList.add('text-gray-300');
-            });
-            if (targetMenuElement) {
-                targetMenuElement.classList.add('menu-item-active', 'text-white');
-                targetMenuElement.classList.remove('text-gray-300');
-
-                // 展开父级菜单
-                let parent = targetMenuElement.parentElement;
-                while (parent && parent !== sidebarMenu) {
-                    if (parent.classList.contains('submenu')) {
-                        parent.classList.add('open');
-                        const prevSibling = parent.previousElementSibling;
-                        if (prevSibling) {
-                            const arrow = prevSibling.querySelector('.arrow-rotate');
-                            if (arrow) arrow.classList.add('rotated');
-                        }
-                    }
-                    parent = parent.parentElement;
-                }
-            }
-        };
-
-        // ================= 页面初始化：默认加载首页 =================
-        window.addEventListener('DOMContentLoaded', () => {
-            const homeMenu = document.getElementById('dashboard-home');
-            if (homeMenu) {
-                homeMenu.click();
-            }
-        });
-    </script>
-</body>
-</html>
+            document.querySelector

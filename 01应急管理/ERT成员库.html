@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHS应急指挥系统 - ERT/ERC管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .table-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        
+        .status-active { 
+            background-color: #dcfce7; 
+            color: #16a34a; 
+            border-color: #bbf7d0; 
+        }
+        .status-inactive { 
+            background-color: #f3f4f6; 
+            color: #6b7280; 
+            border-color: #e5e7eb; 
+        }
+        .status-expired {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        .btn-header {
+            transition: all 0.2s;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            display: inline-flex;
+            align-items: center;
+            background-color: white;
+            color: #374151;
+        }
+        .btn-header:hover {
+            background-color: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #fecaca;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover {
+            background-color: #fecaca;
+        }
+
+        .btn-edit {
+            background-color: #eff6ff;
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #bfdbfe;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover {
+            background-color: #dbeafe;
+        }
+
+        .warning-tag {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+        }
+
+        .filter-label {
+            color: #6b7280;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .filter-select {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 14px;
+            color: #374151;
+            background-color: white;
+            min-width: 140px;
+            width: 100%;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .filter-input {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px 12px 6px 32px;
+            font-size: 14px;
+            color: #374151;
+            width: 100%;
+        }
+        .filter-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Tab样式 */
+        .tab-btn {
+            position: relative;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #374151;
+        }
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .modal-enter {
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        /* ERT队伍表格样式 */
+        .team-table th {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #475569;
+            text-align: left;
+            font-size: 13px;
+        }
+        .team-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: top;
+        }
+        .team-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .org-name {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .area-name {
+            color: #166534;
+            font-weight: 500;
+            background-color: #f0fdf4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        .member-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #dbeafe;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .member-tag:hover {
+            background-color: #dbeafe;
+        }
+        .member-count {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        /* 排班表样式 */
+        .schedule-table {
+            border-collapse: collapse;
+            font-size: 13px;
+            width: 100%;
+        }
+        .schedule-table th {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 6px;
+            font-weight: 600;
+            color: #475569;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 12px;
+            text-align: center;
+        }
+        .schedule-table td {
+            border: 1px solid #e2e8f0;
+            padding: 8px 6px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .schedule-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        .schedule-table tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .org-cell {
+            background-color: #eff6ff;
+            color: #1e40af;
+            font-weight: 600;
+            text-align: left;
+            padding-left: 12px !important;
+        }
+        .shift-cell {
+            background-color: #fff7ed;
+            color: #c2410c;
+            font-weight: 500;
+        }
+        .role-commander {
+            background-color: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+        .role-member {
+            color: #374151;
+        }
+        .date-header {
+            background-color: #f1f5f9;
+            color: #475569;
+            min-width: 80px;
+        }
+        .schedule-name {
+            color: #1e40af;
+            font-weight: 500;
+        }
+        .more-dates {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Sticky列样式 - 调整后（去掉区域列） */
+        .sticky-col {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        .sticky-col-2 {
+            position: sticky;
+            left: 50px;
+            background-color: white;
+            z-index: 5;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        .sticky-col-3 {
+            position: sticky;
+            left: 180px;
+            background-color: white;
+            z-index: 5;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        .sticky-col-role {
+            position: sticky;
+            left: 240px;
+            background-color: white;
+            z-index: 5;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        th.sticky-col, th.sticky-col-2, th.sticky-col-3, th.sticky-col-role {
+            background-color: #f8fafc;
+            z-index: 15;
+        }
+    </style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <div class="p-6 max-w-[100%] mx-auto space-y-6">
+        
+
+
+        <!-- Tab导航（3个Tab） -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="flex px-4">
+                <button onclick="switchTab('ert')" id="tab-ert" class="tab-btn active">
+                    ERT成员库
+                </button>
+                <button onclick="switchTab('team')" id="tab-team" class="tab-btn">
+                    ERT队伍
+                </button>
+                <button onclick="switchTab('schedule')" id="tab-schedule" class="tab-btn">
+                    ERT队伍排班
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab1: ERT成员库 -->
+        <div id="content-ert" class="tab-content space-y-6">
+            <!-- 筛选栏 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center flex-wrap gap-6">
+                    <div class="flex items-center space-x-2">
+                        <span class="filter-label">基地：</span>
+                        <select class="filter-select focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>菏泽基地 (HZ)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="filter-label">所属部门：</span>
+                        <select class="filter-select focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>全部部门</option>
+                            <option>生产部</option>
+                            <option>安全部</option>
+                            <option>仓储部</option>
+                            <option>人事部</option>
+                            <option>设备部</option>
+                            <option>质量部</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="filter-label">状态：</span>
+                        <select class="filter-select focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option selected>全部</option>
+                            <option>有效</option>
+                            <option>培训不合格</option>
+                            <option>逾期未复训</option>
+                            <option>飞行测试不合格</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="filter-label">搜索：</span>
+                        <div class="relative">
+                            <input type="text" placeholder="输入姓名或工号" class="filter-input focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button class="px-5 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition font-medium shadow-sm">
+                            查询
+                        </button>
+                        <button class="px-4 py-1.5 text-gray-600 hover:text-gray-800 text-sm font-medium">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 成员列表 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h3 class="font-bold text-gray-800 text-base">ERT成员名单</h3>
+                        <span class="bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded font-medium">共 156 名成员</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="btn-primary" onclick="openMemberModal()">
+                            <i class="fas fa-plus mr-1"></i>新增ERT成员
+                        </button>
+                        <button class="btn-header">
+                            下载模板
+                        </button>
+                        <button class="btn-header">
+                            导入人员
+                        </button>
+                        <button class="btn-header">
+                            导出名单
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">工号</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">姓名</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">所属基地</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">所属部门</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">培训合格时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">复训时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">状态</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider font-semibold">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="table-row" onclick="openProfileModal('EMP001', '张三', 'ERT')">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-900">EMP001</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-900">张三</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-700">菏泽基地</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-700">生产部</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-600">2026-01-15</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-600">2027-01-15</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span class="status-badge status-active">有效</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm space-x-3">
+                                    <span class="text-blue-600 cursor-pointer hover:underline">编辑</span>
+                                    <span class="text-red-600 cursor-pointer hover:underline">删除</span>
+                                </td>
+                            </tr>
+                            <tr class="table-row" onclick="openProfileModal('EMP002', '李四', 'ERT')">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-900">EMP002</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-900">李四</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-700">菏泽基地</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-700">安全部</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-600">2025-03-25</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-600">2026-03-25</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span class="status-badge status-active">有效</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm space-x-3">
+                                    <span class="text-blue-600 cursor-pointer hover:underline">编辑</span>
+                                    <span class="text-red-600 cursor-pointer hover:underline">删除</span>
+                                </td>
+                            </tr>
+                            <tr class="table-row bg-gray-50/50" onclick="openProfileModal('EMP003', '王五', 'ERT')">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">EMP003</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">王五</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">菏泽基地</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">仓储部</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">2025-04-01</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">2026-04-01</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span class="status-badge status-expired">培训不合格</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm space-x-3">
+                                    <span class="text-blue-600 cursor-pointer hover:underline">编辑</span>
+                                    <span class="text-red-600 cursor-pointer hover:underline">删除</span>
+                                </td>
+                            </tr>
+                            <tr class="table-row bg-gray-50/50" onclick="openProfileModal('EMP004', '陈七', 'ERT')">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">EMP004</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">陈七</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">菏泽基地</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">人事部</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">2024-02-15</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">2025-02-15</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span class="status-badge status-expired">逾期未复训</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm space-x-3">
+                                    <span class="text-blue-600 cursor-pointer hover:underline">编辑</span>
+                                    <span class="text-red-600 cursor-pointer hover:underline">删除</span>
+                                </td>
+                            </tr>
+                            <tr class="table-row bg-gray-50/50" onclick="openProfileModal('EMP005', '刘八', 'ERT')">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">EMP005</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">刘八</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">菏泽基地</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-500">设备部</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">2025-08-20</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm text-gray-400">—</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span class="status-badge status-expired">飞行测试不合格</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm space-x-3">
+                                    <span class="text-blue-600 cursor-pointer hover:underline">编辑</span>
+                                    <span class="text-red-600 cursor-pointer hover:underline">删除</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-white">
+                    <div class="text-sm text-gray-500">
+                        显示第 1 到 5 条，共 156 条
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white disabled:opacity-50" disabled>
+                            上一页
+                        </button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm border border-blue-600">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white">2</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white">3</button>
+                        <span class="px-2 text-gray-600">...</span>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white">32</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white">
+                            下一页
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab2: ERT队伍 -->
+        <div id="content-team" class="tab-content space-y-6 hidden">
+            <!-- 查询条件栏 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center flex-wrap gap-4">
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">基地：</span>
+                        <select class="filter-select" id="filterBase">
+                            <option value="">菏泽基地 (HZ)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">区域：</span>
+                        <select class="filter-select" id="filterArea">
+                            <option value="">全部区域</option>
+                            <option value="M1-阴极前工序">M1-阴极前工序</option>
+                            <option value="M1-阳极前工序">M1-阳极前工序</option>
+                            <option value="M1-装配段">M1-装配段</option>
+                            <option value="M1干燥房">M1干燥房</option>
+                            <option value="M1测试段">M1测试段</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">部门：</span>
+                        <select class="filter-select" id="filterDept">
+                            <option value="">全部部门</option>
+                            <option>电芯生产部-Cell Production Department</option>
+                            <option>EHS</option>
+                            <option>安全部</option>
+                            <option>仓储部</option>
+                            <option>设备部</option>
+                            <option>质量部</option>
+                            <option>人事部</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-[2] min-w-[300px]">
+                        <span class="filter-label">搜索：</span>
+                        <div class="relative w-full">
+                            <input type="text" placeholder="搜索ERT组织名/成员姓名" class="filter-input w-full" id="searchOrgOrMember">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button class="px-5 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition font-medium shadow-sm">
+                            查询
+                        </button>
+                        <button class="px-4 py-1.5 text-gray-600 hover:text-gray-800 text-sm font-medium">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ERT队伍列表 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h3 class="font-bold text-gray-800 text-base">ERT队伍列表</h3>
+                        <span class="bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded font-medium">共 12 个ERT组织</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="btn-success" onclick="createTeam()">
+                            创建ERT队伍
+                        </button>
+                        <button class="btn-header">
+                            下载模板
+                        </button>
+                        <button class="btn-header">
+                            导入队伍
+                        </button>
+                        <button class="btn-header">
+                            导出队伍清单
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full team-table">
+                        <thead>
+                            <tr>
+                                <th class="w-[240px]">ERT组织</th>
+                                <th class="w-[220px]">部门</th>
+                                <th class="w-[160px]">组织对应区域</th>
+                                <th>成员</th>
+                                <th class="w-[150px] text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamTableBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-white">
+                    <div class="text-sm text-gray-500">
+                        显示第 1 到 12 条，共 12 条
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white disabled:opacity-50" disabled>
+                            上一页
+                        </button>
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm border border-blue-600">1</button>
+                        <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50 bg-white disabled:opacity-50" disabled>
+                            下一页
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab3: ERT队伍排班（已去掉组织对应三级区域列） -->
+        <div id="content-schedule" class="tab-content space-y-6 hidden">
+            <!-- 查询条件栏 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div class="flex items-center flex-wrap gap-4">
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">基地：</span>
+                        <select class="filter-select">
+                            <option value="">菏泽基地 (HZ)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">ERT组织：</span>
+                        <select class="filter-select" id="scheduleFilterOrg">
+                            <option value="">全部ERT组织</option>
+                            <option value="M1-阴极搅拌涂布ERT">M1-阴极搅拌涂布ERT</option>
+                            <option value="M1-阴极备料ERT">M1-阴极备料ERT</option>
+                            <option value="R1-L5-前工序ERT">R1-L5-前工序ERT</option>
+                            <option value="M1-阳极搅拌涂布ERT">M1-阳极搅拌涂布ERT</option>
+                            <option value="M1-阳极备料ERT">M1-阳极备料ERT</option>
+                            <option value="M1-装配车间ERT">M1-装配车间ERT(全工序L1-L6)</option>
+                            <option value="M1-L1/2/3干燥房ERT">M1-L1/2/3干燥房ERT</option>
+                            <option value="M1-L4L6干燥房ERT">M1-L4L6干燥房ERT</option>
+                            <option value="R1-L5-后工序包膜测试ERT">R1-L5-后工序包膜测试ERT</option>
+                            <option value="M1-L3-测试&常温静置ERT">M1-L3-测试&常温静置ERT</option>
+                            <option value="M1-L2-测试&常温静置ERT">M1-L2-测试&常温静置ERT</option>
+                            <option value="M1-L1-测试&常温静置ERT">M1-L1-测试&常温静置ERT</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">区域选择：</span>
+                        <select class="filter-select" id="scheduleFilterArea">
+                            <option value="">全部区域</option>
+                            <option value="M1-阴极前工序">M1-阴极前工序</option>
+                            <option value="M1-阳极前工序">M1-阳极前工序</option>
+                            <option value="M1-装配段">M1-装配段</option>
+                            <option value="M1干燥房">M1干燥房</option>
+                            <option value="M1测试段">M1测试段</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[150px]">
+                        <span class="filter-label">班别：</span>
+                        <select class="filter-select" id="scheduleFilterShift">
+                            <option value="">全部班别</option>
+                            <option value="白班">白班</option>
+                            <option value="夜班">夜班</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+                        <span class="filter-label">员工姓名：</span>
+                        <div class="relative w-full">
+                            <input type="text" placeholder="输入姓名搜索" class="filter-input w-full" id="scheduleFilterName">
+                            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button class="px-5 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition font-medium shadow-sm">
+                            查询
+                        </button>
+                        <button class="px-4 py-1.5 text-gray-600 hover:text-gray-800 text-sm font-medium">
+                            重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排班表（已去掉组织对应三级区域列） -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h3 class="font-bold text-gray-800 text-base">ERT队伍排班表</h3>
+                        <span class="text-xs text-gray-500">共 6 个ERT组织 · 12个班组</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="btn-success" onclick="createSchedule()">
+                            <i class="fas fa-plus mr-1"></i>新增排班
+                        </button>
+                        <button class="btn-header">
+                            导入排班表
+                        </button>
+                        <button class="btn-header">
+                            导出排班表
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar" style="max-height: 70vh;">
+                    <table class="schedule-table" id="scheduleTable">
+                        <thead>
+                            <tr>
+                                <th class="sticky-col w-12">序号</th>
+                                <th class="sticky-col-2 w-[130px]">ERT组织</th>
+                                <th class="sticky-col-3 w-[60px]">班别</th>
+                                <th class="sticky-col-role w-[80px]">组织角色</th>
+                                <th class="date-header">3月1日</th>
+                                <th class="date-header">3月2日</th>
+                                <th class="date-header">3月3日</th>
+                                <th class="date-header">3月4日</th>
+                                <th class="date-header">3月5日</th>
+                                <th class="date-header">3月6日</th>
+                                <th class="date-header">3月7日</th>
+                                <th class="date-header">3月8日</th>
+                                <th class="date-header">3月9日</th>
+                                <th class="date-header">3月10日</th>
+                                <th class="more-dates w-16">...</th>
+                                <th class="sticky-col-action w-[80px]" style="position:sticky;right:0;z-index:15;background-color:#f8fafc;box-shadow:-2px 0 5px -2px rgba(0,0,0,0.1);">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗：查看成员档案 -->
+    <div id="profileModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm" onclick="closeProfileModal()"></div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl modal-enter max-h-[90vh] flex flex-col">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/50 shrink-0">
+                    <h3 class="text-lg font-bold text-gray-800">成员应急档案</h3>
+                    <button onclick="closeProfileModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+                        ×
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                    <div class="bg-white border border-gray-200 rounded-lg p-5 flex items-start space-x-6 shadow-sm">
+                        <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold shrink-0" id="profileAvatar">
+                            张
+                        </div>
+                        <div class="flex-1 grid grid-cols-3 gap-y-4 gap-x-6">
+                            <div>
+                                <div class="text-xs text-gray-500 mb-1">姓名</div>
+                                <div class="text-sm font-medium text-gray-900" id="profileName">张三</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 mb-1">工号</div>
+                                <div class="text-sm font-medium text-gray-900" id="profileEmpId">EMP001</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 mb-1">所属部门</div>
+                                <div class="text-sm font-medium text-gray-900" id="profileDept">生产部</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 mb-1">成员类型</div>
+                                <div id="profileType">
+                                    <span class="status-badge badge-ert py-0.5 px-2 bg-purple-50 text-purple-700 border-purple-200">ERT成员</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 mb-1">当前状态</div>
+                                <div><span class="status-badge status-active py-0.5 px-2">有效</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-800 mb-3 flex items-center border-l-4 border-blue-500 pl-2">
+                            历史培训及考核记录
+                        </h4>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-gray-50 text-gray-600 font-medium border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-4 py-3">培训任务编号</th>
+                                        <th class="px-4 py-3">培训类型</th>
+                                        <th class="px-4 py-3">完成时间</th>
+                                        <th class="px-4 py-3">理论成绩</th>
+                                        <th class="px-4 py-3">实操成绩</th>
+                                        <th class="px-4 py-3">考核结论</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white" id="profileRecords">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end shrink-0 rounded-b-xl">
+                    <button onclick="closeProfileModal()" class="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗：批量新增ERT成员 -->
+    <div id="memberModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm" onclick="closeMemberModal()"></div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl modal-enter">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+                    <h3 class="text-lg font-bold text-gray-800">批量新增ERT成员</h3>
+                    <button onclick="closeMemberModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+                        ×
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2 flex-1">
+                            <label class="text-sm text-gray-700 whitespace-nowrap"><span class="text-red-500">*</span> 培训合格时间</label>
+                            <input type="date" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex items-center space-x-2 flex-1">
+                            <label class="text-sm text-gray-700 whitespace-nowrap"><span class="text-red-500">*</span> 复训时间</label>
+                            <input type="date" class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex items-center space-x-2 flex-1">
+                            <label class="text-sm text-gray-700 whitespace-nowrap"><span class="text-red-500">*</span> 状态</label>
+                            <select class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>有效</option>
+                                <option>培训不合格</option>
+                                <option>逾期未复训</option>
+                                <option>飞行测试不合格</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-700">人员信息（<span id="memberRowCount">1</span>）</span>
+                        <button class="btn-edit" onclick="addMemberRow()">新增一行</button>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 text-gray-600 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3">姓名</th>
+                                    <th class="px-4 py-3">工号</th>
+                                    <th class="px-4 py-3">部门</th>
+                                    <th class="px-4 py-3 w-24">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memberRows" class="divide-y divide-gray-200 bg-white">
+                                <tr>
+                                    <td class="px-4 py-2.5">
+                                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option>请选择系统用户</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-4 py-2.5">
+                                        <input type="text" disabled placeholder="选择用户后自动带出" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
+                                    </td>
+                                    <td class="px-4 py-2.5">
+                                        <input type="text" disabled placeholder="选择用户后自动带出" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
+                                    </td>
+                                    <td class="px-4 py-2.5 text-center">
+                                        <span class="text-red-600 cursor-pointer hover:underline" onclick="removeMemberRow(this)">删除</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 rounded-b-xl">
+                    <button onclick="closeMemberModal()" class="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition">取消</button>
+                    <button onclick="saveMembers()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗：创建/编辑ERT队伍 -->
+    <div id="teamModal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm" onclick="closeTeamModal()"></div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg modal-enter">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+                    <h3 class="text-lg font-bold text-gray-800" id="teamModalTitle">创建ERT队伍</h3>
+                    <button onclick="closeTeamModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+                        ×
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <label class="w-28 text-sm text-gray-700 text-right shrink-0"><span class="text-red-500">*</span> 基地</label>
+                        <select id="teamBase" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>菏泽基地 (HZ)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="w-28 text-sm text-gray-700 text-right shrink-0"><span class="text-red-500">*</span> ERT组织名称</label>
+                        <div class="flex-1 relative">
+                            <input type="text" id="teamName" maxlength="40" placeholder="请输入ERT组织名称" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span id="teamNameCount" class="absolute right-3 top-2.5 text-xs text-gray-400">0/40</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="w-28 text-sm text-gray-700 text-right shrink-0"><span class="text-red-500">*</span> 区域</label>
+                        <select id="teamArea" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">请选择所属区域</option>
+                            <option value="M1-阴极前工序">M1-阴极前工序</option>
+                            <option value="M1-阳极前工序">M1-阳极前工序</option>
+                            <option value="M1-装配段">M1-装配段</option>
+                            <option value="M1干燥房">M1干燥房</option>
+                            <option value="M1测试段">M1测试段</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="w-28 text-sm text-gray-700 text-right shrink-0"><span class="text-red-500">*</span> 部门</label>
+                        <select id="teamDept" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">请选择部门</option>
+                            <option>电芯生产部-Cell Production Department</option>
+                            <option>EHS</option>
+                            <option>安全部</option>
+                            <option>仓储部</option>
+                            <option>设备部</option>
+                            <option>质量部</option>
+                            <option>人事部</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <label class="w-28 text-sm text-gray-700 text-right shrink-0"><span class="text-red-500">*</span> 成员</label>
+                        <input type="text" id="teamMembers" placeholder="请输入姓名或工号进行筛选并选择" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 rounded-b-xl">
+                    <button onclick="closeTeamModal()" class="px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition">取消</button>
+                    <button onclick="saveTeam()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 随机姓名生成器
+        function generateRandomName() {
+            const surnames = ['赵', '钱', '孙', '李', '周', '吴', '郑', '王', '冯', '陈', '褚', '卫', '蒋', '沈', '韩', '杨', '朱', '秦', '尤', '许', '何', '吕', '施', '张', '孔', '曹', '严', '华', '金', '魏', '陶', '姜', '戚', '谢', '邹', '喻', '柏', '水', '窦', '章', '云', '苏', '潘', '葛', '奚', '范', '彭', '郎', '鲁', '韦', '昌', '马', '苗', '凤', '花', '方', '俞', '任', '袁', '柳', '酆', '鲍', '史', '唐', '费', '廉', '岑', '薛', '雷', '贺', '倪', '汤'];
+            const names = ['伟', '芳', '娜', '秀', '英', '敏', '静', '丽', '强', '磊', '军', '洋', '勇', '艳', '杰', '娟', '涛', '明', '超', '文', '辉', '刚', '平', '桂', '婷', '宇', '欣', '雨', '晨', '轩', '昊', '瑞', '嘉', '怡', '博', '浩', '泽', '佳', '琪', '梓', '涵', '思', '彤', '睿', '航', '悦', '宸', '希', '瑾', '瑜', '骏', '驰', '皓', '阳', '洋', '凯', '云', '龙', '虎', '豹', '翔', '鹏', '程', '远', '志', '强', '国', '泰', '明', '亮', '晓', '光', '辉', '耀', '兴', '旺', '盛', '世', '博', '睿', '智', '慧', '敏', '捷', '俊', '峰', '岭', '山', '川', '河', '海', '波', '涛', '浪', '潮', '冰', '雪', '霜', '露', '雷', '电', '风', '雨', '雾', '霜', '霞', '彩', '虹'];
+            
+            const surname = surnames[Math.floor(Math.random() * surnames.length)];
+            const name1 = names[Math.floor(Math.random() * names.length)];
+            const name2 = Math.random() > 0.5 ? names[Math.floor(Math.random() * names.length)] : '';
+            return surname + name1 + name2;
+        }
+
+        // Tab切换逻辑
+        function switchTab(tabName) {
+            document.getElementById('content-ert').classList.add('hidden');
+            document.getElementById('content-team').classList.add('hidden');
+            document.getElementById('content-schedule').classList.add('hidden');
+            document.getElementById('tab-ert').classList.remove('active');
+            document.getElementById('tab-team').classList.remove('active');
+            document.getElementById('tab-schedule').classList.remove('active');
+            document.getElementById('content-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // 生成ERT队伍数据
+        function generateTeamTable() {
+            const ertTeams = [
+                { name: 'M1-阴极搅拌涂布ERT', area: 'M1-阴极前工序', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-阴极备料ERT', area: 'M1-阴极前工序', dept: '电芯生产部-Cell Production Department' },
+                { name: 'R1-L5-前工序ERT', area: 'M1-阴极前工序', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-阳极搅拌涂布ERT', area: 'M1-阳极前工序', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-阳极备料ERT', area: 'M1-阳极前工序', dept: '-' },
+                { name: 'M1-装配车间ERT(全工序L1-L6)', area: 'M1-装配段', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-L1/2/3干燥房ERT', area: 'M1干燥房', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-L4L6干燥房ERT', area: 'M1干燥房', dept: '-' },
+                { name: 'R1-L5-后工序包膜测试ERT', area: 'M1测试段', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-L3-测试&常温静置ERT', area: 'M1测试段', dept: '电芯生产部-Cell Production Department' },
+                { name: 'M1-L2-测试&常温静置ERT', area: 'M1测试段', dept: '-' },
+                { name: 'M1-L1-测试&常温静置ERT', area: 'M1测试段', dept: '电芯生产部-Cell Production Department' }
+            ];
+
+            const tbody = document.getElementById('teamTableBody');
+            let html = '';
+
+            ertTeams.forEach((team, index) => {
+                let membersHtml = '';
+                for (let i = 0; i < 12; i++) {
+                    const name = generateRandomName();
+                    membersHtml += `<span class="member-tag" onclick="openProfileModal('EMP${100+index*10+i}', '${name}', 'ERT'); event.stopPropagation();">${name}</span>`;
+                }
+
+                html += `
+                    <tr class="table-row">
+                        <td>
+                            <div class="org-name">${team.name}</div>
+                        </td>
+                        <td class="text-sm text-gray-700">${team.dept}</td>
+                        <td>
+                            <span class="area-name">${team.area}</span>
+                        </td>
+                        <td>
+                            <div class="flex flex-wrap gap-1">
+                                ${membersHtml}
+                                <span class="member-count">共12人</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                <button class="btn-edit" onclick="editTeam('${team.name}', '${team.area}', '${team.dept}'); event.stopPropagation();">
+                                    编辑
+                                </button>
+                                <button class="btn-danger" onclick="deleteTeam(this); event.stopPropagation();">
+                                    删除
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // 生成排班表数据（已去掉组织对应三级区域列）
+        function generateScheduleTable() {
+            const ertOrgs = [
+                { name: 'M1-阴极搅拌涂布ERT', area: 'M1-阴极前工序' },
+                { name: 'M1-阳极搅拌涂布ERT', area: 'M1-阳极前工序' },
+                { name: 'M1-阴极备料ERT', area: 'M1-阴极备料' },
+                { name: 'M1-阳极备料ERT', area: 'M1-阳极备料' },
+                { name: 'M1-装配ERT', area: 'M1-装配段' },
+                { name: 'M1-化成ERT', area: 'M1-化成段' }
+            ];
+
+            const shifts = ['白班', '夜班'];
+            const roles = ['指挥员', '成员1', '成员2', '成员3', '成员4'];
+
+            const tbody = document.getElementById('scheduleBody');
+            let html = '';
+            let globalIndex = 1;
+
+            ertOrgs.forEach((org, orgIndex) => {
+                shifts.forEach((shift, shiftIndex) => {
+                    roles.forEach((role, roleIndex) => {
+                        const roleClass = roleIndex === 0 ? 'role-commander' : 'role-member';
+                        
+                        // 为每个日期生成排班人员（随机姓名）- 只生成1-10日
+                        let dateCells = '';
+                        for (let day = 1; day <= 10; day++) {
+                            const name = generateRandomName();
+                            dateCells += `<td class="schedule-name">${name}</td>`;
+                        }
+                        // 第11列显示"..."表示还有更多日期
+                        dateCells += `<td class="more-dates text-gray-400">...</td>`;
+
+                        // 合并单元格逻辑
+                        const orgRowspan = shifts.length * roles.length; // 10
+                        const shiftRowspan = roles.length; // 5
+                        
+                        let orgCell = '';
+                        let shiftCell = '';
+                        
+                        // ERT组织单元格（每组织一次）
+                        if (shiftIndex === 0 && roleIndex === 0) {
+                            orgCell = `<td class="org-cell sticky-col-2" rowspan="${orgRowspan}">${org.name}</td>`;
+                        }
+                        
+                        // 班别单元格（每班一次）
+                        if (roleIndex === 0) {
+                            shiftCell = `<td class="shift-cell sticky-col-3" rowspan="${shiftRowspan}">${shift}</td>`;
+                        }
+
+                        // 操作列：每个ERT队伍每个班次合并展示一个编辑按钮
+                        let actionCell = '';
+                        if (roleIndex === 0) {
+                            actionCell = `<td class="sticky-col-action" rowspan="${shiftRowspan}" style="position:sticky;right:0;z-index:5;background-color:white;box-shadow:-2px 0 5px -2px rgba(0,0,0,0.1);vertical-align:middle;"><button class="btn-edit" onclick="editSchedule('${org.name}', '${shift}'); event.stopPropagation();"><i class="fas fa-edit mr-1"></i>编辑</button></td>`;
+                        }
+
+                        html += `
+                            <tr class="table-row">
+                                <td class="sticky-col text-center text-gray-600">${globalIndex}</td>
+                                ${orgCell}
+                                ${shiftCell}
+                                <td class="${roleClass} sticky-col-role">${role}</td>
+                                ${dateCells}
+                                ${actionCell}
+                            </tr>
+                        `;
+                        globalIndex++;
+                    });
+                });
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // 创建队伍弹窗
+        function createTeam() {
+            document.getElementById('teamModalTitle').innerText = '创建ERT队伍';
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamNameCount').innerText = '0/40';
+            document.getElementById('teamArea').value = '';
+            document.getElementById('teamDept').value = '';
+            document.getElementById('teamMembers').value = '';
+            document.getElementById('teamModal').classList.remove('hidden');
+        }
+
+        // 编辑队伍
+        function editTeam(name, area, dept) {
+            document.getElementById('teamModalTitle').innerText = '编辑ERT队伍';
+            document.getElementById('teamName').value = name;
+            document.getElementById('teamNameCount').innerText = name.length + '/40';
+            document.getElementById('teamArea').value = area;
+            document.getElementById('teamDept').value = dept === '-' ? '' : dept;
+            document.getElementById('teamMembers').value = '';
+            document.getElementById('teamModal').classList.remove('hidden');
+        }
+
+        // 关闭队伍弹窗
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.add('hidden');
+        }
+
+        // 保存队伍
+        function saveTeam() {
+            const name = document.getElementById('teamName').value;
+            const area = document.getElementById('teamArea').value;
+            const dept = document.getElementById('teamDept').value;
+            const members = document.getElementById('teamMembers').value;
+
+            if (!name || !area || !dept || !members) {
+                alert('请填写完整信息');
+                return;
+            }
+            closeTeamModal();
+            alert('保存成功！');
+        }
+
+        // ERT组织名称字数统计
+        document.getElementById('teamName').addEventListener('input', function() {
+            document.getElementById('teamNameCount').innerText = this.value.length + '/40';
+        });
+
+        // 批量新增ERT成员弹窗逻辑
+        function openMemberModal() {
+            document.getElementById('memberModal').classList.remove('hidden');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
+
+        function addMemberRow() {
+            const tbody = document.getElementById('memberRows');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-4 py-2.5">
+                    <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option>请选择系统用户</option>
+                    </select>
+                </td>
+                <td class="px-4 py-2.5">
+                    <input type="text" disabled placeholder="选择用户后自动带出" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
+                </td>
+                <td class="px-4 py-2.5">
+                    <input type="text" disabled placeholder="选择用户后自动带出" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-400">
+                </td>
+                <td class="px-4 py-2.5 text-center">
+                    <span class="text-red-600 cursor-pointer hover:underline" onclick="removeMemberRow(this)">删除</span>
+                </td>`;
+            tbody.appendChild(tr);
+            updateMemberRowCount();
+        }
+
+        function removeMemberRow(el) {
+            const tbody = document.getElementById('memberRows');
+            if (tbody.children.length > 1) {
+                el.closest('tr').remove();
+                updateMemberRowCount();
+            }
+        }
+
+        function updateMemberRowCount() {
+            document.getElementById('memberRowCount').innerText = document.getElementById('memberRows').children.length;
+        }
+
+        function saveMembers() {
+            closeMemberModal();
+            alert('保存成功！');
+        }
+
+        // 删除队伍
+        function deleteTeam(btn) {
+            if (confirm('确定要删除该ERT队伍吗？')) {
+                btn.closest('tr').remove();
+            }
+        }
+
+        // 查看档案弹窗逻辑
+        function openProfileModal(empId, name, type) {
+            document.getElementById('profileEmpId').innerText = empId;
+            document.getElementById('profileName').innerText = name;
+            document.getElementById('profileAvatar').innerText = name.charAt(0);
+            
+            const typeHtml = type === 'ERT' 
+                ? '<span class="status-badge badge-ert py-0.5 px-2 bg-purple-50 text-purple-700 border-purple-200">ERT成员</span>'
+                : '<span class="erc-badge py-0.5 px-2">ERC成员</span>';
+            document.getElementById('profileType').innerHTML = typeHtml;
+            
+            const recordsHtml = type === 'ERT' ? `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">TRN-2026-005</td>
+                    <td class="px-4 py-3 text-gray-700">ERT年度复训</td>
+                    <td class="px-4 py-3 text-gray-600">2026-01-15</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">95</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">90</td>
+                    <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-medium">合格</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">TRN-2025-042</td>
+                    <td class="px-4 py-3 text-gray-700">ERT专项演练培训</td>
+                    <td class="px-4 py-3 text-gray-600">2025-08-15</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">88</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">92</td>
+                    <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-medium">合格</span></td>
+                </tr>
+            ` : `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">TRN-2026-008</td>
+                    <td class="px-4 py-3 text-gray-700">ERC指挥能力培训</td>
+                    <td class="px-4 py-3 text-gray-600">2026-02-20</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">98</td>
+                    <td class="px-4 py-3 text-gray-900 font-medium">96</td>
+                    <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-medium">合格</span></td>
+                </tr>
+            `;
+            document.getElementById('profileRecords').innerHTML = recordsHtml;
+            
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+        
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        // 编辑排班
+        function editSchedule(orgName, shift) {
+            alert('编辑排班：' + orgName + ' - ' + shift);
+        }
+
+        // 新增排班
+        function createSchedule() {
+            alert('新增排班');
+        }
+
+        // 初始化
+        generateTeamTable();
+        generateScheduleTable();
+    </script>
+</body>
+</html>
