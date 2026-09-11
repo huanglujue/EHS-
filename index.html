@@ -6,43 +6,30 @@
     <title>海辰储能EHS管理平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Markdown 渲染库 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        
         .sidebar-scroll::-webkit-scrollbar-track { background: #1e293b; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #475569; }
         .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
         .menu-item-active { background-color: #2563eb; color: #ffffff; }
         .menu-item-active:hover { background-color: #1d4ed8; }
-        
         .submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .submenu.open { max-height: 2000px; transition: max-height 0.5s ease-in; }
-
+        .submenu.open { max-height: 3000px; transition: max-height 0.5s ease-in; }
         .arrow-rotate { transition: transform 0.3s ease; }
         .arrow-rotate.rotated { transform: rotate(90deg); }
-
-        /* ================= 说明抽屉样式 ================= */
-        #desc-drawer {
-            transition: transform 0.3s ease;
-            transform: translateX(100%);
-        }
-        #desc-drawer.open {
-            transform: translateX(0);
-        }
-
-        /* Markdown 渲染样式 */
+        #desc-drawer { transition: transform 0.3s ease; transform: translateX(100%); }
+        #desc-drawer.open { transform: translateX(0); }
         .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.75rem; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
         .markdown-body h2 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #2563eb; }
         .markdown-body h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.4rem; color: #374151; }
         .markdown-body p { margin: 0.5rem 0; line-height: 1.7; color: #4b5563; font-size: 0.875rem; }
-        .markdown-body ul { margin: 0.5rem 0; padding-left: 1.25rem; list-style: disc; }
-        .markdown-body ol { margin: 0.5rem 0; padding-left: 1.25rem; list-style: decimal; }
+        .markdown-body ul, .markdown-body ol { margin: 0.5rem 0; padding-left: 1.25rem; }
+        .markdown-body ul { list-style: disc; }
+        .markdown-body ol { list-style: decimal; }
         .markdown-body li { margin: 0.25rem 0; color: #4b5563; font-size: 0.875rem; line-height: 1.6; }
         .markdown-body strong { color: #111827; font-weight: 600; }
         .markdown-body code { background: #f3f4f6; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.8rem; color: #dc2626; }
@@ -54,474 +41,457 @@
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
-
-    <div class="flex h-screen overflow-hidden">
-        
-        <!-- ================= 左侧侧边栏 ================= -->
-        <aside class="w-64 bg-[#0f172a] text-gray-300 flex flex-col flex-shrink-0">
-            <div class="h-16 flex items-center px-6 border-b border-gray-700/50">
-                <i class="fa-solid fa-cube text-blue-500 text-xl mr-3"></i>
-                <span class="text-white font-bold text-lg tracking-wide">海辰储能EHS</span>
+<div class="flex h-screen overflow-hidden">
+    <aside class="w-64 bg-[#0f172a] text-gray-300 flex flex-col flex-shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-gray-700/50">
+            <i class="fa-solid fa-cube text-blue-500 text-xl mr-3"></i>
+            <span class="text-white font-bold text-lg tracking-wide">海辰储能EHS</span>
+        </div>
+        <div class="px-4 py-3">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-500 text-sm"></i>
+                <input type="text" placeholder="搜索菜单" class="w-full bg-[#1e293b] text-sm text-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500">
             </div>
+        </div>
+        <nav id="sidebar-menu" class="flex-1 overflow-y-auto sidebar-scroll px-2 pb-4"></nav>
+    </aside>
 
-            <div class="px-4 py-3">
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-500 text-sm"></i>
-                    <input type="text" placeholder="搜索菜单" class="w-full bg-[#1e293b] text-sm text-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500">
+    <div class="flex-1 flex flex-col min-w-0 relative">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
+            <div class="flex items-center text-sm text-gray-500">
+                <i class="fa-solid fa-house mr-2 text-gray-400"></i>
+                <span id="breadcrumb-title">EHS驾驶舱总览</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleDescDrawer()" class="flex items-center px-3 py-1.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200">
+                    <i class="fa-solid fa-circle-info mr-1.5"></i> 查看说明
+                </button>
+                <div class="flex items-center cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold mr-2">超</div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium text-gray-700 leading-tight">超级管理员</span>
+                        <span class="text-xs text-gray-400">admin</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-2"></i>
                 </div>
             </div>
+        </header>
 
-            <nav id="sidebar-menu" class="flex-1 overflow-y-auto sidebar-scroll px-2 pb-4">
-                <!-- JS 渲染菜单 -->
-            </nav>
-        </aside>
+        <main class="flex-1 bg-gray-50 overflow-hidden relative">
+            <div id="welcome-screen" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 hidden">
+                <i class="fa-solid fa-layer-group text-6xl mb-4 text-gray-300"></i>
+                <h2 class="text-xl font-medium text-gray-500 mb-1">欢迎使用 EHS 管理平台</h2>
+                <p class="text-sm">请从左侧菜单选择功能模块</p>
+            </div>
+            <iframe id="content-frame" class="w-full h-full border-0" src="about:blank"></iframe>
+        </main>
 
-        <!-- ================= 右侧主区域 ================= -->
-        <div class="flex-1 flex flex-col min-w-0 relative">
-            
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-10">
-                <div class="flex items-center text-sm text-gray-500">
-                    <i class="fa-solid fa-house mr-2 text-gray-400"></i>
-                    <span id="breadcrumb-title">EHS驾驶舱总览</span>
+        <div id="desc-drawer" class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col border-l border-gray-200">
+            <div class="h-16 flex items-center justify-between px-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>
+                    <span class="font-semibold text-gray-700">页面说明</span>
+                    <span id="desc-page-name" class="ml-2 text-xs text-gray-400 truncate max-w-[180px]"></span>
                 </div>
-
-                <div class="flex items-center space-x-4">
-                    <!-- 查看说明按钮 -->
-                    <button onclick="toggleDescDrawer()" class="flex items-center px-3 py-1.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200">
-                        <i class="fa-solid fa-circle-info mr-1.5"></i>
-                        查看说明
-                    </button>
-
-                    <div class="flex items-center cursor-pointer">
-                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold mr-2">
-                            超
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-medium text-gray-700 leading-tight">超级管理员</span>
-                            <span class="text-xs text-gray-400">admin</span>
-                        </div>
-                        <i class="fa-solid fa-chevron-down text-gray-400 text-xs ml-2"></i>
-                    </div>
-                </div>
-            </header>
-
-            <main class="flex-1 bg-gray-50 overflow-hidden relative">
-                <div id="welcome-screen" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 hidden">
-                    <i class="fa-solid fa-layer-group text-6xl mb-4 text-gray-300"></i>
-                    <h2 class="text-xl font-medium text-gray-500 mb-1">欢迎使用 EHS 管理平台</h2>
-                    <p class="text-sm">请从左侧菜单选择功能模块</p>
-                </div>
-                
-                <iframe id="content-frame" class="w-full h-full border-0" src="about:blank"></iframe>
-            </main>
-
-            <!-- ================= 说明抽屉 ================= -->
-            <div id="desc-drawer" class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-50 flex flex-col border-l border-gray-200">
-                <!-- 抽屉头部 -->
-                <div class="h-16 flex items-center justify-between px-5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>
-                        <span class="font-semibold text-gray-700">页面说明</span>
-                        <span id="desc-page-name" class="ml-2 text-xs text-gray-400 truncate max-w-[180px]"></span>
-                    </div>
-                    <button onclick="toggleDescDrawer()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <i class="fa-solid fa-xmark text-lg"></i>
-                    </button>
-                </div>
-
-                <!-- 抽屉内容 -->
-                <div id="desc-content" class="flex-1 overflow-y-auto p-5 markdown-body">
-                    <p class="text-gray-400 text-sm">请从左侧菜单选择一个页面。</p>
-                </div>
+                <button onclick="toggleDescDrawer()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="desc-content" class="flex-1 overflow-y-auto p-5 markdown-body">
+                <p class="text-gray-400 text-sm">请从左侧菜单选择一个页面。</p>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // ================= 菜单数据 (路径已适配文件夹结构) =================
-        const menuData = [
-            { name: "EHS驾驶舱总览", icon: "fa-chart-pie", path: "01应急管理/dashboard-overview.html", id: "dashboard-home" },
-            { 
-                name: "应急管理", 
-                icon: "fa-bell", 
-                children: [
-                    { name: "值班记录", path: "01应急管理/值班记录.html" },
-                    { name: "今日排班", path: "01应急管理/今日排班.html" },
-                    { name: "对讲未应答记录", path: "01应急管理/对讲未应答记录.html" },
-                    { name: "ERC成员库", path: "01应急管理/ERC成员库.html" },
-                    { name: "ERT成员库", path: "01应急管理/ERT成员库.html" },
-                    { name: "应急培训", path: "01应急管理/应急培训.html" },
-                    { name: "应急预案", path: "01应急管理/应急预案.html" },
-                    { 
-                        name: "应急点检", 
-                        children: [
-                            { name: "点检任务", path: "01应急管理/应急点检/点检任务.html" },
-                            { name: "物资柜点分布", path: "01应急管理/应急点检/物资柜点分布.html" },
-                            { name: "物资维护清单", path: "01应急管理/应急点检/物资维护清单.html" }
-                        ]
-                    },
-                    { 
-                        name: "应急演练", 
-                        children: [
-                            { name: "应急演练", path: "01应急管理/应急演练/应急演练.html" },
-                            { name: "年度演练计划", path: "01应急管理/应急演练/年度演练计划.html" }
-                        ]
-                    },
-                    { name: "应急事件台账", path: "01应急管理/应急事件台账.html" },
-                    { name: "飞行测试演练", path: "01应急管理/飞行测试演练.html" },
-                    { name: "飞行测试考评项目管理", path: "01应急管理/飞行测试考评项目管理.html" },
-                    { name: "应急推送配置", path: "01应急管理/应急推送配置.html" }
-                ]
-            },
-            { 
-                name: "事故管理", 
-                icon: "fa-file-shield", 
-                children: [
-                    { name: "事故复盘", path: "02事故管理/事故复盘.html" },
-                    { name: "整改措施", path: "02事故管理/整改措施.html" },
-                    { name: "横展排查清单", path: "02事故管理/横展排查清单.html" },
-                    { name: "横展排查任务", path: "02事故管理/横展排查任务.html" },
-                    { name: "事故台账", path: "02事故管理/事故台账.html" },
-                    { name: "危险源辨识与风险评价", path: "02事故管理/危险源辨识与风险评价.html" }
-                ]
-            },
-            { 
-                name: "隐患管理", 
-                icon: "fa-shield-halved", 
-                children: [
-                    { name: "EHS专项检查表配置", path: "03隐患管理/EHS专项检查表配置.html" },
-                    { name: "EHS隐患专项排查计划", path: "03隐患管理/EHS隐患专项排查计划.html" },
-                    { name: "EHS隐患排查记录", path: "03隐患管理/EHS隐患排查记录.html" },
-                    { name: "四级区域班组级隐患自查", path: "03隐患管理/四级区域班组级隐患自查.html" },
-                    { name: "区域责任制自查隐患记录", path: "03隐患管理/区域责任制自查隐患记录.html" },
-                    { name: "政府检查台账", path: "03隐患管理/政府检查台账.html" },
-                    { name: "排查计划统计报表", path: "03隐患管理/排查计划统计报表.html" },
-                    { name: "隐患汇总报告", path: "03隐患管理/隐患汇总报告.html" },
-                    { name: "四级区域隐患自查表配置", path: "03隐患管理/四级区域隐患自查表配置.html" }
-                ]
-            },
-            { 
-                name: "施工作业", 
-                icon: "fa-helmet-safety", 
-                children: [
-                    { name: "供应商入场管理", path: "04施工作业/供应商入场管理.html" },
-                    { name: "供应商人员管理", path: "04施工作业/供应商人员管理.html" },
-                    { name: "作业台账", path: "04施工作业/作业台账.html" },
-                    { name: "作业进度跟踪", path: "04施工作业/作业进度跟踪.html" },
-                    { name: "承揽商积分考核", path: "04施工作业/承揽商积分考核.html" }
-                ]
-            },
-            { 
-                name: "消防管理", 
-                icon: "fa-fire-extinguisher", 
-                children: [
-                    { name: "维保任务", path: "05消防管理/维保任务.html" },
-                    { name: "每日防火巡查任务", path: "05消防管理/每日防火巡查任务.html" },
-                    { name: "消防设施点检任务", path: "05消防管理/消防设施点检任务.html" },
-                    { name: "消防档案库", path: "05消防管理/消防档案库.html" },
-                    { name: "消防资产管理", path: "05消防管理/消防资产管理.html" },
-                    { name: "消防中断及恢复台账", path: "05消防管理/消防中断及恢复台账.html" },
-                    { name: "消防设施报修及备件台账", path: "05消防管理/消防设施报修及备件台账.html" },
-                    { name: "消防推送配置", path: "05消防管理/消防推送配置.html" }
-                ]
-            },
-            { 
-                name: "职业健康管理", 
-                icon: "fa-user-doctor", 
-                children: [
-                    { name: "体检提报申请", path: "06职业健康管理/health-exam-apply.html" },
-                    { name: "体检岗位及危害告知书配置", path: "06职业健康管理/体检岗位及危害告知书配置.html" },
-                    { name: "员工健康基础档案", path: "06职业健康管理/员工健康基础档案.html" },
-                    { name: "员工职业健康体检提醒", path: "06职业健康管理/员工职业健康体检提醒.html" },
-                    { name: "员工职业健康体检记录", path: "06职业健康管理/员工职业健康体检记录.html" },
-                    { name: "职业禁忌调岗记录", path: "06职业健康管理/职业禁忌调岗记录.html" },
-                    { name: "职业健康预警", path: "06职业健康管理/职业健康预警.html" },
-                    { name: "个人剂量检测申请", path: "06职业健康管理/个人剂量检测申请.html" },
-                    { name: "个人剂量检测记录", path: "06职业健康管理/个人剂量检测记录.html" },
-                    { name: "危害源数据库管理", path: "06职业健康管理/危害源数据库管理.html" },
-                    { name: "健康趋势分析", path: "06职业健康管理/健康趋势分析.html" },
-                    { name: "职业健康体检异常预警", path: "06职业健康管理/职业健康体检异常预警.html" }
-                ]
-            },
-            { 
-                name: "环保检测预警", 
-                icon: "fa-leaf", 
-                children: [
-                    { 
-                        name: "废气检测", 
-                        children: [
-                            { name: "设备运行状态", path: "07环保检测预警/废气检测/设备运行状态.html" },
-                            { name: "废气VOCs在线浓度", path: "07环保检测预警/废气检测/废气VOCs在线浓度.html" },
-                            { name: "手工监测", path: "07环保检测预警/废气检测/手工监测.html" },
-                            { name: "自行监测", path: "07环保检测预警/废气检测/自行监测.html" }
-                        ]
-                    },
-                    { 
-                        name: "废水检测", 
-                        children: [
-                            { name: "生活污水站进出水流量", path: "07环保检测预警/废水检测/生活污水站进出水流量.html" },
-                            { name: "生产废水站进出水流量", path: "07环保检测预警/废水检测/生产废水站进出水流量.html" },
-                            { name: "事故池液位", path: "07环保检测预警/废水检测/事故池液位.html" },
-                            { name: "手工监测", path: "07环保检测预警/废水检测/手工监测.html" },
-                            { name: "自行监测", path: "07环保检测预警/废水检测/自行监测.html" }
-                        ]
-                    },
-                    { 
-                        name: "水电能耗", 
-                        children: [
-                            { name: "用水量", path: "07环保检测预警/水电能耗/用水量.html" },
-                            { name: "耗电量", path: "07环保检测预警/水电能耗/耗电量.html" },
-                            { name: "耗天然气量", path: "07环保检测预警/水电能耗/耗天然气量.html" },
-                            { name: "耗蒸汽量", path: "07环保检测预警/水电能耗/耗蒸汽量.html" }
-                        ]
-                    },
-                    { name: "雨水闸阀", path: "07环保检测预警/雨水闸阀.html" },
-                    { 
-                        name: "危废固废", 
-                        children: [
-                            { name: "原辅料台账", path: "07环保检测预警/危废固废/原辅料台账.html" },
-                            { name: "危险废物处置量", path: "07环保检测预警/危废固废/危险废物处置量.html" },
-                            { name: "一般固废处置量", path: "07环保检测预警/危废固废/一般固废处置量.html" }
-                        ]
-                    },
-                    { name: "设备点位配置", path: "07环保检测预警/设备点位配置.html" },
-                    { name: "阈值预警", path: "07环保检测预警/阈值预警.html" },
-                    { name: "环境监控看板", path: "07环保检测预警/环境监控看板.html" },
-                    { name: "根因分析任务", path: "07环保检测预警/根因分析任务.html" },
-                    { name: "环境因素识别与跟踪", path: "07环保检测预警/环境因素识别与跟踪.html" },
-                    { name: "化学品使用记录", path: "07环保检测预警/化学品使用记录.html" }
-                ]
-            },
-            { 
-                name: "合规有效性管理", 
-                icon: "fa-file-contract", 
-                children: [
-                    { 
-                        name: "证件管理", 
-                        children: [
-                            { name: "证件管理列表", path: "08合规有效性管理/证件管理/证件管理列表.html" },
-                            { name: "岗位合规清单", path: "08合规有效性管理/证件管理/岗位合规清单.html" }
-                        ]
-                    },
-                    { 
-                        name: "特种设备管理", 
-                        children: [
-                            { name: "电梯管理", path: "08合规有效性管理/特种设备管理/电梯管理.html" },
-                            { name: "行吊管理", path: "08合规有效性管理/特种设备管理/行吊管理.html" },
-                            { name: "压力管道管理", path: "08合规有效性管理/特种设备管理/压力管道管理.html" },
-                            { name: "锅炉管理", path: "08合规有效性管理/特种设备管理/锅炉管理.html" },
-                            { name: "压力容器管理", path: "08合规有效性管理/特种设备管理/压力容器管理.html" },
-                            { name: "叉车管理", path: "08合规有效性管理/特种设备管理/叉车管理.html" },
-                            { name: "安全阀管理", path: "08合规有效性管理/特种设备管理/安全阀管理.html" },
-                            { name: "压力表管理", path: "08合规有效性管理/特种设备管理/压力表管理.html" },
-                            { name: "设备证件管理", path: "08合规有效性管理/特种设备管理/设备证件管理.html" }
-                        ]
-                    },
-                    { 
-                        name: "法律法规", 
-                        children: [
-                            { name: "合规文件台账", path: "08合规有效性管理/法律法规/合规文件台账.html" },
-                            { name: "法律法规合规性评价管理", path: "08合规有效性管理/法律法规/法律法规合规性评价管理.html" },
-                            { name: "文件标签管理", path: "08合规有效性管理/法律法规/文件标签管理.html" },
-                            { name: "合规手续管理", path: "08合规有效性管理/法律法规/合规手续管理.html" },
-                            { name: "宣导任务管理", path: "08合规有效性管理/法律法规/宣导任务管理.html" },
-                            { name: "年度合规性评价报告", path: "08合规有效性管理/法律法规/年度合规性评价报告.html" }
-                        ]
-                    }
-                ]
-            },
-            { 
-                name: "EHS仪表盘", 
-                icon: "fa-gauge-high", 
-                children: [
-                    { name: "应急事件总览", path: "09EHS仪表盘/应急事件总览.html" },
-                    { name: "隐患统计看板", path: "09EHS仪表盘/隐患统计看板.html" },
-                    { name: "施工作业看板", path: "09EHS仪表盘/施工作业看板.html" },
-                    { name: "合规有效性看板", path: "09EHS仪表盘/合规有效性看板.html" },
-                    { name: "职业健康看板", path: "09EHS仪表盘/职业健康看板.html" },
-                    { name: "集团EHS审核看板", path: "09EHS仪表盘/集团EHS审核看板.html" },
-                    { name: "组织考核看板", path: "09EHS仪表盘/组织考核看板.html" }
-                ]
-            },
-            { 
-                name: "考核管理", 
-                icon: "fa-clipboard-check", 
-                children: [
-                    { 
-                        name: "集团EHS审核", 
-                        children: [
-                            { name: "集团EHS审核记录", path: "10考核管理/集团EHS审核/集团EHS审核记录.html" },
-                            { name: "整改任务", path: "10考核管理/集团EHS审核/整改任务.html" },
-                            { name: "审核清单配置", path: "10考核管理/集团EHS审核/审核清单配置.html" }
-                        ]
-                    },
-                    { 
-                        name: "安全环保综合指数", 
-                        children: [
-                            { 
-                                name: "考核模型", 
-                                children: [
-                                    { name: "生产安全事件", path: "10考核管理/安全环保综合指数/考核模型/生产安全事件.html" },
-                                    { name: "隐患治理", path: "10考核管理/安全环保综合指数/考核模型/隐患治理.html" },
-                                    { name: "教育培训", path: "10考核管理/安全环保综合指数/考核模型/教育培训.html" },
-                                    { name: "应急管理", path: "10考核管理/安全环保综合指数/考核模型/应急管理.html" },
-                                    { name: "行为安全", path: "10考核管理/安全环保综合指数/考核模型/行为安全.html" },
-                                    { name: "职业健康", path: "10考核管理/安全环保综合指数/考核模型/职业健康.html" },
-                                    { name: "安全领导力", path: "10考核管理/安全环保综合指数/考核模型/安全领导力.html" }
-                                ]
-                            },
-                            { 
-                                name: "考核评分", 
-                                children: [
-                                    { name: "生产安全事件", path: "10考核管理/安全环保综合指数/考核评分/生产安全事件.html" },
-                                    { name: "隐患治理", path: "10考核管理/安全环保综合指数/考核评分/隐患治理.html" },
-                                    { name: "教育培训", path: "10考核管理/安全环保综合指数/考核评分/教育培训.html" },
-                                    { name: "应急管理", path: "10考核管理/安全环保综合指数/考核评分/应急管理.html" },
-                                    { name: "行为安全", path: "10考核管理/安全环保综合指数/考核评分/行为安全.html" },
-                                    { name: "职业健康", path: "10考核管理/安全环保综合指数/考核评分/职业健康.html" },
-                                    { name: "安全领导力", path: "10考核管理/安全环保综合指数/考核评分/安全领导力.html" }
-                                ]
-                            },
-                            { 
-                                name: "考核数据", 
-                                children: [
-                                    { name: "迟报瞒报数据", path: "10考核管理/安全环保综合指数/考核数据/迟报瞒报数据.html" },
-                                    { name: "百万工时工伤率", path: "10考核管理/安全环保综合指数/考核数据/百万工时工伤率.html" },
-                                    { name: "集团月度抽检隐患整改", path: "10考核管理/安全环保综合指数/考核数据/集团月度抽检隐患整改.html" },
-                                    { name: "三级安全教育", path: "10考核管理/安全环保综合指数/考核数据/三级安全教育.html" },
-                                    { name: "再教育", path: "10考核管理/安全环保综合指数/考核数据/再教育.html" },
-                                    { name: "EHS强化培训", path: "10考核管理/安全环保综合指数/考核数据/EHS强化培训.html" },
-                                    { name: "特岗作业抽查", path: "10考核管理/安全环保综合指数/考核数据/特岗作业抽查.html" },
-                                    { name: "ERT组织完整性", path: "10考核管理/安全环保综合指数/考核数据/ERT组织完整性.html" },
-                                    { name: "ERT组织实测问题点", path: "10考核管理/安全环保综合指数/考核数据/ERT组织实测问题点.html" },
-                                    { name: "人的不安全行为", path: "10考核管理/安全环保综合指数/考核数据/人的不安全行为.html" },
-                                    { name: "应会知会抽查", path: "10考核管理/安全环保综合指数/考核数据/应会知会抽查.html" },
-                                    { name: "各部门职卫调岗现场抽查名单", path: "10考核管理/安全环保综合指数/考核数据/各部门职卫调岗现场抽查名单.html" },
-                                    { name: "PPE使用情况记录", path: "10考核管理/安全环保综合指数/考核数据/PPE使用情况记录.html" },
-                                    { name: "安全领导力任务", path: "10考核管理/安全环保综合指数/考核数据/安全领导力任务.html" }
-                                ]
-                            },
-                            { name: "考核评分表", path: "10考核管理/安全环保综合指数/考核评分表.html" }
-                        ]
-                    },
-                    { 
-                        name: "区域责任制", 
-                        children: [
-                            { name: "考核模型", path: "10考核管理/区域责任制/考核模型.html" },
-                            { 
-                                name: "考核评分", 
-                                children: [
-                                    { name: "EHS强化培训", path: "10考核管理/区域责任制/考核评分/EHS强化培训.html" },
-                                    { name: "三级区域专项检查记录", path: "10考核管理/区域责任制/考核评分/三级区域专项检查记录.html" },
-                                    { name: "三级区域每日巡查记录", path: "10考核管理/区域责任制/考核评分/三级区域每日巡查记录.html" },
-                                    { name: "应知应会抽查记录", path: "10考核管理/区域责任制/考核评分/应知应会抽查记录.html" },
-                                    { name: "应急管理", path: "10考核管理/区域责任制/考核评分/应急管理.html" },
-                                    { name: "加分项", path: "10考核管理/区域责任制/考核评分/加分项.html" }
-                                ]
-                            },
-                            { 
-                                name: "考核数据", 
-                                children: [
-                                    { name: "EHS强化培训数据", path: "10考核管理/区域责任制/考核数据/EHS强化培训数据.html" },
-                                    { name: "应知应会考核数据", path: "10考核管理/区域责任制/考核数据/应知应会考核数据.html" },
-                                    { name: "不安全行为稽查", path: "10考核管理/区域责任制/考核数据/不安全行为稽查.html" },
-                                    { name: "应急指引看板被稽查数据", path: "10考核管理/区域责任制/考核数据/应急指引看板被稽查数据.html" },
-                                    { name: "KYT/JHA数据", path: "10考核管理/区域责任制/考核数据/KYT_JHA数据.html" }
-                                ]
-                            },
-                            { name: "考核评分表", path: "10考核管理/区域责任制/考核评分表.html" }
-                        ]
-                    }
-                ]
-            },
-            { 
-                name: "系统管理", 
-                icon: "fa-gear", 
-                children: [
-                    { name: "用户管理", path: "11系统管理/用户管理.html" },
-                    { name: "角色管理", path: "11系统管理/角色管理.html" },
-                    { name: "菜单管理", path: "11系统管理/菜单管理.html" },
-                    { name: "部门管理", path: "11系统管理/部门管理.html" },
-                    { name: "字典管理", path: "11系统管理/字典管理.html" },
-                    { name: "区域管理", path: "11系统管理/区域管理.html" },
-                    { name: "维保区域管理", path: "11系统管理/维保区域管理.html" },
-                    { name: "楼栋信息管理", path: "11系统管理/楼栋信息管理.html" },
-                    { name: "事件配置", path: "11系统管理/事件配置.html" },
-                    { name: "用户基地配置", path: "11系统管理/用户基地配置.html" }
-                ]
-            },
-            { name: "EHS变更台账", icon: "fa-list-check", path: "12EHS变更台账/EHS变更台账.html" },
-            { name: "意见反馈", icon: "fa-comment-dots", path: "13意见反馈/意见反馈.html" },
-            { name: "操作日志", icon: "fa-history", path: "14操作日志/操作日志.html" },
-            { name: "Hiro EHS", icon: "fa-robot", path: "14操作日志/HiroEHS.html" }
-        ];
+<script>
+// ================= 菜单数据 =================
+// 格式: [名称, 图标, 路径/子菜单, id(可选)]
+const menuData = [
+    ["EHS驾驶舱总览", "fa-chart-pie", "01应急管理/dashboard-overview.html", "dashboard-home"],
+    ["应急管理", "fa-bell", [
+        ["值班记录", "01应急管理/值班记录.html"],
+        ["今日排班", "01应急管理/今日排班.html"],
+        ["对讲未应答记录", "01应急管理/对讲未应答记录.html"],
+        ["ERC成员库", "01应急管理/ERC成员库.html"],
+        ["ERT成员库", "01应急管理/ERT成员库.html"],
+        ["应急培训", "01应急管理/应急培训.html"],
+        ["应急预案", "01应急管理/应急预案.html"],
+        ["应急点检", [
+            ["点检任务", "01应急管理/应急点检/点检任务.html"],
+            ["物资柜点分布", "01应急管理/应急点检/物资柜点分布.html"],
+            ["物资维护清单", "01应急管理/应急点检/物资维护清单.html"]
+        ]],
+        ["应急演练", [
+            ["应急演练", "01应急管理/应急演练/应急演练.html"],
+            ["年度演练计划", "01应急管理/应急演练/年度演练计划.html"]
+        ]],
+        ["应急事件台账", "01应急管理/应急事件台账.html"],
+        ["飞行测试演练", "01应急管理/飞行测试演练.html"],
+        ["飞行测试考评项目管理", "01应急管理/飞行测试考评项目管理.html"],
+        ["应急推送配置", "01应急管理/应急推送配置.html"]
+    ]],
+    ["事故管理", "fa-file-shield", [
+        ["事故复盘", "02事故管理/事故复盘.html"],
+        ["整改措施", "02事故管理/整改措施.html"],
+        ["横展排查清单", "02事故管理/横展排查清单.html"],
+        ["横展排查任务", "02事故管理/横展排查任务.html"],
+        ["事故台账", "02事故管理/事故台账.html"],
+        ["危险源辨识与风险评价", "02事故管理/危险源辨识与风险评价.html"]
+    ]],
+    ["隐患管理", "fa-shield-halved", [
+        ["EHS专项检查表配置", "03隐患管理/EHS专项检查表配置.html"],
+        ["EHS隐患专项排查计划", "03隐患管理/EHS隐患专项排查计划.html"],
+        ["EHS隐患排查记录", "03隐患管理/EHS隐患排查记录.html"],
+        ["四级区域班组级隐患自查", "03隐患管理/四级区域班组级隐患自查.html"],
+        ["区域责任制自查隐患记录", "03隐患管理/区域责任制自查隐患记录.html"],
+        ["政府检查台账", "03隐患管理/政府检查台账.html"],
+        ["排查计划统计报表", "03隐患管理/排查计划统计报表.html"],
+        ["隐患汇总报告", "03隐患管理/隐患汇总报告.html"],
+        ["四级区域隐患自查表配置", "03隐患管理/四级区域隐患自查表配置.html"]
+    ]],
+    ["施工作业", "fa-helmet-safety", [
+        ["供应商入场管理", "04施工作业/供应商入场管理.html"],
+        ["供应商人员管理", "04施工作业/供应商人员管理.html"],
+        ["作业台账", "04施工作业/作业台账.html"],
+        ["作业进度跟踪", "04施工作业/作业进度跟踪.html"],
+        ["承揽商积分考核", "04施工作业/承揽商积分考核.html"]
+    ]],
+    ["消防管理", "fa-fire-extinguisher", [
+        ["维保任务", "05消防管理/维保任务.html"],
+        ["每日防火巡查任务", "05消防管理/每日防火巡查任务.html"],
+        ["消防设施点检任务", "05消防管理/消防设施点检任务.html"],
+        ["消防档案库", "05消防管理/消防档案库.html"],
+        ["消防资产管理", "05消防管理/消防资产管理.html"],
+        ["消防中断及恢复台账", "05消防管理/消防中断及恢复台账.html"],
+        ["消防设施报修及备件台账", "05消防管理/消防设施报修及备件台账.html"],
+        ["消防推送配置", "05消防管理/消防推送配置.html"]
+    ]],
+    ["职业健康管理", "fa-user-doctor", [
+        ["体检提报申请", "06职业健康管理/health-exam-apply.html"],
+        ["体检岗位及危害告知书配置", "06职业健康管理/体检岗位及危害告知书配置.html"],
+        ["员工健康基础档案", "06职业健康管理/员工健康基础档案.html"],
+        ["员工职业健康体检提醒", "06职业健康管理/员工职业健康体检提醒.html"],
+        ["员工职业健康体检记录", "06职业健康管理/员工职业健康体检记录.html"],
+        ["职业禁忌调岗记录", "06职业健康管理/职业禁忌调岗记录.html"],
+        ["职业健康预警", "06职业健康管理/职业健康预警.html"],
+        ["个人剂量检测申请", "06职业健康管理/个人剂量检测申请.html"],
+        ["个人剂量检测记录", "06职业健康管理/个人剂量检测记录.html"],
+        ["危害源数据库管理", "06职业健康管理/危害源数据库管理.html"],
+        ["健康趋势分析", "06职业健康管理/健康趋势分析.html"],
+        ["职业健康体检异常预警", "06职业健康管理/职业健康体检异常预警.html"]
+    ]],
+    ["环保检测预警", "fa-leaf", [
+        ["废气检测", [
+            ["设备运行状态", "07环保检测预警/废气检测/设备运行状态.html"],
+            ["废气VOCs在线浓度", "07环保检测预警/废气检测/废气VOCs在线浓度.html"],
+            ["手工监测", "07环保检测预警/废气检测/手工监测.html"],
+            ["自行监测", "07环保检测预警/废气检测/自行监测.html"]
+        ]],
+        ["废水检测", [
+            ["生活污水站进出水流量", "07环保检测预警/废水检测/生活污水站进出水流量.html"],
+            ["生产废水站进出水流量", "07环保检测预警/废水检测/生产废水站进出水流量.html"],
+            ["事故池液位", "07环保检测预警/废水检测/事故池液位.html"],
+            ["手工监测", "07环保检测预警/废水检测/手工监测.html"],
+            ["自行监测", "07环保检测预警/废水检测/自行监测.html"]
+        ]],
+        ["水电能耗", [
+            ["用水量", "07环保检测预警/水电能耗/用水量.html"],
+            ["耗电量", "07环保检测预警/水电能耗/耗电量.html"],
+            ["耗天然气量", "07环保检测预警/水电能耗/耗天然气量.html"],
+            ["耗蒸汽量", "07环保检测预警/水电能耗/耗蒸汽量.html"]
+        ]],
+        ["雨水闸阀", "07环保检测预警/雨水闸阀.html"],
+        ["危废固废", [
+            ["原辅料台账", "07环保检测预警/危废固废/原辅料台账.html"],
+            ["危险废物处置量", "07环保检测预警/危废固废/危险废物处置量.html"],
+            ["一般固废处置量", "07环保检测预警/危废固废/一般固废处置量.html"]
+        ]],
+        ["设备点位配置", "07环保检测预警/设备点位配置.html"],
+        ["阈值预警", "07环保检测预警/阈值预警.html"],
+        ["环境监控看板", "07环保检测预警/环境监控看板.html"],
+        ["根因分析任务", "07环保检测预警/根因分析任务.html"],
+        ["环境因素识别与跟踪", "07环保检测预警/环境因素识别与跟踪.html"],
+        ["化学品使用记录", "07环保检测预警/化学品使用记录.html"]
+    ]],
+    ["合规有效性管理", "fa-file-contract", [
+        ["证件管理", [
+            ["证件管理列表", "08合规有效性管理/证件管理/证件管理列表.html"],
+            ["岗位合规清单", "08合规有效性管理/证件管理/岗位合规清单.html"]
+        ]],
+        ["特种设备管理", [
+            ["电梯管理", "08合规有效性管理/特种设备管理/电梯管理.html"],
+            ["行吊管理", "08合规有效性管理/特种设备管理/行吊管理.html"],
+            ["压力管道管理", "08合规有效性管理/特种设备管理/压力管道管理.html"],
+            ["锅炉管理", "08合规有效性管理/特种设备管理/锅炉管理.html"],
+            ["压力容器管理", "08合规有效性管理/特种设备管理/压力容器管理.html"],
+            ["叉车管理", "08合规有效性管理/特种设备管理/叉车管理.html"],
+            ["安全阀管理", "08合规有效性管理/特种设备管理/安全阀管理.html"],
+            ["压力表管理", "08合规有效性管理/特种设备管理/压力表管理.html"],
+            ["设备证件管理", "08合规有效性管理/特种设备管理/设备证件管理.html"]
+        ]],
+        ["法律法规", [
+            ["合规文件台账", "08合规有效性管理/法律法规/合规文件台账.html"],
+            ["法律法规合规性评价管理", "08合规有效性管理/法律法规/法律法规合规性评价管理.html"],
+            ["文件标签管理", "08合规有效性管理/法律法规/文件标签管理.html"],
+            ["合规手续管理", "08合规有效性管理/法律法规/合规手续管理.html"],
+            ["宣导任务管理", "08合规有效性管理/法律法规/宣导任务管理.html"],
+            ["年度合规性评价报告", "08合规有效性管理/法律法规/年度合规性评价报告.html"]
+        ]]
+    ]],
+    ["EHS仪表盘", "fa-gauge-high", [
+        ["应急事件总览", "09EHS仪表盘/应急事件总览.html"],
+        ["隐患统计看板", "09EHS仪表盘/隐患统计看板.html"],
+        ["施工作业看板", "09EHS仪表盘/施工作业看板.html"],
+        ["合规有效性看板", "09EHS仪表盘/合规有效性看板.html"],
+        ["职业健康看板", "09EHS仪表盘/职业健康看板.html"],
+        ["集团EHS审核看板", "09EHS仪表盘/集团EHS审核看板.html"],
+        ["组织考核看板", "09EHS仪表盘/组织考核看板.html"]
+    ]],
+    ["考核管理", "fa-clipboard-check", [
+        ["集团EHS审核", [
+            ["集团EHS审核记录", "10考核管理/集团EHS审核/集团EHS审核记录.html"],
+            ["整改任务", "10考核管理/集团EHS审核/整改任务.html"],
+            ["审核清单配置", "10考核管理/集团EHS审核/审核清单配置.html"]
+        ]],
+        ["安全环保综合指数", [
+            ["考核模型", [
+                ["生产安全事件", "10考核管理/安全环保综合指数/考核模型/生产安全事件.html"],
+                ["隐患治理", "10考核管理/安全环保综合指数/考核模型/隐患治理.html"],
+                ["教育培训", "10考核管理/安全环保综合指数/考核模型/教育培训.html"],
+                ["应急管理", "10考核管理/安全环保综合指数/考核模型/应急管理.html"],
+                ["行为安全", "10考核管理/安全环保综合指数/考核模型/行为安全.html"],
+                ["职业健康", "10考核管理/安全环保综合指数/考核模型/职业健康.html"],
+                ["安全领导力", "10考核管理/安全环保综合指数/考核模型/安全领导力.html"]
+            ]],
+            ["考核评分", [
+                ["生产安全事件", "10考核管理/安全环保综合指数/考核评分/生产安全事件.html"],
+                ["隐患治理", "10考核管理/安全环保综合指数/考核评分/隐患治理.html"],
+                ["教育培训", "10考核管理/安全环保综合指数/考核评分/教育培训.html"],
+                ["应急管理", "10考核管理/安全环保综合指数/考核评分/应急管理.html"],
+                ["行为安全", "10考核管理/安全环保综合指数/考核评分/行为安全.html"],
+                ["职业健康", "10考核管理/安全环保综合指数/考核评分/职业健康.html"],
+                ["安全领导力", "10考核管理/安全环保综合指数/考核评分/安全领导力.html"]
+            ]],
+            ["考核数据", [
+                ["迟报瞒报数据", "10考核管理/安全环保综合指数/考核数据/迟报瞒报数据.html"],
+                ["百万工时工伤率", "10考核管理/安全环保综合指数/考核数据/百万工时工伤率.html"],
+                ["集团月度抽检隐患整改", "10考核管理/安全环保综合指数/考核数据/集团月度抽检隐患整改.html"],
+                ["三级安全教育", "10考核管理/安全环保综合指数/考核数据/三级安全教育.html"],
+                ["再教育", "10考核管理/安全环保综合指数/考核数据/再教育.html"],
+                ["EHS强化培训", "10考核管理/安全环保综合指数/考核数据/EHS强化培训.html"],
+                ["特岗作业抽查", "10考核管理/安全环保综合指数/考核数据/特岗作业抽查.html"],
+                ["ERT组织完整性", "10考核管理/安全环保综合指数/考核数据/ERT组织完整性.html"],
+                ["ERT组织实测问题点", "10考核管理/安全环保综合指数/考核数据/ERT组织实测问题点.html"],
+                ["人的不安全行为", "10考核管理/安全环保综合指数/考核数据/人的不安全行为.html"],
+                ["应会知会抽查", "10考核管理/安全环保综合指数/考核数据/应会知会抽查.html"],
+                ["各部门职卫调岗现场抽查名单", "10考核管理/安全环保综合指数/考核数据/各部门职卫调岗现场抽查名单.html"],
+                ["PPE使用情况记录", "10考核管理/安全环保综合指数/考核数据/PPE使用情况记录.html"],
+                ["安全领导力任务", "10考核管理/安全环保综合指数/考核数据/安全领导力任务.html"]
+            ]],
+            ["考核评分表", "10考核管理/安全环保综合指数/考核评分表.html"]
+        ]],
+        ["区域责任制", [
+            ["考核模型", "10考核管理/区域责任制/考核模型.html"],
+            ["考核评分", [
+                ["EHS强化培训", "10考核管理/区域责任制/考核评分/EHS强化培训.html"],
+                ["三级区域专项检查记录", "10考核管理/区域责任制/考核评分/三级区域专项检查记录.html"],
+                ["三级区域每日巡查记录", "10考核管理/区域责任制/考核评分/三级区域每日巡查记录.html"],
+                ["应知应会抽查记录", "10考核管理/区域责任制/考核评分/应知应会抽查记录.html"],
+                ["应急管理", "10考核管理/区域责任制/考核评分/应急管理.html"],
+                ["加分项", "10考核管理/区域责任制/考核评分/加分项.html"]
+            ]],
+            ["考核数据", [
+                ["EHS强化培训数据", "10考核管理/区域责任制/考核数据/EHS强化培训数据.html"],
+                ["应知应会考核数据", "10考核管理/区域责任制/考核数据/应知应会考核数据.html"],
+                ["不安全行为稽查", "10考核管理/区域责任制/考核数据/不安全行为稽查.html"],
+                ["应急指引看板被稽查数据", "10考核管理/区域责任制/考核数据/应急指引看板被稽查数据.html"],
+                ["KYT/JHA数据", "10考核管理/区域责任制/考核数据/KYT_JHA数据.html"]
+            ]],
+            ["考核评分表", "10考核管理/区域责任制/考核评分表.html"]
+        ]]
+    ]],
+    ["系统管理", "fa-gear", [
+        ["用户管理", "11系统管理/用户管理.html"],
+        ["角色管理", "11系统管理/角色管理.html"],
+        ["菜单管理", "11系统管理/菜单管理.html"],
+        ["部门管理", "11系统管理/部门管理.html"],
+        ["字典管理", "11系统管理/字典管理.html"],
+        ["区域管理", "11系统管理/区域管理.html"],
+        ["维保区域管理", "11系统管理/维保区域管理.html"],
+        ["楼栋信息管理", "11系统管理/楼栋信息管理.html"],
+        ["事件配置", "11系统管理/事件配置.html"],
+        ["用户基地配置", "11系统管理/用户基地配置.html"]
+    ]],
+    ["EHS变更台账", "fa-list-check", "12EHS变更台账/EHS变更台账.html"],
+    ["意见反馈", "fa-comment-dots", "13意见反馈/意见反馈.html"],
+    ["操作日志", "fa-history", "14操作日志/操作日志.html"],
+    ["Hiro EHS", "fa-robot", "14操作日志/HiroEHS.html"]
+];
 
-        // ================= 渲染菜单逻辑 =================
-        const sidebarMenu = document.getElementById('sidebar-menu');
+// ================= 渲染菜单 =================
+const sidebarMenu = document.getElementById('sidebar-menu');
 
-        function renderMenu(items, level = 0) {
-            let html = '';
-            items.forEach(item => {
-                const hasChildren = item.children && item.children.length > 0;
-                const paddingLeft = 12 + (level * 12);
-                
-                if (hasChildren) {
-                    html += `
-                        <div class="menu-group">
-                            <div class="menu-item flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors" 
-                                 style="padding-left: ${paddingLeft}px"
-                                 onclick="toggleSubmenu(this)">
-                                <div class="flex items-center">
-                                    ${level === 0 ? `<i class="fa-solid ${item.icon} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
-                                    <span>${item.name}</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right text-xs text-gray-500 arrow-rotate"></i>
-                            </div>
-                            <div class="submenu">
-                                ${renderMenu(item.children, level + 1)}
-                            </div>
+function renderMenu(items, level = 0) {
+    let html = '';
+    items.forEach(item => {
+        const [name, iconOrPath, pathOrChildren, id] = item;
+        const hasChildren = Array.isArray(pathOrChildren);
+        const paddingLeft = 12 + (level * 12);
+        
+        if (hasChildren) {
+            html += `
+                <div class="menu-group">
+                    <div class="menu-item flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors" 
+                         style="padding-left: ${paddingLeft}px"
+                         onclick="toggleSubmenu(this)">
+                        <div class="flex items-center">
+                            ${level === 0 ? `<i class="fa-solid ${iconOrPath} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
+                            <span>${name}</span>
                         </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="menu-item flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors"
-                             style="padding-left: ${paddingLeft}px"
-                             ${item.id ? `id="${item.id}"` : ''}
-                             onclick="loadPage('${item.path}', '${item.name}', this)">
-                            <i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>
-                            <span>${item.name}</span>
-                        </div>
-                    `;
-                }
-            });
-            return html;
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-500 arrow-rotate"></i>
+                    </div>
+                    <div class="submenu">${renderMenu(pathOrChildren, level + 1)}</div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="menu-item flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors"
+                     style="padding-left: ${paddingLeft}px"
+                     ${id ? `id="${id}"` : ''}
+                     onclick="loadPage('${pathOrChildren}', '${name}', this)">
+                    <i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>
+                    <span>${name}</span>
+                </div>
+            `;
         }
+    });
+    return html;
+}
 
-        sidebarMenu.innerHTML = renderMenu(menuData);
+sidebarMenu.innerHTML = renderMenu(menuData);
 
-        // ================= 交互逻辑 =================
-        function toggleSubmenu(element) {
-            const submenu = element.nextElementSibling;
-            const arrow = element.querySelector('.arrow-rotate');
-            
-            if (submenu.classList.contains('open')) {
-                submenu.classList.remove('open');
-                arrow.classList.remove('rotated');
-            } else {
-                submenu.classList.add('open');
-                arrow.classList.add('rotated');
+// ================= 交互逻辑 =================
+function toggleSubmenu(element) {
+    const submenu = element.nextElementSibling;
+    const arrow = element.querySelector('.arrow-rotate');
+    if (submenu.classList.contains('open')) {
+        submenu.classList.remove('open');
+        arrow.classList.remove('rotated');
+    } else {
+        submenu.classList.add('open');
+        arrow.classList.add('rotated');
+    }
+}
+
+function loadPage(path, title, element) {
+    const iframe = document.getElementById('content-frame');
+    const welcome = document.getElementById('welcome-screen');
+    welcome.classList.add('hidden');
+    iframe.classList.remove('hidden');
+    iframe.src = path;
+    document.getElementById('breadcrumb-title').textContent = title;
+
+    document.querySelectorAll('.menu-item').forEach(el => {
+        el.classList.remove('menu-item-active', 'text-white');
+        el.classList.add('text-gray-300');
+    });
+    element.classList.add('menu-item-active', 'text-white');
+    element.classList.remove('text-gray-300');
+
+    let parent = element.parentElement;
+    while (parent && parent !== sidebarMenu) {
+        if (parent.classList.contains('submenu')) {
+            parent.classList.add('open');
+            const prevSibling = parent.previousElementSibling;
+            if (prevSibling) {
+                const arrow = prevSibling.querySelector('.arrow-rotate');
+                if (arrow) arrow.classList.add('rotated');
             }
         }
+        parent = parent.parentElement;
+    }
 
-        function loadPage(path, title, element) {
-            const iframe = document.getElementById('content-frame');
-            const welcome = document.getElementById('welcome-screen');
-            
-            welcome.classList.add('hidden');
-            iframe.classList.remove('hidden');
-            
-            iframe.src = path;
-            
-            document.getElementById('breadcrumb-title').textContent = title;
+    loadPageDescription(path, title);
+}
 
-            document.querySelector
+// ================= 说明抽屉 =================
+function toggleDescDrawer() {
+    document.getElementById('desc-drawer').classList.toggle('open');
+}
+
+function loadPageDescription(path, title) {
+    const descContent = document.getElementById('desc-content');
+    document.getElementById('desc-page-name').textContent = title || '';
+    const mdPath = path.replace(/\.html?$/i, '.md');
+    descContent.innerHTML = '<p class="text-gray-400 text-sm">加载中...</p>';
+    
+    fetch(mdPath)
+        .then(res => {
+            if (!res.ok) throw new Error('Not found');
+            return res.text();
+        })
+        .then(md => {
+            descContent.innerHTML = marked.parse(md);
+        })
+        .catch(() => {
+            descContent.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fa-regular fa-file-lines text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-400 text-sm">暂无说明文件</p>
+                    <p class="text-gray-300 text-xs mt-2">请在 <code class="bg-gray-100 px-1 rounded">${mdPath}</code> 中添加说明</p>
+                </div>
+            `;
+        });
+}
+
+// ================= 供子页面调用的全局跳转 =================
+window.navigateTo = function(targetPath, targetTitle) {
+    let targetMenuElement = null;
+    document.querySelectorAll('.menu-item').forEach(el => {
+        const onclickAttr = el.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(targetPath)) {
+            targetMenuElement = el;
+        }
+    });
+
+    const iframe = document.getElementById('content-frame');
+    const welcome = document.getElementById('welcome-screen');
+    welcome.classList.add('hidden');
+    iframe.classList.remove('hidden');
+    iframe.src = targetPath;
+    document.getElementById('breadcrumb-title').textContent = targetTitle;
+
+    document.querySelectorAll('.menu-item').forEach(el => {
+        el.classList.remove('menu-item-active', 'text-white');
+        el.classList.add('text-gray-300');
+    });
+    if (targetMenuElement) {
+        targetMenuElement.classList.add('menu-item-active', 'text-white');
+        targetMenuElement.classList.remove('text-gray-300');
+
+        let parent = targetMenuElement.parentElement;
+        while (parent && parent !== sidebarMenu) {
+            if (parent.classList.contains('submenu')) {
+                parent.classList.add('open');
+                const prevSibling = parent.previousElementSibling;
+                if (prevSibling) {
+                    const arrow = prevSibling.querySelector('.arrow-rotate');
+                    if (arrow) arrow.classList.add('rotated');
+                }
+            }
+            parent = parent.parentElement;
+        }
+    }
+
+    loadPageDescription(targetPath, targetTitle);
+};
+
+// ================= 初始化 =================
+window.addEventListener('DOMContentLoaded', () => {
+    const homeMenu = document.getElementById('dashboard-home');
+    if (homeMenu) homeMenu.click();
+});
+</script>
+</body>
+</html>
