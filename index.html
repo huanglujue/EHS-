@@ -108,7 +108,7 @@
 // ================= 菜单数据 =================
 // 格式: [名称, 图标, 路径/子菜单, id(可选)]
 const menuData = [
-    ["EHS驾驶舱总览", "fa-chart-pie", "01应急管理/dashboard-overview.html", "dashboard-home"],
+   ["EHS驾驶舱总览", "01应急管理/dashboard-overview.html", "dashboard-home"],
     ["应急管理", "fa-bell", [
         ["值班记录", "01应急管理/值班记录.html"],
         ["今日排班", "01应急管理/今日排班.html"],
@@ -335,31 +335,36 @@ const sidebarMenu = document.getElementById('sidebar-menu');
 function renderMenu(items, level = 0) {
     let html = '';
     items.forEach(item => {
-        const [name, iconOrPath, pathOrChildren, id] = item;
-        const hasChildren = Array.isArray(pathOrChildren);
+        const hasChildren = Array.isArray(item[2]); // 第三个元素是数组，说明有子菜单
         const paddingLeft = 12 + (level * 12);
-        
+
         if (hasChildren) {
+            // 父级菜单：格式 [name, icon, children]
+            const [name, icon, children] = item;
             html += `
                 <div class="menu-group">
                     <div class="menu-item flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors" 
                          style="padding-left: ${paddingLeft}px"
                          onclick="toggleSubmenu(this)">
                         <div class="flex items-center">
-                            ${level === 0 ? `<i class="fa-solid ${iconOrPath} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
+                            ${level === 0 ? `<i class="fa-solid ${icon} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
                             <span>${name}</span>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 arrow-rotate"></i>
                     </div>
-                    <div class="submenu">${renderMenu(pathOrChildren, level + 1)}</div>
+                    <div class="submenu">${renderMenu(children, level + 1)}</div>
                 </div>
             `;
         } else {
+            // 叶子节点：格式 [name, path] 或 [name, path, id]
+            const name = item[0];
+            const path = item[1];
+            const id = item[2]; // 可选
             html += `
                 <div class="menu-item flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors"
                      style="padding-left: ${paddingLeft}px"
                      ${id ? `id="${id}"` : ''}
-                     onclick="loadPage('${pathOrChildren}', '${name}', this)">
+                     onclick="loadPage('${path}', '${name}', this)">
                     <i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>
                     <span>${name}</span>
                 </div>
@@ -368,7 +373,6 @@ function renderMenu(items, level = 0) {
     });
     return html;
 }
-
 sidebarMenu.innerHTML = renderMenu(menuData);
 
 // ================= 交互逻辑 =================
