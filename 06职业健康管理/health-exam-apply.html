@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>体检管理系统</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px;
+      color: #333;
+      background: #f0f2f5;
+    }
+    .container { max-width: 1600px; margin: 0 auto; padding: 16px; }
+
+    /* Tab Header */
+    .tab-header {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 24px;
+    }
+    .tab-item {
+      padding: 14px 24px;
+      cursor: pointer;
+      color: #666;
+      font-size: 14px;
+      position: relative;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .tab-item:hover { color: #f5222d; }
+    .tab-item.active {
+      color: #f5222d;
+      font-weight: 500;
+    }
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #f5222d;
+    }
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: #ff4d4f;
+      color: #fff;
+      font-size: 11px;
+      font-weight: normal;
+    }
+
+    /* Tab Content */
+    .tab-content { display: none; padding: 16px 0; }
+    .tab-content.active { display: block; }
+
+    /* Search Area */
+    .search-area {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .search-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .search-row:last-child { margin-bottom: 0; }
+    .search-label {
+      color: #666;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .search-input, .search-select {
+      height: 32px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-size: 13px;
+      color: #333;
+      outline: none;
+      transition: border-color 0.3s;
+      background: #fff;
+    }
+    .search-input:focus, .search-select:focus { border-color: #40a9ff; }
+    .search-input::placeholder { color: #bfbfbf; }
+    .search-select {
+      min-width: 140px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 28px;
+    }
+    .date-range { display: flex; align-items: center; gap: 8px; }
+    .date-input { width: 130px; }
+    .date-separator { color: #999; }
+    .date-icon { color: #bfbfbf; margin-left: 4px; cursor: pointer; }
+
+    /* Buttons */
+    .btn-group { display: flex; gap: 8px; }
+    .btn {
+      height: 32px;
+      padding: 0 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: #1890ff; color: #fff; border-color: #1890ff; }
+    .btn-primary:hover { background: #40a9ff; border-color: #40a9ff; }
+    .btn-success { background: #52c41a; color: #fff; border-color: #52c41a; }
+    .btn-success:hover { background: #73d13d; border-color: #73d13d; }
+    .btn-default { background: #fff; color: #666; border-color: #d9d9d9; }
+    .btn-default:hover { color: #40a9ff; border-color: #40a9ff; }
+    .btn-danger { background: #ff4d4f; color: #fff; border-color: #ff4d4f; }
+    .btn-danger:hover { background: #ff7875; border-color: #ff7875; }
+    .btn-gray { background: #f5f5f5; color: #666; border-color: #d9d9d9; }
+    .btn-gray:hover { color: #40a9ff; border-color: #40a9ff; }
+
+    /* Table toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .toolbar-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #ff4d4f;
+      font-size: 12px;
+      margin-right: auto;
+    }
+    .toolbar-hint .icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid #ff4d4f;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    /* Table */
+    .table-wrapper {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    thead { background: #fafafa; }
+    th {
+      padding: 12px 8px;
+      text-align: center;
+      font-weight: 500;
+      color: #666;
+      border-bottom: 1px solid #e8e8e8;
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      text-align: center;
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: #e6f7ff; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* Checkbox */
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      cursor: pointer;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Status Tags */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .tag-red { background: #fff1f0; color: #ff4d4f; border: 1px solid #ffa39e; }
+    .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+    .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+    .tag-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+    /* Error text */
+    .error-cell { color: #ff4d4f; }
+    .error-cell .sub-text { display: block; font-size: 11px; margin-top: 2px; }
+    .empty-cell { color: #999; }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .action-link {
+      color: #1890ff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-link:hover { color: #40a9ff; }
+    .action-link.danger { color: #ff4d4f; }
+    .action-link.danger:hover { color: #ff7875; }
+    .action-divider { color: #e8e8e8; }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="container">
+    <!-- Tab Header -->
+    <div class="tab-header">
+      <div class="tab-item active" onclick="switchTab('tab1', this)">
+        <span>⚠</span> 体检提报记录
+      </div>
+      <div class="tab-item" onclick="switchTab('tab2', this)">
+         错误信息 <span class="tab-badge">10</span>
+      </div>
+    </div>
+
+    <!-- Tab 1: 体检提报记录 -->
+    <div id="tab1" class="tab-content active">
+      <!-- 查询条件 -->
+      <div class="search-area">
+        <div class="search-row">
+          <span class="search-label">提报日期：</span>
+          <div class="date-range">
+            <input type="text" class="search-input date-input" placeholder="选择日期">
+            <span class="date-separator">-</span>
+            <input type="text" class="search-input date-input" placeholder="选择日期">
+                     </div>
+          <span class="search-label">基地：</span>
+          <select class="search-select">
+            <option>菏泽基地 (HZ)</option>
+            <option>全部</option>
+          </select>
+          <span class="search-label">部门代称：</span>
+          <select class="search-select">
+            <option>全部</option>
+            <option>PE</option>
+            <option>PRD</option>
+            <option>PACK</option>
+          </select>
+          <span class="search-label">工作区域&amp;车间：</span>
+          <select class="search-select">
+            <option>全部</option>
+          </select>
+        </div>
+        <div class="search-row">
+          <span class="search-label">部门：</span>
+          <select class="search-select">
+            <option>请选择部门</option>
+            <option>EHS-EHS</option>
+            <option>研发中心-RD</option>
+          </select>
+          <span class="search-label">职业病危害工种：</span>
+          <select class="search-select">
+            <option>全部</option>
+          </select>
+          <span class="search-label">体检类型：</span>
+          <select class="search-select">
+            <option>全部</option>
+            <option>岗前</option>
+            <option>岗中</option>
+            <option>离岗</option>
+          </select>
+          <span class="search-label">审核状态：</span>
+          <select class="search-select">
+            <option>全部</option>
+            <option>待部门负责人审核</option>
+            <option>已通过</option>
+            <option>部门负责人驳回</option>
+          </select>
+          <span class="search-label">员工姓名/工号：</span>
+          <input type="text" class="search-input" placeholder="请输入" style="width: 160px;">
+        </div>
+        <div class="search-row">
+          <div class="btn-group">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-success">体检申请</button>
+            <button class="btn btn-success">体检申请导入</button>
+            <button class="btn btn-gray">重置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 表格 -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px;"><span class="checkbox"></span></th>
+              <th>提报日期</th>
+              <th>工号</th>
+              <th>姓名</th>
+              <th>一级部门</th>
+              <th>二级部门</th>
+              <th>入职时间</th>
+              <th>接触工龄</th>
+              <th>部门代称</th>
+              <th>工作区域&amp;车间</th>
+              <th>接触职业病危害工种</th>
+              <th>体检类型</th>
+              <th>体检职业危害因素</th>
+              <th>班次</th>
+              <th>审核提示</th>
+              <th>审核状态</th>
+              <th>审核说明</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-08-07</td>
+              <td>32199ef4</td>
+              <td>张三</td>
+              <td>菏泽制造基地-...</td>
+              <td>EHS-EHS</td>
+              <td>-</td>
+              <td>一个月</td>
+              <td>PE</td>
+              <td>CF3 焚烧炉&amp;CF3浸...</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-gray">离岗</span></td>
+              <td>皮肤与眼部损伤,铅、镉等重...</td>
+              <td>全天</td>
+              <td>-</td>
+              <td>待部门负责人审核</td>
+              <td>重复提交</td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-08-07</td>
+              <td>32199ef4</td>
+              <td>张三</td>
+              <td>菏泽制造基地-...</td>
+              <td>EHS-EHS</td>
+              <td>-</td>
+              <td>一个月</td>
+              <td>PE</td>
+              <td>CF3 焚烧炉&amp;CF3浸...</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-gray">离岗</span></td>
+              <td>皮肤与眼部损伤,铅、镉等重...</td>
+              <td>全天</td>
+              <td>-</td>
+              <td>已通过</td>
+              <td>-</td>
+              <td class="actions">-</td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-08-07</td>
+              <td>1cg48d2a</td>
+              <td>李四</td>
+              <td>菏泽制造基地-...</td>
+              <td>EHS-EHS</td>
+              <td>-</td>
+              <td>3</td>
+              <td>PE</td>
+              <td>F6-测试中心(浸泡房...</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>皮肤与眼部损伤,铅、镉等重...</td>
+              <td>全天</td>
+              <td>-</td>
+              <td>待部门负责人审核</td>
+              <td>-</td>
+              <td class="actions">
+                <a href="#" class="action-link">通过</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">驳回</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-08-06</td>
+              <td>45fafs53</td>
+              <td>王五</td>
+              <td>菏泽制造基地-...</td>
+              <td>EHS-EHS</td>
+              <td>-</td>
+              <td>10</td>
+              <td>PRD</td>
+              <td>R1-F3(拆解房)</td>
+              <td>粉尘作业</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>铅、镉等重金属化合物,皮肤...</td>
+              <td>全天</td>
+              <td>-</td>
+              <td>待部门负责人审核</td>
+              <td>-</td>
+              <td class="actions">
+                <a href="#" class="action-link">通过</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">驳回</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-08-06</td>
+              <td>HC26070978</td>
+              <td>李明</td>
+              <td>重庆制造基地-...</td>
+              <td>设备维护部-Eq...</td>
+              <td>-</td>
+              <td>2</td>
+              <td>PRD</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>铅、镉等重金属化合物,皮肤...</td>
+              <td>白班</td>
+              <td>-</td>
+              <td>待部门负责人审核</td>
+              <td>-</td>
+              <td class="actions">
+                <a href="#" class="action-link">通过</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">驳回</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-07-27</td>
+              <td>HC23070852</td>
+              <td>王小二</td>
+              <td>信息中心-Infor...</td>
+              <td>业务解决方案...</td>
+              <td>-</td>
+              <td>1</td>
+              <td>-</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电池拆解</td>
+              <td><span class="tag tag-blue">岗前</span></td>
+              <td>氟及其无机化合物,其他粉尘...</td>
+              <td>白班</td>
+              <td>-</td>
+              <td>待部门负责人审核</td>
+              <td>EHS审核通过</td>
+              <td class="actions">
+                <a href="#" class="action-link">通过</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">驳回</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-07-27</td>
+              <td>45fafs53</td>
+              <td>王五</td>
+              <td>海辰储能-Hithi...</td>
+              <td>菏泽制造基地-...</td>
+              <td>-</td>
+              <td>10天</td>
+              <td>-</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电池拆解</td>
+              <td><span class="tag tag-blue">岗前</span></td>
+              <td>氟及其无机化合物,其他粉尘...</td>
+              <td>白班</td>
+              <td>-</td>
+              <td>已通过</td>
+              <td>-</td>
+              <td class="actions">-</td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-06-29</td>
+              <td>1cg48d2a</td>
+              <td>李四</td>
+              <td>菏泽制造基地</td>
+              <td>-</td>
+              <td>-</td>
+              <td>3</td>
+              <td>-</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-gray">离岗</span></td>
+              <td>铅、镉等重金属化合物,皮肤...</td>
+              <td>全天</td>
+              <td>-</td>
+              <td>已通过</td>
+              <td>-</td>
+              <td class="actions">-</td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-06-29</td>
+              <td>af9g3315</td>
+              <td>罗伟</td>
+              <td>菏泽制造基地</td>
+              <td>-</td>
+              <td>-</td>
+              <td>15</td>
+              <td>-</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电解液加注</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>铅、镉等重金属化合物,皮肤...</td>
+              <td>白班</td>
+              <td>-</td>
+              <td>已通过</td>
+              <td>-</td>
+              <td class="actions">-</td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>2026-06-29</td>
+              <td>45fafs53</td>
+              <td>王五</td>
+              <td>菏泽制造基地</td>
+              <td>-</td>
+              <td>-</td>
+              <td>14</td>
+              <td>-</td>
+              <td>R1-F3(拆解房)</td>
+              <td>电池拆解</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>氟及其无机化合物,其他粉尘...</td>
+              <td>全天</td>
+              <td>上次体检时间2...</td>
+              <td>已通过</td>
+              <td>-</td>
+              <td class="actions">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: 错误信息 -->
+    <div id="tab2" class="tab-content">
+      <!-- 查询条件 -->
+      <div class="search-area">
+        <div class="search-row">
+          <span class="search-label">提报日期：</span>
+          <div class="date-range">
+            <input type="text" class="search-input date-input" placeholder="选择日期">
+            <span class="date-separator">-</span>
+            <input type="text" class="search-input date-input" placeholder="选择日期">
+            
+          </div>
+          <span class="search-label">基地：</span>
+          <select class="search-select">
+            <option>菏泽基地 (HZ)</option>
+            <option>全部</option>
+          </select>
+          <span class="search-label">部门代称：</span>
+          <select class="search-select">
+            <option>全部</option>
+            <option>PE</option>
+            <option>PRD</option>
+            <option>PACK</option>
+          </select>
+          <span class="search-label">工作区域&amp;车间：</span>
+          <select class="search-select">
+            <option>全部</option>
+          </select>
+        </div>
+        <div class="search-row">
+          <span class="search-label">部门：</span>
+          <select class="search-select">
+            <option>请选择部门</option>
+            <option>EHS-EHS</option>
+            <option>研发中心-RD</option>
+          </select>
+          <span class="search-label">职业病危害工种：</span>
+          <select class="search-select">
+            <option>全部</option>
+          </select>
+          <span class="search-label">体检类型：</span>
+          <select class="search-select">
+            <option>全部</option>
+            <option>岗前</option>
+            <option>岗中</option>
+            <option>离岗</option>
+          </select>
+          <span class="search-label">员工姓名/工号：</span>
+          <input type="text" class="search-input" placeholder="请输入" style="width: 160px;">
+        </div>
+        <div class="search-row">
+          <div class="btn-group">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-success">体检申请</button>
+            <button class="btn btn-success">体检申请导入</button>
+            <button class="btn btn-gray">重置</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="table-toolbar">
+        <div class="toolbar-hint">
+          <span class="icon">!</span>
+          红色单元格为未匹配字段，可勾选后批量提交或批量删除
+        </div>
+        <button class="btn btn-primary">批量提交</button>
+        <button class="btn btn-danger">批量删除</button>
+      </div>
+
+      <!-- 表格 -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px;"><span class="checkbox"></span></th>
+              <th>基地代码</th>
+              <th>提报日期</th>
+              <th>工号</th>
+              <th>姓名</th>
+              <th>一级部门</th>
+              <th>二级部门</th>
+              <th>入职时间</th>
+              <th>接触工龄</th>
+              <th>部门代码</th>
+              <th>工作区域&amp;车间</th>
+              <th>接触职业病危害工种</th>
+              <th>体检类型</th>
+              <th>体检职业危害因素</th>
+              <th>班次</th>
+              <th>审核状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>HZ</td>
+              <td>2026-08-18</td>
+              <td class="error-cell">HC20269999<span class="sub-text">（工号不存在）</span></td>
+              <td class="error-cell">张三<span class="sub-text">（姓名不存在）</span></td>
+              <td class="empty-cell">—(未关联工号)</td>
+              <td class="empty-cell">—(未关联工号)</td>
+              <td class="empty-cell">-</td>
+              <td>2个月</td>
+              <td>PRD</td>
+              <td>模组PACK</td>
+              <td>终检水试</td>
+              <td><span class="tag tag-blue">岗前</span></td>
+              <td>甲苯、二甲苯,电工作业</td>
+              <td>白班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>HZ</td>
+              <td>2026-08-18</td>
+              <td>HC20230412</td>
+              <td class="error-cell">李小龙<span class="sub-text">（工号与姓名不匹配）</span></td>
+              <td>菏泽制造基地-Heze Manufa...</td>
+              <td>EHS-EHS</td>
+              <td>2023-04-12</td>
+              <td>1年</td>
+              <td>PRD</td>
+              <td>模组PACK</td>
+              <td>终检水试</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>甲苯、二甲苯,电工作业</td>
+              <td>夜班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td class="error-cell">SH_ERR<span class="sub-text">（代码不存在）</span></td>
+              <td>2026-08-18</td>
+              <td>HC20221101</td>
+              <td>孙宇航</td>
+              <td>海辰储能-Hithium</td>
+              <td>动力设施部-FAC</td>
+              <td>2022-11-01</td>
+              <td>10个月</td>
+              <td>FAC</td>
+              <td>动力站房</td>
+              <td>空压机/制冷机运维</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>噪声,压力容器作业,高温</td>
+              <td>全天</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td class="error-cell">-<span class="sub-text">（代码未填写）</span></td>
+              <td>2026-08-18</td>
+              <td>HC20240220</td>
+              <td>王欣怡</td>
+              <td>厦门制造基地-Xiamen Base</td>
+              <td>研发中心-RD</td>
+              <td>2024-02-20</td>
+              <td class="error-cell">-<span class="sub-text">（接触工龄未填写）</span></td>
+              <td>PRD</td>
+              <td>模组PACK</td>
+              <td>容量测试</td>
+              <td><span class="tag tag-gray">离岗</span></td>
+              <td>电工作业</td>
+              <td>白班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>XM</td>
+              <td>2026-08-18</td>
+              <td class="error-cell">-<span class="sub-text">（工号未填写）</span></td>
+              <td class="error-cell">-<span class="sub-text">（姓名未填写）</span></td>
+              <td class="empty-cell">—(未关联工号)</td>
+              <td class="empty-cell">—(未关联工号)</td>
+              <td class="empty-cell">-</td>
+              <td>3年</td>
+              <td>PACK</td>
+              <td>激光焊接工段</td>
+              <td>Busbar激光焊接</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td>激光辐射,焊接烟尘,臭氧</td>
+              <td>白班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>CQ</td>
+              <td>2026-08-18</td>
+              <td>HC20231009</td>
+              <td>赵嘉豪</td>
+              <td>重庆制造基地-Chongqing B...</td>
+              <td>电芯制造部-CELL</td>
+              <td>2023-10-09</td>
+              <td>8个月</td>
+              <td class="error-cell">FINANCE_DEPT<span class="sub-text">（部门代码不存在）</span></td>
+              <td class="error-cell">注液车间<span class="sub-text">（工作区域不存在）</span></td>
+              <td>电解液注液操作</td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td class="error-cell">-<span class="sub-text">（未匹配到职业危害因素）</span></td>
+              <td>夜班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>CQ</td>
+              <td>2026-08-18</td>
+              <td>HC20240512</td>
+              <td>陈敏慧</td>
+              <td>重庆制造基地-Chongqing B...</td>
+              <td>PACK模组车间</td>
+              <td>2024-05-12</td>
+              <td>1.2年</td>
+              <td class="error-cell">-<span class="sub-text">（部门代码未填写）</span></td>
+              <td class="error-cell">-<span class="sub-text">（工作区域未填写）</span></td>
+              <td class="error-cell">-<span class="sub-text">（危害工种未填写）</span></td>
+              <td><span class="tag tag-blue">岗前</span></td>
+              <td class="error-cell">-<span class="sub-text">（未匹配到职业危害因素）</span></td>
+              <td>全天</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>HZ</td>
+              <td>2026-08-15</td>
+              <td>HC20230412</td>
+              <td>黄小伟</td>
+              <td>菏泽制造基地-Heze Manufa...</td>
+              <td>EHS-EHS</td>
+              <td>2023-04-12</td>
+              <td>1年</td>
+              <td>PRD</td>
+              <td>阴阳极粉料投料间</td>
+              <td class="error-cell">Busbar激光焊接<span class="sub-text">（危害工种不存在）</span></td>
+              <td><span class="tag tag-blue">岗中</span></td>
+              <td class="error-cell">-<span class="sub-text">（未匹配到职业危害因素）</span></td>
+              <td>夜班</td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>TL</td>
+              <td>2026-08-14</td>
+              <td>HC20240220</td>
+              <td>王欣怡</td>
+              <td>厦门制造基地-Xiamen Base</td>
+              <td>研发中心-RD</td>
+              <td>2024-02-20</td>
+              <td>5个月</td>
+              <td>PRD</td>
+              <td>模组PACK</td>
+              <td>容量测试</td>
+              <td class="error-cell">常规年检<span class="sub-text">（体检类型未匹配）</span></td>
+              <td>电工作业</td>
+              <td class="error-cell">中班<span class="sub-text">（班次未匹配）</span></td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="checkbox"></span></td>
+              <td>XM</td>
+              <td>2026-08-14</td>
+              <td>HC20230110</td>
+              <td>张博文</td>
+              <td>厦门海辰储能总部-Xiamen ...</td>
+              <td>制造中心-生产一部</td>
+              <td>2023-01-10</td>
+              <td>2年</td>
+              <td>PACK</td>
+              <td>激光焊接工段</td>
+              <td>Busbar激光焊接</td>
+              <td class="error-cell">-<span class="sub-text">（体检类型未填写）</span></td>
+              <td>激光辐射,焊接烟尘,臭氧</td>
+              <td class="error-cell">-<span class="sub-text">（班次未填写）</span></td>
+              <td><span class="tag tag-orange">待提交</span></td>
+              <td class="actions">
+                <a href="#" class="action-link">编辑</a>
+                <span class="action-divider">|</span>
+                <a href="#" class="action-link danger"> 删除</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  </script>
+</body>
+</html>
