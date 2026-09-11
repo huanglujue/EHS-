@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海辰储能EHS可视化驾驶舱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    <style>
+        body { background-color: #030816; color: #e2e8f0; overflow: hidden; font-family: -apple-system, sans-serif; user-select: none; }
+        .bg-tech {
+            background-image: radial-gradient(ellipse at center, rgba(16, 42, 86, 0.4) 0%, rgba(3, 8, 22, 1) 100%),
+            linear-gradient(rgba(0, 204, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 204, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+        .header-title { background: linear-gradient(to bottom, #fff 20%, #4facfe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(79, 172, 254, 0.5); }
+        .panel { background: linear-gradient(180deg, rgba(8, 25, 48, 0.8) 0%, rgba(4, 13, 26, 0.9) 100%); border: 1px solid rgba(0, 195, 255, 0.2); box-shadow: inset 0 0 20px rgba(0, 195, 255, 0.05); position: relative; backdrop-filter: blur(4px); }
+        .panel::before, .panel::after, .panel-b::before, .panel-b::after { content: ''; position: absolute; width: 10px; height: 10px; border: 2px solid #00c3ff; pointer-events: none; }
+        .panel::before { top: -1px; left: -1px; border-right: none; border-bottom: none; } .panel::after { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+        .panel-b::before { bottom: -1px; left: -1px; border-right: none; border-top: none; } .panel-b::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+        .panel-title-bg { background: linear-gradient(90deg, rgba(0, 195, 255, 0.15) 0%, transparent 100%); border-left: 3px solid #00c3ff; }
+        ::-webkit-scrollbar { width: 4px; height: 4px;} ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); } ::-webkit-scrollbar-thumb { background: rgba(0,195,255,0.3); border-radius: 4px; }
+.mask-radial { background: radial-gradient(ellipse at center, transparent 60%, rgba(3, 8, 22, 0.15) 85%, rgba(3, 8, 22, 0.4) 100%); }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4); } 100% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); } }
+        .base-select { background-color: #0a1526; border: 1px solid #1b3252; color: #e2f4ff; font-weight: bold; border-radius: 4px; padding: 2px 6px; outline: none; cursor: pointer; }
+        .base-select option { background-color: #0a1526; color: #e2e4e8; }
+    </style>
+</head>
+<body class="bg-tech w-screen h-screen flex flex-col relative">
+
+<!-- 中间透出背景与地图 -->
+    <div class="fixed inset-0 z-0 pointer-events-none flex items-center justify-center bg-[#030816]">
+        <div class="absolute inset-0 bg-[url('https://cdn4.codesign.qq.com/prototypes/2026/05/08/5l42926lvame05ZdYDO08/5yfwirofwbv9zzzt/20c14fddeb35535325ef2fc5cbed63fc.png')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#030816] via-transparent to-[#030816] opacity-25"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#030816] via-transparent to-[#030816] opacity-25"></div>
+        <div class="absolute inset-0 mask-radial"></div>
+        <div class="absolute inset-0 bg-grid"></div>
+    </div>
+
+    <!-- 顶部 -->
+    <header class="h-[70px] flex items-center justify-between px-6 shrink-0 bg-[url('https://demo.cssmoban.com/cssthemes6/cpts_2112_bzp/images/head_bg.png')] bg-center bg-no-repeat bg-cover border-b border-cyan-900/50 z-10">
+        <div class="flex-1 flex items-center space-x-6 text-[14px] text-cyan-300 font-mono pb-2">
+            <span id="current-time"></span>
+            <span id="current-date"></span>
+            <div class="flex items-center text-gray-300"><span class="material-symbols-outlined text-[18px] mr-1">cloud</span>晴 26°C</div>
+        </div>
+        <div class="flex-[2] text-center pb-2"><h1 class="text-[28px] font-bold header-title inline-block tracking-wider">海辰储能EHS可视化驾驶舱</h1></div>
+        <div class="flex-1 flex justify-end items-center space-x-4 text-[13px] text-cyan-200 pb-2">
+            <span class="flex items-center"><span class="material-symbols-outlined text-[18px] mr-1">account_circle</span>管理员</span>
+        </div>
+    </header>
+
+    <!-- 主体区域：恢复 p-3 边距 -->
+    <main class="flex-1 flex p-3 space-x-3 overflow-hidden relative z-0">
+
+        <!-- ================= 左侧 ================= -->
+        <aside class="w-[420px] flex flex-col space-y-3 shrink-0">
+
+            <!-- 1. 基地详情 -->
+            <div class="panel shrink-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">domain</span>基地详情
+                </div>
+                <div class="p-2 px-3 text-[13px] space-y-2 text-gray-300">
+                    <div class="flex items-center justify-between pb-1">
+                        <select id="base-select" class="base-select text-[15px]">
+                            <option value="菏泽制造基地" selected>菏泽制造基地</option>
+                            <option value="厦门制造基地">厦门制造基地</option>
+                            <option value="重庆制造基地">重庆制造基地</option>
+                        </select>
+                        <span class="text-green-400 text-[12px] bg-green-900/30 px-2 py-0.5 border border-green-500/50 rounded flex items-center">
+                            <i class="w-1.5 h-1.5 rounded-full bg-green-400 mr-1 animate-pulse"></i>正常生产
+                        </span>
+                    </div>
+
+                    <div class="flex items-center bg-[#0a1526] border border-[#1b3252] rounded p-1.5">
+                        <div class="flex-1 flex items-center space-x-2 border-r border-[#1b3252]">
+                            <span class="material-symbols-outlined text-[#3b82f6] text-[28px] opacity-80">badge</span>
+                            <div class="flex flex-col">
+                                <span class="text-[11px] text-gray-500 mb-0.5">主要负责人</span>
+                                <div class="text-[13px] text-white font-bold flex items-end">李建国 <span class="text-[#0cf] text-[11px] font-mono ml-1.5 font-normal">13800138000</span></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex items-center space-x-2 pl-3">
+                            <span class="material-symbols-outlined text-[#f59e0b] text-[28px] opacity-80">engineering</span>
+                            <div class="flex flex-col">
+                                <span class="text-[11px] text-gray-500 mb-0.5">EHS负责人</span>
+                                <div class="text-[13px] text-white font-bold flex items-end">王安全 <span class="text-[#0cf] text-[11px] font-mono ml-1.5 font-normal">13900139000</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 事件类型分布 -->
+            <div class="panel flex-[1.2] flex flex-col min-h-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">pie_chart</span>事故事件类型分布（近1年）
+                </div>
+                <div class="flex-1 relative w-full h-full" id="pieChart"></div>
+            </div>
+
+            <!-- 3. 隐患排查 -->
+            <div class="panel flex-[1.5] flex flex-col min-h-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">bar_chart</span>隐患排查与按期整改趋势
+                </div>
+                <div class="flex-1 relative w-full h-full" id="barChart"></div>
+            </div>
+
+             <!-- 4. 今日报备高危作业 -->
+             <div class="panel shrink-0 py-1">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">security</span>今日报备高危作业
+                </div>
+                <div class="px-3 py-1.5 space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">有限空间</span><span class="text-[15px] font-bold text-[#d946ef] ml-1">1</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">高处作业</span><span class="text-[15px] font-bold text-[#0cf] ml-1">4</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">动火作业</span><span class="text-[15px] font-bold text-[#0cf] ml-1">2</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">吊装作业</span><span class="text-[15px] font-bold text-gray-500 ml-1">0</span></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">动土作业</span><span class="text-[15px] font-bold text-[#0cf] ml-1">1</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">盲板抽堵</span><span class="text-[15px] font-bold text-gray-500 ml-1">0</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">吊顶作业</span><span class="text-[15px] font-bold text-[#0cf] ml-1">2</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">占道作业</span><span class="text-[15px] font-bold text-gray-500 ml-1">0</span></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">临时用电</span><span class="text-[15px] font-bold text-[#0cf] ml-1">3</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">危险管道</span><span class="text-[15px] font-bold text-gray-500 ml-1">0</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">高风险接电</span><span class="text-[15px] font-bold text-[#0cf] ml-1">1</span></div>
+                        <div class="w-[1px] h-4 bg-slate-700 mx-2"></div>
+                        <div class="flex items-center flex-1"><span class="text-[11px] text-gray-400 w-[62px]">孔洞临边</span><span class="text-[15px] font-bold text-[#f59e0b] ml-1">1</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+        <!-- 中间弹性占位：背景透出区 -->
+        <div class="flex-1 pointer-events-none"></div>
+
+        <!-- ================= 右侧 ================= -->
+        <aside class="w-[420px] flex flex-col space-y-3 shrink-0 px-0.5">
+
+            <!-- 1. 实时告警 -->
+            <div class="panel h-[200px] flex flex-col shrink-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center justify-between">
+                    <div class="flex items-center"><span class="material-symbols-outlined mr-2 text-[16px]">emergency</span>应急事件告警 <span class="text-[#ef4444] ml-1 font-mono">(8)</span></div>
+                    <span class="text-[11px] text-gray-400 font-normal cursor-pointer hover:text-cyan-300">全部</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto px-2 py-2 space-y-2">
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-red-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-[#7f1d1d]/60 border border-red-500 text-red-400 px-1 rounded whitespace-nowrap">消防报警主机</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[180px]">储能仓A区电池组温度异常 45.2°C</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">2分钟前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-[#0cf]/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-cyan-900/40 border border-cyan-500 text-cyan-400 px-1 rounded whitespace-nowrap">AICV系统</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[180px]">#03区未戴安全帽违规</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">15分钟前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-[#f59e0b]/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-amber-900/40 border border-amber-500 text-amber-400 px-1 rounded whitespace-nowrap">IOT物联</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[180px]">废气排放口VOCs浓度超标报警</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">1小时前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-[#0cf]/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-cyan-900/40 border border-cyan-500 text-cyan-400 px-1 rounded whitespace-nowrap">AICV系统</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[180px]">电解液车间人员异常闯入限制区</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">2小时前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-red-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-[#7f1d1d]/60 border border-red-500 text-red-400 px-1 rounded whitespace-nowrap">消防报警主机</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[180px]">仓库B区烟雾报警器预警</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">3小时前</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 2. 环保监测预警 -->
+            <div class="panel h-[200px] flex flex-col shrink-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center justify-between">
+                    <div class="flex items-center"><span class="material-symbols-outlined mr-2 text-[16px]">eco</span>环保监测预警 <span class="text-[#ef4444] ml-1 font-mono">(6)</span></div>
+                    <span class="text-[11px] text-gray-400 font-normal cursor-pointer hover:text-cyan-300">全部</span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto px-2 py-2 space-y-2">
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-red-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-[#7f1d1d]/60 border border-red-500 text-red-400 px-1 rounded whitespace-nowrap">超标</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[240px]">菏泽基地-DA0001-M1厂房排放口 VOCs排放120mg/m³</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">刚刚</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-amber-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-amber-900/40 border border-amber-500 text-amber-400 px-1 rounded whitespace-nowrap">临近超标</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[240px]">菏泽基地-DA0002-M2厂房排放口 颗粒物排放28mg/m³</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">8分钟前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-red-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-[#7f1d1d]/60 border border-red-500 text-red-400 px-1 rounded whitespace-nowrap">超标</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[240px]">菏泽基地-WS0001-污水处理站排口 COD排放68mg/L</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">26分钟前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-amber-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-amber-900/40 border border-amber-500 text-amber-400 px-1 rounded whitespace-nowrap">临近超标</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[240px]">菏泽基地-DA0003-食堂油烟排口 非甲烷总烃42mg/m³</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">1小时前</span>
+                    </div>
+
+                    <div class="bg-[#111827]/60 border border-[#1f2937] hover:border-amber-500/50 rounded flex items-center justify-between p-2 pl-3 group cursor-pointer">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-[10px] bg-amber-900/40 border border-amber-500 text-amber-400 px-1 rounded whitespace-nowrap">临近超标</span>
+                            <span class="text-[13px] text-gray-200 group-hover:text-white truncate max-w-[240px]">菏泽基地-ZS0001-锅炉房排口 氮氧化物92mg/m³</span>
+                        </div>
+                        <span class="text-[11px] text-gray-500 shrink-0">3小时前</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 职业健康情况 -->
+            <div class="panel h-[142px] flex flex-col shrink-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">medical_services</span>职业健康情况 (近1年)
+                </div>
+                <div class="flex-1 flex flex-col justify-center px-6 pb-1 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">体检正常 (人)</span>
+                            <span class="text-[17px] font-bold text-[#10b981] drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">462</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-slate-700"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">体检异常复查</span>
+                            <span class="text-[17px] font-bold text-[#f59e0b]">3</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-slate-700"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">禁忌证转岗</span>
+                            <span class="text-[17px] font-bold text-[#ef4444]">1</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-[#1b3252]"></div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">个人剂量计检测人次</span>
+                            <span class="text-[17px] font-bold text-[#0cf]">856</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-slate-700"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">季度超量人数</span>
+                            <span class="text-[17px] font-bold text-[#10b981]">0</span>
+                        </div>
+                        <div class="w-[1px] h-8 bg-slate-700"></div>
+                        <div class="flex flex-col">
+                            <span class="text-[11px] text-gray-400 mb-0.5">年度超量人数</span>
+                            <span class="text-[17px] font-bold text-[#ef4444]">1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 本月消防设施点检率 -->
+            <div class="panel flex-1 min-h-[150px] flex flex-col shrink-0">
+                <div class="panel-b"></div>
+                <div class="panel-title-bg px-3 py-1.5 text-[14px] font-bold text-cyan-300 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-[16px]">local_fire_department</span>本月消防设施点检率
+                </div>
+                <div class="flex-1 flex flex-col justify-center px-3 py-1.5 space-y-1.5">
+                    <div class="flex items-center">
+                        <span class="text-[11px] text-gray-300 w-[136px] shrink-0 whitespace-nowrap">消火栓 <span class="text-gray-500 font-mono">24台</span></span>
+                        <div class="flex-1 h-1 bg-[#1e293b] rounded-full overflow-hidden mr-2">
+                            <div class="h-full bg-[#0cf] shadow-[0_0_4px_#0cf]" style="width: 100%"></div>
+                        </div>
+                        <span class="text-[11px] text-[#0cf] font-mono w-[38px] text-right shrink-0">100%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[11px] text-gray-300 w-[136px] shrink-0 whitespace-nowrap">干粉灭火器 <span class="text-gray-500 font-mono">120具</span></span>
+                        <div class="flex-1 h-1 bg-[#1e293b] rounded-full overflow-hidden mr-2">
+                            <div class="h-full bg-[#0cf] shadow-[0_0_4px_#0cf]" style="width: 96.7%"></div>
+                        </div>
+                        <span class="text-[11px] text-[#0cf] font-mono w-[38px] text-right shrink-0">96.7%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[11px] text-gray-300 w-[136px] shrink-0 whitespace-nowrap">二氧化碳灭火器 <span class="text-gray-500 font-mono">45具</span></span>
+                        <div class="flex-1 h-1 bg-[#1e293b] rounded-full overflow-hidden mr-2">
+                            <div class="h-full bg-[#0cf] shadow-[0_0_4px_#0cf]" style="width: 97.8%"></div>
+                        </div>
+                        <span class="text-[11px] text-[#0cf] font-mono w-[38px] text-right shrink-0">97.8%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[11px] text-gray-300 w-[136px] shrink-0 whitespace-nowrap">水基灭火器 <span class="text-gray-500 font-mono">30具</span></span>
+                        <div class="flex-1 h-1 bg-[#1e293b] rounded-full overflow-hidden mr-2">
+                            <div class="h-full bg-[#f59e0b] shadow-[0_0_4px_#f59e0b]" style="width: 93.3%"></div>
+                        </div>
+                        <span class="text-[11px] text-[#f59e0b] font-mono w-[38px] text-right shrink-0">93.3%</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[11px] text-gray-300 w-[136px] shrink-0 whitespace-nowrap">泡沫罐 <span class="text-gray-500 font-mono">8套</span></span>
+                        <div class="flex-1 h-1 bg-[#1e293b] rounded-full overflow-hidden mr-2">
+                            <div class="h-full bg-[#0cf] shadow-[0_0_4px_#0cf]" style="width: 100%"></div>
+                        </div>
+                        <span class="text-[11px] text-[#0cf] font-mono w-[38px] text-right shrink-0">100%</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+
+    <!-- 图表初始化 script -->
+    <script>
+        const updateTime = () => {
+            const now = new Date();
+            document.getElementById('current-time').innerText = now.toLocaleTimeString('zh-CN', {hour12:false});
+            const days = ['周日','周一','周二','周三','周四','周五','周六'];
+            document.getElementById('current-date').innerText = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]}`;
+        };
+        setInterval(updateTime, 1000); updateTime();
+
+        const txtColor = '#94a3b8';
+        const splitLineColor = 'rgba(255,255,255,0.05)';
+
+        const pieChart = echarts.init(document.getElementById('pieChart'));
+        pieChart.setOption({
+            color: ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#06b6d4', '#10b981', '#8b5cf6', '#64748b'],
+            tooltip: { trigger: 'item', backgroundColor:'rgba(3,11,25,0.8)', borderColor:'#0cf', textStyle:{color:'#fff',fontSize:12} },
+            legend: {
+                orient: 'vertical', right: '5%', top: 'middle',
+                textStyle: { color: txtColor, fontSize: 11 },
+                itemWidth: 10, itemHeight: 10, icon: 'circle',
+                formatter: name => name
+            },
+            graphic: {
+                type: 'text', left: '33.5%', top: 'center',
+                style: { text: '68\n事件总数', textAlign: 'center', fill: '#fff', fontSize: 13, fontWeight: 'bold' }
+            },
+            series: [{
+                name: '事件分类', type: 'pie', radius: ['50%', '70%'], center: ['35%', '50%'],
+                label: { show: false }, labelLine: { show: false },
+                itemStyle: { borderColor: '#030816', borderWidth: 2 },
+                data: [
+                    { value: 4, name: '人员伤害' }, { value: 6, name: '火警' },
+                    { value: 3, name: '化学品泄漏' }, { value: 12, name: '公辅安全' },
+                    { value: 8, name: '产品安全' }, { value: 18, name: '设备安全' },
+                    { value: 5, name: '职业健康' }, { value: 12, name: '环境事件' }
+                ]
+            }]
+        });
+
+        const barChart = echarts.init(document.getElementById('barChart'));
+        barChart.setOption({
+            tooltip: { trigger: 'axis', axisPointer: {type:'shadow'}, backgroundColor:'rgba(0,0,0,0.8)', borderColor:'#0cf', textStyle:{color:'#fff',fontSize:12}},
+            legend: { data: ['发现隐患', '按期整改', '按期整改率'], top: 0, textStyle: {color: txtColor, fontSize: 11}, itemWidth: 10, itemHeight: 10 },
+            grid: { left: '3%', right: '4%', bottom: '5%', top: '22%', containLabel: true },
+            xAxis: {
+                type: 'category', data: ['11月','12月','1月','2月','3月','4月'],
+                axisLine: { lineStyle: {color: '#1e293b'} }, axisLabel: {color: txtColor, fontSize:10}
+            },
+            yAxis: [
+                {
+                    type: 'value', axisLine: {show:false}, splitLine: { lineStyle: { color: splitLineColor, type: 'dashed' } },
+                    axisLabel: {color: txtColor, fontSize:10}
+                },
+                {
+                    type: 'value', min: 0, max: 100, axisLine: {show:false}, splitLine: {show:false},
+                    axisLabel: {color: '#f59e0b', fontSize:10, formatter: '{value}%'}
+                }
+            ],
+            series: [
+                {
+                    name: '发现隐患', type: 'bar', barWidth: '22%', data: [142, 98, 70, 110, 85, 45],
+                    itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0, color:'#ef4444'}, {offset:1, color:'rgba(239,68,68,0.1)'}]), borderRadius: [2,2,0,0] }
+                },
+                {
+                    name: '按期整改', type: 'bar', barWidth: '22%', data: [140, 97, 70, 108, 80, 40],
+                    itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0, color:'#06b6d4'}, {offset:1, color:'rgba(6,182,212,0.1)'}]), borderRadius: [2,2,0,0] }
+                },
+                {
+                    name: '按期整改率', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'circle', symbolSize: 6,
+                    data: [98.6, 99.0, 100, 98.2, 94.1, 88.9],
+                    lineStyle: { color: '#f59e0b', width: 2 },
+                    itemStyle: { color: '#f59e0b', borderColor: '#030816', borderWidth: 1 },
+                    label: { show: true, color: '#f59e0b', fontSize: 10, formatter: '{c}%' }
+                }
+            ]
+        });
+
+        window.addEventListener('resize', () => {
+            pieChart.resize(); barChart.resize();
+        });
+    </script>
+</body>
+</html>
