@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>应急指挥系统 - 废气治理设施运行工况</title>
+    <title>应急指挥系统 - 废水排放量</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -123,10 +123,6 @@
         table.schedule-table td:nth-child(2) { text-align: left; }
         table.schedule-table th:nth-child(3),
         table.schedule-table td:nth-child(3) { text-align: left; }
-        table.schedule-table th:nth-child(4),
-        table.schedule-table td:nth-child(4) { text-align: left; }
-        table.schedule-table th:nth-child(5),
-        table.schedule-table td:nth-child(5) { text-align: left; }
         .op-link {
             font-size: 13px;
             color: #3b82f6;
@@ -252,7 +248,7 @@
         }
         .form-row:last-child { margin-bottom: 0; }
         .form-label {
-            width: 120px;
+            width: 140px;
             text-align: right;
             padding-right: 16px;
             font-size: 13px;
@@ -284,10 +280,10 @@
             color: #9ca3af;
             cursor: not-allowed;
         }
-        /* 排放浓度超限标红样式 */
+        /* 新增：输入框错误状态样式 */
         .form-control.input-error {
             border-color: #ef4444 !important;
-            background-color: #fef2f2;
+            color: #ef4444 !important;
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
         }
         .form-select {
@@ -447,7 +443,7 @@
             gap: 12px;
         }
         .limit-item label {
-            width: 110px;
+            width: 120px;
             font-size: 13px;
             color: #475569;
             text-align: right;
@@ -484,11 +480,15 @@
             padding: 12px 0 8px 0;
             border-bottom: 1px solid #f1f5f9;
             margin-bottom: 12px;
+            grid-column: 1 / -1;
+        }
+        .section-subtitle:first-of-type {
+            padding-top: 0;
         }
         .inline-disabled {
-            background: #f3f4f6;
-            color: #9ca3af;
-            cursor: not-allowed;
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
         }
     </style>
 </head>
@@ -497,7 +497,7 @@
 
     <section class="card p-6 w-full">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="title-bar">废气治理设施运行工况</h2>
+            <h2 class="title-bar">废水排放量</h2>
             <div class="flex items-center gap-3 flex-wrap">
                 <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
                 <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
@@ -511,7 +511,7 @@
         <div class="flex flex-wrap items-center gap-3 mb-5">
             <div class="flex items-center gap-2">
                 <label class="filter-label">基地：</label>
-                <select class="filter-input filter-select w-40">
+                <select class="filter-input filter-select w-40" id="filterBase">
                     <option value="">全部基地</option>
                     <option>厦门基地</option>
                     <option>重庆基地</option>
@@ -520,27 +520,24 @@
             </div>
             <div class="flex items-center gap-2">
                 <label class="filter-label">月份：</label>
-                <input type="month" class="filter-input w-40" value="2025-01">
-            </div>
-            <div class="flex items-center gap-2">
-                <label class="filter-label">厂房：</label>
-                <select class="filter-input filter-select w-36">
-                    <option value="">全部厂房</option>
-                    <option>CM1</option>
-                    <option>CM3</option>
-                    <option>CM4</option>
+                <select class="filter-input filter-select w-40" id="filterMonth">
+                    <option value="">全部月份</option>
+                    <option>2024年1月</option>
+                    <option>2024年2月</option>
+                    <option>2024年3月</option>
+                    <option>2024年4月</option>
+                    <option>2024年5月</option>
+                    <option>2024年6月</option>
+                    <option>2024年7月</option>
+                    <option>2024年8月</option>
+                    <option>2024年9月</option>
+                    <option>2024年10月</option>
+                    <option>2024年11月</option>
+                    <option>2024年12月</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2">
-                <label class="filter-label">数据依据：</label>
-                <select class="filter-input filter-select w-32">
-                    <option value="">全部</option>
-                    <option>委外</option>
-                    <option>在线</option>
-                </select>
-            </div>
-            <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
-            <button class="plain-btn">重置</button>
+            <button class="primary-btn" onclick="filterData()"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn" onclick="resetFilter()">重置</button>
         </div>
 
         <div class="w-full overflow-x-auto">
@@ -550,54 +547,54 @@
                         <th rowspan="2">基地</th>
                         <th rowspan="2">月份</th>
                         <th rowspan="2">排放口</th>
-                        <th rowspan="2">厂房</th>
-                        <th rowspan="2">数据依据</th>
-                        <th rowspan="2">排放风量<br>(m³/h)</th>
-                        <th rowspan="2">运行天数<br>(d)</th>
-                        <th rowspan="2">运行时长<br>(h)</th>
-                        <th colspan="3">二氧化硫</th>
-                        <th colspan="3">氮氧化物</th>
-                        <th colspan="3">颗粒物</th>
-                        <th colspan="3">非甲烷总烃</th>
+                        <th rowspan="2">废水排放总量<br>(吨)</th>
+                        <th colspan="3">COD</th>
+                        <th colspan="3">氨氮</th>
+                        <th colspan="3">总氮</th>
+                        <th colspan="3">总磷</th>
+                        <th colspan="3">悬浮物</th>
                         <th rowspan="2">操作</th>
                     </tr>
                     <tr>
-                        <th>排放浓度<br>(mg/m³)</th>
-                        <th>法定排放浓度限值<br>(mg/m³)</th>
-                        <th>排放量(kg)</th>
-                        <th>排放浓度<br>(mg/m³)</th>
-                        <th>法定排放浓度限值<br>(mg/m³)</th>
-                        <th>排放量(kg)</th>
-                        <th>排放浓度<br>(mg/m³)</th>
-                        <th>法定排放浓度限值<br>(mg/m³)</th>
-                        <th>排放量(kg)</th>
-                        <th>排放浓度<br>(mg/m³)</th>
-                        <th>法定排放浓度限值<br>(mg/m³)</th>
-                        <th>排放量(kg)</th>
+                        <th>排放浓度<br>(mg/L)</th>
+                        <th>法定排放浓度限值<br>(mg/L)</th>
+                        <th>排放总量<br>(kg)</th>
+                        <th>排放浓度<br>(mg/L)</th>
+                        <th>法定排放浓度限值<br>(mg/L)</th>
+                        <th>排放总量<br>(kg)</th>
+                        <th>排放浓度<br>(mg/L)</th>
+                        <th>法定排放浓度限值<br>(mg/L)</th>
+                        <th>排放总量<br>(kg)</th>
+                        <th>排放浓度<br>(mg/L)</th>
+                        <th>法定排放浓度限值<br>(mg/L)</th>
+                        <th>排放总量<br>(kg)</th>
+                        <th>排放浓度<br>(mg/L)</th>
+                        <th>法定排放浓度限值<br>(mg/L)</th>
+                        <th>排放总量<br>(kg)</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
+                    <!-- 初始数据参照截图 -->
                     <tr>
                         <td style="text-align:left;">重庆基地</td>
                         <td style="text-align:left;">2024年1月</td>
-                        <td style="text-align:left;">1#排口（搅拌废气）</td>
-                        <td style="text-align:left;">CM1</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>1640</td>
-                        <td>28</td>
-                        <td>672</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
+                        <td style="text-align:left;">生产废水排口 DW001</td>
+                        <td>917</td>
+                        <td>27</td>
+                        <td>150</td>
+                        <td>24.76</td>
+                        <td>3.32</td>
+                        <td>30</td>
+                        <td>3.04</td>
+                        <td>7</td>
+                        <td>40</td>
+                        <td>6.42</td>
+                        <td>0.12</td>
+                        <td>2</td>
+                        <td>0.11</td>
+                        <td>8</td>
+                        <td>140</td>
+                        <td>7.34</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -606,128 +603,49 @@
                     <tr>
                         <td style="text-align:left;">重庆基地</td>
                         <td style="text-align:left;">2024年2月</td>
-                        <td style="text-align:left;">1#排口（搅拌废气）</td>
-                        <td style="text-align:left;">CM3</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>1640</td>
-                        <td>28</td>
-                        <td>672</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
+                        <td style="text-align:left;">生产废水排口 DW001</td>
+                        <td>1096</td>
+                        <td>27</td>
+                        <td>150</td>
+                        <td>29.59</td>
+                        <td>3.32</td>
+                        <td>30</td>
+                        <td>3.64</td>
+                        <td>7</td>
+                        <td>40</td>
+                        <td>7.67</td>
+                        <td>0.12</td>
+                        <td>2</td>
+                        <td>0.13</td>
+                        <td>8</td>
+                        <td>140</td>
+                        <td>8.77</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
                         </td>
                     </tr>
+                    <!-- 测试无排放项示例 -->
                     <tr>
-                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">厦门基地</td>
                         <td style="text-align:left;">2024年3月</td>
-                        <td style="text-align:left;">1#排口（搅拌废气）</td>
-                        <td style="text-align:left;">CM4</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>1640</td>
-                        <td>28</td>
-                        <td>672</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td class="text-center">
-                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
-                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:left;">重庆基地</td>
-                        <td style="text-align:left;">2024年4月</td>
-                        <td style="text-align:left;">1#排口（搅拌废气）</td>
-                        <td style="text-align:left;">CM4</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>1640</td>
-                        <td>28</td>
-                        <td>672</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td>6.71</td>
-                        <td>50</td>
-                        <td>7.39</td>
-                        <td class="text-center">
-                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
-                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:left;">重庆基地</td>
-                        <td style="text-align:left;">2024年1月</td>
-                        <td style="text-align:left;">2#排口（1#阳极涂布）</td>
-                        <td style="text-align:left;">CM4</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td class="text-center">
-                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
-                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="text-align:left;">重庆基地</td>
-                        <td style="text-align:left;">2024年2月</td>
-                        <td style="text-align:left;">3#排口（2#阳极涂布）</td>
-                        <td style="text-align:left;">CM4</td>
-                        <td style="text-align:left;">委外</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
-                        <td>3.37</td>
-                        <td>50</td>
-                        <td>0.00</td>
+                        <td style="text-align:left;">生活污水排口 DW002</td>
+                        <td>500</td>
+                        <td>/</td>
+                        <td></td>
+                        <td></td>
+                        <td>2.5</td>
+                        <td>30</td>
+                        <td>1.25</td>
+                        <td>/</td>
+                        <td></td>
+                        <td></td>
+                        <td>0.5</td>
+                        <td>2</td>
+                        <td>0.25</td>
+                        <td>/</td>
+                        <td></td>
+                        <td></td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -738,7 +656,7 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between pt-4">
-            <div class="text-sm text-slate-500">共 24 条数据</div>
+            <div class="text-sm text-slate-500" id="recordCount">共 3 条数据</div>
             <div class="flex flex-wrap items-center gap-2">
                 <select class="page-size-select">
                     <option>20 条/页</option>
@@ -747,11 +665,10 @@
                 </select>
                 <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
                 <button class="pager-btn active">1</button>
-                <button class="pager-btn">2</button>
                 <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
                 <span class="text-sm text-slate-500 ml-2">跳至</span>
                 <input type="text" class="jump-input" value="1">
-                <span class="text-sm text-slate-500">/ 2 页</span>
+                <span class="text-sm text-slate-500">/ 1 页</span>
             </div>
         </div>
     </section>
@@ -762,7 +679,7 @@
 <div class="modal-overlay" id="addModal">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 id="modalTitle">新增废气治理设施运行工况</h3>
+            <h3 id="modalTitle">新增废水排放量记录</h3>
             <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -778,104 +695,114 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label"><span class="required">*</span>月份</label>
-                    <input type="month" class="form-control" id="fieldMonth" value="2025-01">
+                    <select class="form-control form-select" id="fieldMonth">
+                        <option value="">请选择月份</option>
+                        <option>2024年1月</option>
+                        <option>2024年2月</option>
+                        <option>2024年3月</option>
+                        <option>2024年4月</option>
+                        <option>2024年5月</option>
+                        <option>2024年6月</option>
+                        <option>2024年7月</option>
+                        <option>2024年8月</option>
+                        <option>2024年9月</option>
+                        <option>2024年10月</option>
+                        <option>2024年11月</option>
+                        <option>2024年12月</option>
+                    </select>
                 </div>
                 <div class="form-row">
                     <label class="form-label"><span class="required">*</span>排放口</label>
-                    <input type="text" class="form-control" id="fieldOutlet" placeholder="如：1#排口（搅拌废气）">
+                    <input type="text" class="form-control" id="fieldOutlet" placeholder="如：生产废水排口 DW001">
                 </div>
                 <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>厂房</label>
-                    <select class="form-control form-select" id="fieldWorkshop">
-                        <option value="">请选择厂房</option>
-                        <option>CM1</option>
-                        <option>CM3</option>
-                        <option>CM4</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>数据依据</label>
-                    <select class="form-control form-select" id="fieldBasis">
-                        <option value="">请选择</option>
-                        <option>委外</option>
-                        <option>在线</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>排放风量 (m³/h)</label>
-                    <input type="number" step="0.01" class="form-control" id="fieldAirflow" placeholder="请输入" value="0">
-                </div>
-                <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>运行天数 (d)</label>
-                    <input type="number" step="1" class="form-control" id="fieldDays" placeholder="请输入" value="0">
-                </div>
-                <div class="form-row">
-                    <label class="form-label">运行时长 (h)</label>
-                    <input type="text" class="form-control" id="fieldHours" disabled placeholder="自动计算">
+                    <label class="form-label"><span class="required">*</span>废水排放总量 (吨)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldTotalWater" placeholder="请输入" value="0">
                 </div>
             </div>
 
-            <div class="section-subtitle">二氧化硫</div>
+            <!-- COD -->
+            <div class="section-subtitle">COD</div>
             <div class="form-grid-3">
                 <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldSO2" placeholder="请输入或/" value="0">
+                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldCOD" placeholder="请输入或 /" value="0">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">法定排放浓度限值 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldSO2Limit" disabled placeholder="自动获取">
+                    <label class="form-label">法定排放浓度限值 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldCODLimit" disabled placeholder="自动获取">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">排放量(kg)</label>
-                    <input type="text" class="form-control" id="fieldSO2Emission" disabled placeholder="自动计算">
+                    <label class="form-label">排放总量 (kg)</label>
+                    <input type="text" class="form-control" id="fieldCODEmission" disabled placeholder="自动计算">
                 </div>
             </div>
 
-            <div class="section-subtitle">氮氧化物</div>
+            <!-- 氨氮 -->
+            <div class="section-subtitle">氨氮</div>
             <div class="form-grid-3">
                 <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldNOx" placeholder="请输入或/" value="0">
+                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldAmmonia" placeholder="请输入或 /" value="0">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">法定排放浓度限值 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldNOxLimit" disabled placeholder="自动获取">
+                    <label class="form-label">法定排放浓度限值 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldAmmoniaLimit" disabled placeholder="自动获取">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">排放量(kg)</label>
-                    <input type="text" class="form-control" id="fieldNOxEmission" disabled placeholder="自动计算">
+                    <label class="form-label">排放总量 (kg)</label>
+                    <input type="text" class="form-control" id="fieldAmmoniaEmission" disabled placeholder="自动计算">
                 </div>
             </div>
 
-            <div class="section-subtitle">颗粒物</div>
+            <!-- 总氮 -->
+            <div class="section-subtitle">总氮</div>
             <div class="form-grid-3">
                 <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldPM" placeholder="请输入或/" value="0">
+                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldTN" placeholder="请输入或 /" value="0">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">法定排放浓度限值 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldPMLimit" disabled placeholder="自动获取">
+                    <label class="form-label">法定排放浓度限值 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldTNLimit" disabled placeholder="自动获取">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">排放量(kg)</label>
-                    <input type="text" class="form-control" id="fieldPMEmission" disabled placeholder="自动计算">
+                    <label class="form-label">排放总量 (kg)</label>
+                    <input type="text" class="form-control" id="fieldTNEmission" disabled placeholder="自动计算">
                 </div>
             </div>
 
-            <div class="section-subtitle">非甲烷总烃</div>
+            <!-- 总磷 -->
+            <div class="section-subtitle">总磷</div>
             <div class="form-grid-3">
                 <div class="form-row">
-                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldNMP" placeholder="请输入或/" value="0">
+                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldTP" placeholder="请输入或 /" value="0">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">法定排放浓度限值 (mg/m³)</label>
-                    <input type="text" class="form-control" id="fieldNMPLimit" disabled placeholder="自动获取">
+                    <label class="form-label">法定排放浓度限值 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldTPLimit" disabled placeholder="自动获取">
                 </div>
                 <div class="form-row">
-                    <label class="form-label">排放量(kg)</label>
-                    <input type="text" class="form-control" id="fieldNMPEmission" disabled placeholder="自动计算">
+                    <label class="form-label">排放总量 (kg)</label>
+                    <input type="text" class="form-control" id="fieldTPEmission" disabled placeholder="自动计算">
+                </div>
+            </div>
+
+            <!-- 悬浮物 -->
+            <div class="section-subtitle">悬浮物</div>
+            <div class="form-grid-3">
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>排放浓度 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldSS" placeholder="请输入或 /" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">法定排放浓度限值 (mg/L)</label>
+                    <input type="text" class="form-control" id="fieldSSLimit" disabled placeholder="自动获取">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">排放总量 (kg)</label>
+                    <input type="text" class="form-control" id="fieldSSEmission" disabled placeholder="自动计算">
                 </div>
             </div>
         </div>
@@ -913,14 +840,12 @@
                     <div class="tag-input-wrap" id="tagWrap-xiamen">
                         <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                        <input type="text" placeholder="输入姓名后回车添加" onkeydown="addTag(event, this)">
                     </div>
                 </div>
                 <div class="base-config-row">
                     <label>重庆基地</label>
                     <div class="tag-input-wrap" id="tagWrap-chongqing">
                         <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                        <input type="text" placeholder="输入姓名后回车添加" onkeydown="addTag(event, this)">
                     </div>
                 </div>
                 <div class="base-config-row">
@@ -928,7 +853,6 @@
                     <div class="tag-input-wrap" id="tagWrap-heze">
                         <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                        <input type="text" placeholder="输入姓名后回车添加" onkeydown="addTag(event, this)">
                     </div>
                 </div>
             </div>
@@ -950,20 +874,24 @@
         <div class="modal-body">
             <div class="limit-grid">
                 <div class="limit-item">
-                    <label>二氧化硫 (mg/m³)</label>
-                    <input type="number" step="0.01" id="limitSO2" value="50">
+                    <label>COD (mg/L)</label>
+                    <input type="number" step="0.01" id="limitCOD" value="150">
                 </div>
                 <div class="limit-item">
-                    <label>氮氧化物 (mg/m³)</label>
-                    <input type="number" step="0.01" id="limitNOx" value="50">
+                    <label>氨氮 (mg/L)</label>
+                    <input type="number" step="0.01" id="limitAmmonia" value="30">
                 </div>
                 <div class="limit-item">
-                    <label>颗粒物 (mg/m³)</label>
-                    <input type="number" step="0.01" id="limitPM" value="50">
+                    <label>总氮 (mg/L)</label>
+                    <input type="number" step="0.01" id="limitTN" value="40">
                 </div>
                 <div class="limit-item">
-                    <label>非甲烷总烃 (mg/m³)</label>
-                    <input type="number" step="0.01" id="limitNMP" value="50">
+                    <label>总磷 (mg/L)</label>
+                    <input type="number" step="0.01" id="limitTP" value="2">
+                </div>
+                <div class="limit-item">
+                    <label>悬浮物 (mg/L)</label>
+                    <input type="number" step="0.01" id="limitSS" value="140">
                 </div>
             </div>
             <div class="hint-text" style="padding-left:0;margin-top:12px;">
@@ -978,139 +906,88 @@
 </div>
 
 <script>
+    // 法规限值默认配置
     let limits = {
-        SO2: 50,
-        NOx: 50,
-        PM: 50,
-        NMP: 50
+        COD: 150,
+        Ammonia: 30,
+        TN: 40,
+        TP: 2,
+        SS: 140
     };
 
+    // 应用限值到表单
     function applyLimitsToForm() {
-        document.getElementById('fieldSO2Limit').value = limits.SO2;
-        document.getElementById('fieldNOxLimit').value = limits.NOx;
-        document.getElementById('fieldPMLimit').value = limits.PM;
-        document.getElementById('fieldNMPLimit').value = limits.NMP;
+        document.getElementById('fieldCODLimit').value = limits.COD;
+        document.getElementById('fieldAmmoniaLimit').value = limits.Ammonia;
+        document.getElementById('fieldTNLimit').value = limits.TN;
+        document.getElementById('fieldTPLimit').value = limits.TP;
+        document.getElementById('fieldSSLimit').value = limits.SS;
     }
 
-    // 校验单个污染物并设置/清除标红样式
-    function checkPollutantError(concId, limitKey) {
-        const concEl = document.getElementById(concId);
-        const concVal = concEl.value.trim();
-        if (concVal === '/' || concVal === '') {
-            concEl.classList.remove('input-error');
-            return false;
-        }
-        const conc = parseFloat(concVal);
-        if (isNaN(conc)) {
-            concEl.classList.remove('input-error');
-            return false;
-        }
-        if (conc >= limits[limitKey]) {
-            concEl.classList.add('input-error');
-            return true;
-        } else {
-            concEl.classList.remove('input-error');
-            return false;
-        }
-    }
-
+    // 计算排放总量并校验浓度
     function calculateAutoFields() {
-        const days = parseFloat(document.getElementById('fieldDays').value) || 0;
-        document.getElementById('fieldHours').value = (days * 24).toFixed(0);
+        const totalWater = parseFloat(document.getElementById('fieldTotalWater').value) || 0;
 
-        const airflow = parseFloat(document.getElementById('fieldAirflow').value) || 0;
-        const daysVal = parseFloat(document.getElementById('fieldDays').value) || 0;
+        function calcEmission(concId, emissionId, limitId) {
+            const concInput = document.getElementById(concId);
+            const emissionInput = document.getElementById(emissionId);
+            const limitInput = document.getElementById(limitId);
+            let concVal = concInput.value.trim();
 
-        // 排放量保留两位小数
-        const so2 = document.getElementById('fieldSO2').value.trim();
-        let so2Emission = '';
-        if (so2 === '/' || so2 === '') {
-            so2Emission = '';
-        } else {
-            const so2Val = parseFloat(so2) || 0;
-            so2Emission = (airflow * daysVal * 24 / 10000 * so2Val / 100).toFixed(2);
-        }
-        document.getElementById('fieldSO2Emission').value = so2Emission;
+            // 每次计算前先移除错误样式
+            concInput.classList.remove('input-error');
 
-        const nox = document.getElementById('fieldNOx').value.trim();
-        let noxEmission = '';
-        if (nox === '/' || nox === '') {
-            noxEmission = '';
-        } else {
-            const noxVal = parseFloat(nox) || 0;
-            noxEmission = (airflow * daysVal * 24 / 10000 * noxVal / 100).toFixed(2);
-        }
-        document.getElementById('fieldNOxEmission').value = noxEmission;
-
-        const pm = document.getElementById('fieldPM').value.trim();
-        let pmEmission = '';
-        if (pm === '/' || pm === '') {
-            pmEmission = '';
-        } else {
-            const pmVal = parseFloat(pm) || 0;
-            pmEmission = (airflow * daysVal * 24 / 10000 * pmVal / 100).toFixed(2);
-        }
-        document.getElementById('fieldPMEmission').value = pmEmission;
-
-        const nmp = document.getElementById('fieldNMP').value.trim();
-        let nmpEmission = '';
-        if (nmp === '/' || nmp === '') {
-            nmpEmission = '';
-        } else {
-            const nmpVal = parseFloat(nmp) || 0;
-            nmpEmission = (airflow * daysVal * 24 / 10000 * nmpVal / 100).toFixed(2);
-        }
-        document.getElementById('fieldNMPEmission').value = nmpEmission;
-
-        togglePollutantFields('SO2');
-        togglePollutantFields('NOx');
-        togglePollutantFields('PM');
-        togglePollutantFields('NMP');
-
-        // 实时校验，标红超限输入框
-        checkPollutantError('fieldSO2', 'SO2');
-        checkPollutantError('fieldNOx', 'NOx');
-        checkPollutantError('fieldPM', 'PM');
-        checkPollutantError('fieldNMP', 'NMP');
-    }
-
-    function togglePollutantFields(pollutant) {
-        const inputMap = {
-            SO2: { conc: 'fieldSO2', limit: 'fieldSO2Limit', emission: 'fieldSO2Emission' },
-            NOx: { conc: 'fieldNOx', limit: 'fieldNOxLimit', emission: 'fieldNOxEmission' },
-            PM: { conc: 'fieldPM', limit: 'fieldPMLimit', emission: 'fieldPMEmission' },
-            NMP: { conc: 'fieldNMP', limit: 'fieldNMPLimit', emission: 'fieldNMPEmission' }
-        };
-        const ids = inputMap[pollutant];
-        const concVal = document.getElementById(ids.conc).value.trim();
-        const limitEl = document.getElementById(ids.limit);
-        const emissionEl = document.getElementById(ids.emission);
-
-        if (concVal === '/') {
-            limitEl.value = '';
-            emissionEl.value = '';
-            limitEl.disabled = true;
-            emissionEl.disabled = true;
-            limitEl.classList.add('inline-disabled');
-            emissionEl.classList.add('inline-disabled');
-        } else {
-            const limitKey = pollutant;
-            limitEl.value = limits[limitKey];
-            limitEl.disabled = true;
-            emissionEl.disabled = true;
-            limitEl.classList.remove('inline-disabled');
-            emissionEl.classList.remove('inline-disabled');
-            if (concVal === '') {
-                emissionEl.value = '';
+            // 如果是 "/"，则清空并禁用限值和排放量
+            if (concVal === '/') {
+                limitInput.value = '';
+                emissionInput.value = '';
+                limitInput.disabled = true;
+                emissionInput.disabled = true;
+                limitInput.classList.add('inline-disabled');
+                emissionInput.classList.add('inline-disabled');
+                return;
             }
+
+            // 恢复限值显示
+            const limitVal = parseFloat(limitInput.value) || 0;
+            limitInput.disabled = true;
+            emissionInput.disabled = true;
+            limitInput.classList.remove('inline-disabled');
+            emissionInput.classList.remove('inline-disabled');
+
+            // 处理空值或非数字
+            if (concVal === '' || isNaN(parseFloat(concVal))) {
+                emissionInput.value = '';
+                return;
+            }
+
+            // 校验浓度不得大于限值：标红输入框并阻止保存
+            const concNum = parseFloat(concVal);
+            if (concNum > limitVal) {
+                concInput.classList.add('input-error');
+                emissionInput.value = ''; // 清空排放量，避免错误计算
+                return;
+            }
+
+            // 计算排放总量 (吨 * mg/L / 1000 = kg)
+            const emission = (totalWater * concNum / 1000).toFixed(4);
+            emissionInput.value = emission;
         }
+
+        calcEmission('fieldCOD', 'fieldCODEmission', 'fieldCODLimit');
+        calcEmission('fieldAmmonia', 'fieldAmmoniaEmission', 'fieldAmmoniaLimit');
+        calcEmission('fieldTN', 'fieldTNEmission', 'fieldTNLimit');
+        calcEmission('fieldTP', 'fieldTPEmission', 'fieldTPLimit');
+        calcEmission('fieldSS', 'fieldSSEmission', 'fieldSSLimit');
     }
 
-    ['fieldAirflow','fieldDays','fieldSO2','fieldNOx','fieldPM','fieldNMP'].forEach(function(id){
+    // 监听输入变化
+    ['fieldTotalWater', 'fieldCOD', 'fieldAmmonia', 'fieldTN', 'fieldTP', 'fieldSS'].forEach(function(id) {
         document.getElementById(id).addEventListener('input', calculateAutoFields);
         document.getElementById(id).addEventListener('change', calculateAutoFields);
     });
 
+    // 弹窗控制
     function openModal(id) {
         document.getElementById(id).classList.add('active');
     }
@@ -1125,183 +1002,176 @@
         });
     });
 
+    // 新增 / 编辑
     let editingRow = null;
 
     function openAddModal() {
         editingRow = null;
-        document.getElementById('modalTitle').textContent = '新增废气治理设施运行工况';
+        document.getElementById('modalTitle').textContent = '新增废水排放量记录';
         document.getElementById('fieldBase').value = '';
-        document.getElementById('fieldMonth').value = '2025-01';
+        document.getElementById('fieldMonth').value = '';
         document.getElementById('fieldOutlet').value = '';
-        document.getElementById('fieldWorkshop').value = '';
-        document.getElementById('fieldBasis').value = '';
-        document.getElementById('fieldAirflow').value = '0';
-        document.getElementById('fieldDays').value = '0';
-        document.getElementById('fieldSO2').value = '0';
-        document.getElementById('fieldNOx').value = '0';
-        document.getElementById('fieldPM').value = '0';
-        document.getElementById('fieldNMP').value = '0';
-        // 清除标红样式
-        ['fieldSO2','fieldNOx','fieldPM','fieldNMP'].forEach(function(id) {
-            document.getElementById(id).classList.remove('input-error');
-        });
+        document.getElementById('fieldTotalWater').value = '0';
+        document.getElementById('fieldCOD').value = '0';
+        document.getElementById('fieldAmmonia').value = '0';
+        document.getElementById('fieldTN').value = '0';
+        document.getElementById('fieldTP').value = '0';
+        document.getElementById('fieldSS').value = '0';
         applyLimitsToForm();
         calculateAutoFields();
-        togglePollutantFields('SO2');
-        togglePollutantFields('NOx');
-        togglePollutantFields('PM');
-        togglePollutantFields('NMP');
         openModal('addModal');
     }
 
     function openEditModal(el) {
         editingRow = el.closest('tr');
-        document.getElementById('modalTitle').textContent = '编辑废气治理设施运行工况';
+        document.getElementById('modalTitle').textContent = '编辑废水排放量记录';
         const cells = editingRow.querySelectorAll('td');
         document.getElementById('fieldBase').value = cells[0].textContent.trim();
-        const monthText = cells[1].textContent.trim();
-        const match = monthText.match(/(\d{4})年(\d{1,2})月/);
-        if (match) {
-            document.getElementById('fieldMonth').value = match[1] + '-' + match[2].padStart(2, '0');
-        }
+        document.getElementById('fieldMonth').value = cells[1].textContent.trim();
         document.getElementById('fieldOutlet').value = cells[2].textContent.trim();
-        document.getElementById('fieldWorkshop').value = cells[3].textContent.trim();
-        document.getElementById('fieldBasis').value = cells[4].textContent.trim();
-        document.getElementById('fieldAirflow').value = cells[5].textContent.trim() || '0';
-        document.getElementById('fieldDays').value = cells[6].textContent.trim() || '0';
-        document.getElementById('fieldSO2').value = cells[8].textContent.trim();
-        document.getElementById('fieldNOx').value = cells[11].textContent.trim();
-        document.getElementById('fieldPM').value = cells[14].textContent.trim();
-        document.getElementById('fieldNMP').value = cells[17].textContent.trim();
+        document.getElementById('fieldTotalWater').value = cells[3].textContent.trim() || '0';
+        
+        // COD
+        document.getElementById('fieldCOD').value = cells[4].textContent.trim() || '0';
+        // 氨氮
+        document.getElementById('fieldAmmonia').value = cells[7].textContent.trim() || '0';
+        // 总氮
+        document.getElementById('fieldTN').value = cells[10].textContent.trim() || '0';
+        // 总磷
+        document.getElementById('fieldTP').value = cells[13].textContent.trim() || '0';
+        // 悬浮物
+        document.getElementById('fieldSS').value = cells[16].textContent.trim() || '0';
 
-        // 清除标红样式
-        ['fieldSO2','fieldNOx','fieldPM','fieldNMP'].forEach(function(id) {
-            document.getElementById(id).classList.remove('input-error');
-        });
-
+        applyLimitsToForm();
         calculateAutoFields();
         openModal('addModal');
     }
 
-    // 校验单个污染物的排放浓度是否小于法定限值
-    function validatePollutant(concId, limitKey, label) {
-        const concEl = document.getElementById(concId);
-        const concVal = concEl.value.trim();
-        if (concVal === '/' || concVal === '') {
-            return true;
-        }
-        const conc = parseFloat(concVal);
-        if (isNaN(conc)) {
-            alert(label + ' 排放浓度输入无效，请输入数字或 /');
-            return false;
-        }
-        const limitVal = limits[limitKey];
-        if (conc >= limitVal) {
-            concEl.classList.add('input-error');
-            alert(label + ' 排放浓度(' + conc + ') 必须小于法定排放浓度限值(' + limitVal + ')');
-            return false;
-        }
-        return true;
-    }
-
     function saveData() {
+        // 校验是否有标红的输入框（浓度超限）
+        const errorInputs = document.querySelectorAll('#addModal .input-error');
+        if (errorInputs.length > 0) {
+            alert('存在排放浓度大于法定排放浓度限值的输入，请修改后再保存。');
+            return;
+        }
+
+        // 获取表单数据
         const base = document.getElementById('fieldBase').value;
         const month = document.getElementById('fieldMonth').value;
         const outlet = document.getElementById('fieldOutlet').value.trim();
-        const workshop = document.getElementById('fieldWorkshop').value;
-        const basis = document.getElementById('fieldBasis').value;
+        const totalWater = document.getElementById('fieldTotalWater').value.trim() || '0';
+        
+        const cod = document.getElementById('fieldCOD').value.trim() || '0';
+        const codLimit = document.getElementById('fieldCODLimit').value;
+        const codEmission = document.getElementById('fieldCODEmission').value;
+
+        const ammonia = document.getElementById('fieldAmmonia').value.trim() || '0';
+        const ammoniaLimit = document.getElementById('fieldAmmoniaLimit').value;
+        const ammoniaEmission = document.getElementById('fieldAmmoniaEmission').value;
+
+        const tn = document.getElementById('fieldTN').value.trim() || '0';
+        const tnLimit = document.getElementById('fieldTNLimit').value;
+        const tnEmission = document.getElementById('fieldTNEmission').value;
+
+        const tp = document.getElementById('fieldTP').value.trim() || '0';
+        const tpLimit = document.getElementById('fieldTPLimit').value;
+        const tpEmission = document.getElementById('fieldTPEmission').value;
+
+        const ss = document.getElementById('fieldSS').value.trim() || '0';
+        const ssLimit = document.getElementById('fieldSSLimit').value;
+        const ssEmission = document.getElementById('fieldSSEmission').value;
+
+        // 校验必填
         if (!base) { alert('请选择基地'); return; }
         if (!month) { alert('请选择月份'); return; }
         if (!outlet) { alert('请输入排放口'); return; }
-        if (!workshop) { alert('请选择厂房'); return; }
-        if (!basis) { alert('请选择数据依据'); return; }
 
-        // 校验各污染物排放浓度是否小于法定限值
-        if (!validatePollutant('fieldSO2', 'SO2', '二氧化硫')) return;
-        if (!validatePollutant('fieldNOx', 'NOx', '氮氧化物')) return;
-        if (!validatePollutant('fieldPM', 'PM', '颗粒物')) return;
-        if (!validatePollutant('fieldNMP', 'NMP', '非甲烷总烃')) return;
-
-        const airflow = document.getElementById('fieldAirflow').value.trim() || '0';
-        const days = document.getElementById('fieldDays').value.trim() || '0';
-        const hours = document.getElementById('fieldHours').value;
-        const so2 = document.getElementById('fieldSO2').value.trim();
-        const so2Limit = document.getElementById('fieldSO2Limit').value;
-        const so2Emission = document.getElementById('fieldSO2Emission').value;
-        const nox = document.getElementById('fieldNOx').value.trim();
-        const noxLimit = document.getElementById('fieldNOxLimit').value;
-        const noxEmission = document.getElementById('fieldNOxEmission').value;
-        const pm = document.getElementById('fieldPM').value.trim();
-        const pmLimit = document.getElementById('fieldPMLimit').value;
-        const pmEmission = document.getElementById('fieldPMEmission').value;
-        const nmp = document.getElementById('fieldNMP').value.trim();
-        const nmpLimit = document.getElementById('fieldNMPLimit').value;
-        const nmpEmission = document.getElementById('fieldNMPEmission').value;
-
-        const [y, m] = month.split('-');
-        const monthDisplay = y + '年' + parseInt(m) + '月';
+        // 构建行 HTML
+        let html = '';
+        html += '<td style="text-align:left;">' + base + '</td>';
+        html += '<td style="text-align:left;">' + month + '</td>';
+        html += '<td style="text-align:left;">' + outlet + '</td>';
+        html += '<td>' + totalWater + '</td>';
+        // COD
+        html += '<td>' + cod + '</td>';
+        html += '<td>' + codLimit + '</td>';
+        html += '<td>' + codEmission + '</td>';
+        // 氨氮
+        html += '<td>' + ammonia + '</td>';
+        html += '<td>' + ammoniaLimit + '</td>';
+        html += '<td>' + ammoniaEmission + '</td>';
+        // 总氮
+        html += '<td>' + tn + '</td>';
+        html += '<td>' + tnLimit + '</td>';
+        html += '<td>' + tnEmission + '</td>';
+        // 总磷
+        html += '<td>' + tp + '</td>';
+        html += '<td>' + tpLimit + '</td>';
+        html += '<td>' + tpEmission + '</td>';
+        // 悬浮物
+        html += '<td>' + ss + '</td>';
+        html += '<td>' + ssLimit + '</td>';
+        html += '<td>' + ssEmission + '</td>';
+        // 操作
+        html += '<td class="text-center">';
+        html += '<a class="op-link" onclick="openEditModal(this)">编辑</a>';
+        html += '<a class="op-link danger" onclick="deleteRow(this)">删除</a>';
+        html += '</td>';
 
         if (editingRow) {
-            const cells = editingRow.querySelectorAll('td');
-            cells[0].textContent = base;
-            cells[1].textContent = monthDisplay;
-            cells[2].textContent = outlet;
-            cells[3].textContent = workshop;
-            cells[4].textContent = basis;
-            cells[5].textContent = airflow;
-            cells[6].textContent = days;
-            cells[7].textContent = hours;
-            cells[8].textContent = so2;
-            cells[9].textContent = so2Limit;
-            cells[10].textContent = so2Emission;
-            cells[11].textContent = nox;
-            cells[12].textContent = noxLimit;
-            cells[13].textContent = noxEmission;
-            cells[14].textContent = pm;
-            cells[15].textContent = pmLimit;
-            cells[16].textContent = pmEmission;
-            cells[17].textContent = nmp;
-            cells[18].textContent = nmpLimit;
-            cells[19].textContent = nmpEmission;
+            editingRow.innerHTML = html;
         } else {
-            const tbody = document.querySelector('#dataTable tbody');
+            const tbody = document.getElementById('tableBody');
             const tr = document.createElement('tr');
-            let html = '<td style="text-align:left;">' + base + '</td>';
-            html += '<td style="text-align:left;">' + monthDisplay + '</td>';
-            html += '<td style="text-align:left;">' + outlet + '</td>';
-            html += '<td style="text-align:left;">' + workshop + '</td>';
-            html += '<td style="text-align:left;">' + basis + '</td>';
-            html += '<td>' + airflow + '</td>';
-            html += '<td>' + days + '</td>';
-            html += '<td>' + hours + '</td>';
-            html += '<td>' + so2 + '</td>';
-            html += '<td>' + so2Limit + '</td>';
-            html += '<td>' + so2Emission + '</td>';
-            html += '<td>' + nox + '</td>';
-            html += '<td>' + noxLimit + '</td>';
-            html += '<td>' + noxEmission + '</td>';
-            html += '<td>' + pm + '</td>';
-            html += '<td>' + pmLimit + '</td>';
-            html += '<td>' + pmEmission + '</td>';
-            html += '<td>' + nmp + '</td>';
-            html += '<td>' + nmpLimit + '</td>';
-            html += '<td>' + nmpEmission + '</td>';
-            html += '<td class="text-center">';
-            html += '<a class="op-link" onclick="openEditModal(this)">编辑</a>';
-            html += '<a class="op-link danger" onclick="deleteRow(this)">删除</a>';
-            html += '</td>';
             tr.innerHTML = html;
             tbody.appendChild(tr);
         }
         closeModal('addModal');
+        updateRecordCount();
     }
 
     function deleteRow(el) {
         if (confirm('确定要删除该条记录吗？')) {
             el.closest('tr').remove();
+            updateRecordCount();
         }
     }
 
+    // 更新记录数显示
+    function updateRecordCount() {
+        const count = document.querySelectorAll('#tableBody tr').length;
+        document.getElementById('recordCount').textContent = '共 ' + count + ' 条数据';
+    }
+
+    // 查询 / 重置（简单的前端筛选）
+    function filterData() {
+        const baseFilter = document.getElementById('filterBase').value;
+        const monthFilter = document.getElementById('filterMonth').value;
+        const rows = document.querySelectorAll('#tableBody tr');
+        let visibleCount = 0;
+        rows.forEach(function(row) {
+            const cells = row.querySelectorAll('td');
+            const base = cells[0].textContent.trim();
+            const month = cells[1].textContent.trim();
+            let show = true;
+            if (baseFilter && base !== baseFilter) show = false;
+            if (monthFilter && month !== monthFilter) show = false;
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+        document.getElementById('recordCount').textContent = '共 ' + visibleCount + ' 条数据';
+    }
+
+    function resetFilter() {
+        document.getElementById('filterBase').value = '';
+        document.getElementById('filterMonth').value = '';
+        document.querySelectorAll('#tableBody tr').forEach(function(row) {
+            row.style.display = '';
+        });
+        updateRecordCount();
+    }
+
+    // 推送规则
     function openPushModal() {
         openModal('pushModal');
     }
@@ -1323,6 +1193,13 @@
         el.closest('.tag').remove();
     }
 
+    // 为所有标签输入框绑定回车事件
+    document.querySelectorAll('.tag-input-wrap input').forEach(function(input) {
+        input.addEventListener('keydown', function(e) {
+            addTag(e, this);
+        });
+    });
+
     function savePushRule() {
         const day = document.getElementById('pushDay').value;
         if (!day || day < 1 || day > 31) {
@@ -1343,23 +1220,22 @@
         closeModal('pushModal');
     }
 
+    // 法规限值配置
     function openLimitModal() {
-        document.getElementById('limitSO2').value = limits.SO2;
-        document.getElementById('limitNOx').value = limits.NOx;
-        document.getElementById('limitPM').value = limits.PM;
-        document.getElementById('limitNMP').value = limits.NMP;
+        document.getElementById('limitCOD').value = limits.COD;
+        document.getElementById('limitAmmonia').value = limits.Ammonia;
+        document.getElementById('limitTN').value = limits.TN;
+        document.getElementById('limitTP').value = limits.TP;
+        document.getElementById('limitSS').value = limits.SS;
         openModal('limitModal');
     }
 
     function saveLimitConfig() {
-        const so2 = parseFloat(document.getElementById('limitSO2').value) || 0;
-        const nox = parseFloat(document.getElementById('limitNOx').value) || 0;
-        const pm = parseFloat(document.getElementById('limitPM').value) || 0;
-        const nmp = parseFloat(document.getElementById('limitNMP').value) || 0;
-        limits.SO2 = so2;
-        limits.NOx = nox;
-        limits.PM = pm;
-        limits.NMP = nmp;
+        limits.COD = parseFloat(document.getElementById('limitCOD').value) || 0;
+        limits.Ammonia = parseFloat(document.getElementById('limitAmmonia').value) || 0;
+        limits.TN = parseFloat(document.getElementById('limitTN').value) || 0;
+        limits.TP = parseFloat(document.getElementById('limitTP').value) || 0;
+        limits.SS = parseFloat(document.getElementById('limitSS').value) || 0;
         if (document.getElementById('addModal').classList.contains('active')) {
             applyLimitsToForm();
             calculateAutoFields();
@@ -1367,6 +1243,9 @@
         alert('法规限值配置已保存');
         closeModal('limitModal');
     }
+
+    // 初始化记录数
+    updateRecordCount();
 </script>
 
 </body>

@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - 一般工业固废统计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+        .plain-btn {
+            background: white;
+            color: #475569;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .plain-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+        .filter-label {
+            font-size: 14px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .filter-input::placeholder { color: #9ca3af; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+        table.schedule-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.schedule-table td {
+            font-size: 12px;
+            color: #334155;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.schedule-table tbody tr { transition: background 0.15s; }
+        table.schedule-table tbody tr:hover { background: #f8fafc; }
+        .op-link {
+            font-size: 13px;
+            color: #3b82f6;
+            margin-right: 14px;
+            transition: color 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .op-link:hover { color: #2563eb; }
+        .op-link.danger { color: #f87171; }
+        .op-link.danger:hover { color: #ef4444; }
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-size-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 26px 6px 10px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+        .jump-input {
+            width: 44px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            outline: none;
+        }
+        .jump-input:focus { border-color: #3b82f6; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 8px;
+            width: 680px;
+            max-width: 90vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: modalIn 0.2s ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-size: 18px;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #475569; }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label {
+            width: 100px;
+            text-align: right;
+            padding-right: 16px;
+            font-size: 14px;
+            color: #374151;
+            flex-shrink: 0;
+        }
+        .form-label .required {
+            color: #ef4444;
+            margin-right: 4px;
+        }
+        .form-control {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-confirm {
+            background: #3b82f6;
+            color: white;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover { background: #2563eb; }
+
+        /* 推送规则弹窗特有 */
+        .rule-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .rule-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .rule-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rule-section-title i {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+        .input-inline {
+            width: 60px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #374151;
+            outline: none;
+        }
+        .input-inline:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .base-config-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        .base-config-row:last-child { margin-bottom: 0; }
+        .base-config-row label {
+            width: 90px;
+            font-size: 13px;
+            color: #475569;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .tag-input-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 4px 8px;
+            background: white;
+            min-height: 36px;
+            flex-wrap: wrap;
+        }
+        .tag-input-wrap:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .tag-input-wrap .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #bfdbfe;
+        }
+        .tag-input-wrap .tag .remove {
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            color: #60a5fa;
+        }
+        .tag-input-wrap .tag .remove:hover { color: #ef4444; }
+        .tag-input-wrap input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: #374151;
+            flex: 1;
+            min-width: 80px;
+            padding: 4px 0;
+            background: transparent;
+        }
+        .tag-input-wrap input::placeholder { color: #9ca3af; }
+        .hint-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* 固废大类配置表格 */
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .config-table th {
+            background: #f8fafc;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .config-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        .config-table input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 13px;
+            outline: none;
+        }
+        .config-table input:focus {
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="max-w-[1500px] mx-auto space-y-4">
+
+    <!-- 一般工业固废统计 -->
+    <section class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">一般工业固废统计</h2>
+            <div class="flex items-center gap-3 flex-wrap">
+                <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
+                <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
+                <button class="plain-btn" onclick="openCategoryConfigModal()"><i class="fas fa-gear text-xs"></i>固废大类配置</button>
+                <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
+                <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
+                <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+            <div class="flex items-center gap-2">
+                <label class="filter-label">基地：</label>
+                <select class="filter-input filter-select w-36" id="queryBase">
+                    <option value="">全部基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">月份：</label>
+                <input type="month" class="filter-input w-36" id="queryMonth" value="2026-01">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">厂房：</label>
+                <select class="filter-input filter-select w-28" id="queryFactory">
+                    <option value="">全部厂房</option>
+                    <option>CM1</option>
+                    <option>CM2</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">处置方式：</label>
+                <select class="filter-input filter-select w-36" id="queryDisposal">
+                    <option value="">全部方式</option>
+                    <option>回收利用</option>
+                    <option>内部回用</option>
+                    <option>焚烧</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">固废大类：</label>
+                <select class="filter-input filter-select w-44" id="queryCategory">
+                    <option value="">全部大类</option>
+                    <!-- 动态填充 -->
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">固废名称：</label>
+                <input type="text" class="filter-input w-40" id="queryName" placeholder="输入搜索">
+            </div>
+            <button class="primary-btn" onclick="handleSearch()"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn" onclick="resetQuery()">重置</button>
+        </div>
+
+        <!-- 列表 -->
+        <div class="overflow-x-auto">
+            <table class="w-full schedule-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>基地</th>
+                        <th>月份</th>
+                        <th>厂房</th>
+                        <th>处置方式及去向</th>
+                        <th>固废大类</th>
+                        <th>固废大类代码</th>
+                        <th>固废名称</th>
+                        <th>处置量 (t)</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">共 24 条数据</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="page-size-select">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+                <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn">2</button>
+                <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
+                <span class="text-sm text-slate-500 ml-2">跳至</span>
+                <input type="text" class="jump-input" value="1">
+                <span class="text-sm text-slate-500">/ 2 页</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ========== 新增/编辑弹窗 ========== -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">新增固废记录</h3>
+            <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>基地</label>
+                <select class="form-control form-select" id="fieldBase">
+                    <option value="">请选择基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>月份</label>
+                <input type="month" class="form-control" id="fieldMonth" value="2026-01">
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>厂房</label>
+                <select class="form-control form-select" id="fieldFactory">
+                    <option value="">请选择厂房</option>
+                    <option>CM1</option>
+                    <option>CM2</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>处置方式及去向</label>
+                <select class="form-control form-select" id="fieldDisposal">
+                    <option value="">请选择处置方式</option>
+                    <option>回收利用</option>
+                    <option>内部回用</option>
+                    <option>焚烧</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>固废大类</label>
+                <select class="form-control form-select" id="fieldCategory" onchange="handleCategoryChange()">
+                    <option value="">请选择固废大类</option>
+                    <!-- 动态填充 -->
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>固废大类代码</label>
+                <input type="text" class="form-control" id="fieldCategoryCode" placeholder="自动带出" disabled>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>固废名称</label>
+                <input type="text" class="form-control" id="fieldName" placeholder="请输入固废名称">
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>处置量 (t)</label>
+                <input type="number" step="0.01" class="form-control" id="fieldQuantity" placeholder="请输入处置量" value="0">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+            <button class="btn-confirm" onclick="saveData()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 推送规则弹窗 ========== -->
+<div class="modal-overlay" id="pushModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>推送规则设置</h3>
+            <button class="modal-close" onclick="closeModal('pushModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-clock"></i>推送时间</div>
+                <div style="display:flex; align-items:center; gap:8px; padding-left:24px;">
+                    <span style="font-size:14px;color:#475569;">每月</span>
+                    <input type="number" class="input-inline" id="pushDay" value="5" min="1" max="28">
+                    <span style="font-size:14px;color:#475569;">号推送飞书消息提醒</span>
+                </div>
+                <div class="hint-text" style="padding-left:24px;margin-top:8px;">
+                    系统将在每月指定日期上午 09:00 自动发送飞书消息提醒各基地相关人员导入/录入上月数据。
+                </div>
+            </div>
+
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-users"></i>各基地接收人员配置</div>
+                <div class="base-config-row">
+                    <label>厦门基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-xiamen">
+                        <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+        
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>重庆基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-chongqing">
+                        <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+             
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>菏泽基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-heze">
+                        <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                  
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('pushModal')">取消</button>
+            <button class="btn-confirm" onclick="savePushRule()">保存规则</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 固废大类配置弹窗 ========== -->
+<div class="modal-overlay" id="categoryConfigModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>固废大类配置</h3>
+            <button class="modal-close" onclick="closeModal('categoryConfigModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom: 15px;">
+                <button class="primary-btn" style="padding: 5px 14px; font-size: 12px;" onclick="addCategoryRow()">
+                    <i class="fas fa-plus text-xs"></i>新增
+                </button>
+            </div>
+            <table class="config-table" id="configTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">固废大类</th>
+                        <th style="width: 40%;">固废大类代码</th>
+                        <th style="width: 20%; text-align: center;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="configTableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('categoryConfigModal')">关闭</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== 全局数据 =====
+    // 固废大类配置数据
+    let categoryConfigList = [
+        { name: '废塑料', code: '900-003-S17' },
+        { name: '废木材', code: '900-009-S17' },
+        { name: '废纸', code: '900-005-S17' },
+        { name: '废电池及电池废料', code: '900-012-S17' },
+        { name: '污泥', code: '900-099-S07' },
+        { name: '其他工业生产过程中产生的固体废物', code: '900-099-S59' }
+    ];
+
+    // 表格数据
+    let tableData = [
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废塑料', code: '900-003-S17', name: '塑料类', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废塑料', code: '900-003-S17', name: '缠绕膜', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废塑料', code: '900-003-S17', name: '吨袋', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废塑料', code: '900-003-S17', name: '泡沫', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废木材', code: '900-009-S17', name: '木制品', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废纸', code: '900-005-S17', name: '纸皮', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '极片/极耳', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '报废电芯', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '顶盖/顶贴片', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '滑石粉', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '磷酸铁锂', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '铝制品', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '铜制品', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '石墨/导电碳', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: 'PVDF/勃姆石', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: '阴极浆料', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '回收利用', category: '废电池及电池废料', code: '900-012-S17', name: 'NMP废液（外部售卖）', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '内部回用', category: '/', code: '/', name: 'NMP废液-精馏液（内部回收）', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '焚烧', category: '污泥', code: '900-099-S07', name: '阳极浆料', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '焚烧', category: '污泥', code: '900-099-S07', name: '废水处理污泥', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '焚烧', category: '其他工业生产过程中产生的固体废物', code: '900-099-S59', name: '前工序沾染物', quantity: 1.00 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', disposal: '焚烧', category: '其他工业生产过程中产生的固体废物', code: '900-099-S59', name: '垃圾', quantity: 1.00 }
+    ];
+
+    // 当前编辑的行索引
+    let editingIndex = -1;
+
+    // ===== 初始化 =====
+    function init() {
+        renderTable();
+        renderCategoryOptions();
+        renderConfigTable();
+    }
+
+    // ===== 渲染表格 =====
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        tableData.forEach(function(row, index) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.base}</td>
+                <td>${formatMonth(row.month)}</td>
+                <td>${row.factory}</td>
+                <td>${row.disposal}</td>
+                <td>${row.category}</td>
+                <td>${row.code}</td>
+                <td>${row.name}</td>
+                <td>${row.quantity.toFixed(2)}</td>
+                <td class="text-center">
+                    <a class="op-link" onclick="openEditModal(${index})">编辑</a>
+                    <a class="op-link danger" onclick="deleteRow(${index})">删除</a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 格式化月份显示
+    function formatMonth(monthStr) {
+        if (!monthStr) return '';
+        const [y, m] = monthStr.split('-');
+        return y + '年' + parseInt(m) + '月';
+    }
+
+    // ===== 渲染下拉选项 =====
+    function renderCategoryOptions() {
+        const select = document.getElementById('fieldCategory');
+        const querySelect = document.getElementById('queryCategory');
+        // 保留第一个默认选项
+        select.innerHTML = '<option value="">请选择固废大类</option>';
+        querySelect.innerHTML = '<option value="">全部大类</option>';
+        categoryConfigList.forEach(function(item) {
+            const opt = document.createElement('option');
+            opt.value = item.name;
+            opt.textContent = item.name;
+            select.appendChild(opt);
+
+            const opt2 = document.createElement('option');
+            opt2.value = item.name;
+            opt2.textContent = item.name;
+            querySelect.appendChild(opt2);
+        });
+    }
+
+    // ===== 弹窗开关 =====
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    // 点击遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // ===== 新增/编辑弹窗 =====
+    function openAddModal() {
+        editingIndex = -1;
+        document.getElementById('modalTitle').textContent = '新增固废记录';
+        document.getElementById('fieldBase').value = '';
+        document.getElementById('fieldMonth').value = '2026-01';
+        document.getElementById('fieldFactory').value = '';
+        document.getElementById('fieldDisposal').value = '';
+        document.getElementById('fieldCategory').value = '';
+        document.getElementById('fieldCategoryCode').value = '';
+        document.getElementById('fieldName').value = '';
+        document.getElementById('fieldQuantity').value = '0';
+        openModal('addModal');
+    }
+
+    function openEditModal(index) {
+        editingIndex = index;
+        const row = tableData[index];
+        document.getElementById('modalTitle').textContent = '编辑固废记录';
+        document.getElementById('fieldBase').value = row.base;
+        document.getElementById('fieldMonth').value = row.month;
+        document.getElementById('fieldFactory').value = row.factory;
+        document.getElementById('fieldDisposal').value = row.disposal;
+        document.getElementById('fieldCategory').value = row.category;
+        document.getElementById('fieldCategoryCode').value = row.code;
+        document.getElementById('fieldName').value = row.name;
+        document.getElementById('fieldQuantity').value = row.quantity;
+        openModal('addModal');
+    }
+
+    // 固废大类改变时自动带出代码
+    function handleCategoryChange() {
+        const selectedName = document.getElementById('fieldCategory').value;
+        const codeInput = document.getElementById('fieldCategoryCode');
+        const found = categoryConfigList.find(function(item) {
+            return item.name === selectedName;
+        });
+        if (found) {
+            codeInput.value = found.code;
+        } else {
+            codeInput.value = '';
+        }
+    }
+
+    function saveData() {
+        const base = document.getElementById('fieldBase').value;
+        const month = document.getElementById('fieldMonth').value;
+        const factory = document.getElementById('fieldFactory').value;
+        const disposal = document.getElementById('fieldDisposal').value;
+        const category = document.getElementById('fieldCategory').value;
+        const code = document.getElementById('fieldCategoryCode').value;
+        const name = document.getElementById('fieldName').value;
+        const quantity = parseFloat(document.getElementById('fieldQuantity').value) || 0;
+
+        // 校验
+        if (!base) { alert('请选择基地'); return; }
+        if (!month) { alert('请选择月份'); return; }
+        if (!factory) { alert('请选择厂房'); return; }
+        if (!disposal) { alert('请选择处置方式及去向'); return; }
+        if (!category) { alert('请选择固废大类'); return; }
+        if (!code) { alert('固废大类代码不能为空'); return; }
+        if (!name) { alert('请输入固废名称'); return; }
+        if (quantity < 0) { alert('处置量不能为负数'); return; }
+
+        const newRow = { base, month, factory, disposal, category, code, name, quantity };
+
+        if (editingIndex > -1) {
+            // 编辑
+            tableData[editingIndex] = newRow;
+        } else {
+            // 新增
+            tableData.push(newRow);
+        }
+
+        renderTable();
+        closeModal('addModal');
+    }
+
+    function deleteRow(index) {
+        if (confirm('确定要删除该条记录吗？')) {
+            tableData.splice(index, 1);
+            renderTable();
+        }
+    }
+
+    // ===== 查询 =====
+    function handleSearch() {
+        const base = document.getElementById('queryBase').value;
+        const month = document.getElementById('queryMonth').value;
+        const factory = document.getElementById('queryFactory').value;
+        const disposal = document.getElementById('queryDisposal').value;
+        const category = document.getElementById('queryCategory').value;
+        const name = document.getElementById('queryName').value.trim();
+
+        // 简单的前端过滤演示
+        const filtered = tableData.filter(function(row) {
+            if (base && row.base !== base) return false;
+            if (month && row.month !== month) return false;
+            if (factory && row.factory !== factory) return false;
+            if (disposal && row.disposal !== disposal) return false;
+            if (category && row.category !== category) return false;
+            if (name && row.name.indexOf(name) === -1) return false;
+            return true;
+        });
+
+        // 重新渲染表格
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        filtered.forEach(function(row, index) {
+            // 找到原始索引以便编辑删除
+            const originalIndex = tableData.indexOf(row);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.base}</td>
+                <td>${formatMonth(row.month)}</td>
+                <td>${row.factory}</td>
+                <td>${row.disposal}</td>
+                <td>${row.category}</td>
+                <td>${row.code}</td>
+                <td>${row.name}</td>
+                <td>${row.quantity.toFixed(2)}</td>
+                <td class="text-center">
+                    <a class="op-link" onclick="openEditModal(${originalIndex})">编辑</a>
+                    <a class="op-link danger" onclick="deleteRow(${originalIndex})">删除</a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function resetQuery() {
+        document.getElementById('queryBase').value = '';
+        document.getElementById('queryMonth').value = '2026-01';
+        document.getElementById('queryFactory').value = '';
+        document.getElementById('queryDisposal').value = '';
+        document.getElementById('queryCategory').value = '';
+        document.getElementById('queryName').value = '';
+        renderTable();
+    }
+
+    // ===== 推送规则弹窗 =====
+    function openPushModal() {
+        openModal('pushModal');
+    }
+
+    // 标签添加
+    function addTag(event, input) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const val = input.value.trim();
+            if (!val) return;
+            const wrap = input.closest('.tag-input-wrap');
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.innerHTML = val + ' <span class="remove" onclick="removeTag(this)">&times;</span>';
+            wrap.insertBefore(tag, input);
+            input.value = '';
+        }
+    }
+    function removeTag(el) {
+        el.closest('.tag').remove();
+    }
+
+    function savePushRule() {
+        const day = document.getElementById('pushDay').value;
+        if (!day || day < 1 || day > 28) {
+            alert('请输入有效的日期（1-28）');
+            return;
+        }
+        const bases = ['xiamen', 'chongqing', 'heze'];
+        const names = ['厦门基地', '重庆基地', '菏泽基地'];
+        let result = '推送规则已保存：\n每月 ' + day + ' 号推送\n';
+        bases.forEach(function(b, i) {
+            const wrap = document.getElementById('tagWrap-' + b);
+            const tags = wrap.querySelectorAll('.tag');
+            const arr = [];
+            tags.forEach(function(t) { arr.push(t.textContent.replace('×','').trim()); });
+            result += names[i] + '接收人：' + (arr.length ? arr.join('、') : '（未配置）') + '\n';
+        });
+        alert(result);
+        closeModal('pushModal');
+    }
+
+    // ===== 固废大类配置弹窗 =====
+    function openCategoryConfigModal() {
+        renderConfigTable();
+        openModal('categoryConfigModal');
+    }
+
+    function renderConfigTable() {
+        const tbody = document.getElementById('configTableBody');
+        tbody.innerHTML = '';
+        categoryConfigList.forEach(function(item, index) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="config-name-display">${item.name}</span></td>
+                <td><span class="config-code-display">${item.code}</span></td>
+                <td style="text-align:center;">
+                    <a class="op-link" onclick="editConfigRow(${index})">编辑</a>
+                    <a class="op-link danger" onclick="deleteConfigRow(${index})">删除</a>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addCategoryRow() {
+        // 直接在列表中新增一行，处于编辑状态
+        const tbody = document.getElementById('configTableBody');
+        const tr = document.createElement('tr');
+        tr.className = 'editing-row';
+        tr.innerHTML = `
+            <td><input type="text" placeholder="请输入固废大类" class="config-input-name"></td>
+            <td><input type="text" placeholder="请输入固废大类代码" class="config-input-code"></td>
+            <td style="text-align:center;">
+                <a class="op-link" onclick="saveConfigRow(this)">保存</a>
+                <a class="op-link" style="color:#f87171;" onclick="cancelConfigRow(this)">取消</a>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        // 聚焦到第一个输入框
+        tr.querySelector('.config-input-name').focus();
+    }
+
+    function saveConfigRow(el) {
+        const tr = el.closest('tr');
+        const nameInput = tr.querySelector('.config-input-name');
+        const codeInput = tr.querySelector('.config-input-code');
+        const name = nameInput.value.trim();
+        const code = codeInput.value.trim();
+
+        if (!name) { alert('请输入固废大类'); return; }
+        if (!code) { alert('请输入固废大类代码'); return; }
+
+        // 判断是新增还是编辑（通过是否有 data-index 属性判断）
+        if (tr.dataset.index !== undefined) {
+            // 编辑现有行
+            const idx = parseInt(tr.dataset.index);
+            categoryConfigList[idx].name = name;
+            categoryConfigList[idx].code = code;
+        } else {
+            // 新增行
+            categoryConfigList.push({ name, code });
+        }
+
+        renderConfigTable();
+        renderCategoryOptions(); // 更新下拉选项
+    }
+
+    function cancelConfigRow(el) {
+        // 直接重新渲染表格，放弃修改
+        renderConfigTable();
+    }
+
+    function editConfigRow(index) {
+        // 将当前行替换为可编辑状态
+        const item = categoryConfigList[index];
+        const tbody = document.getElementById('configTableBody');
+        const rows = tbody.querySelectorAll('tr');
+        const tr = rows[index];
+        
+        tr.className = 'editing-row';
+        tr.dataset.index = index;
+        tr.innerHTML = `
+            <td><input type="text" class="config-input-name" value="${item.name}"></td>
+            <td><input type="text" class="config-input-code" value="${item.code}"></td>
+            <td style="text-align:center;">
+                <a class="op-link" onclick="saveConfigRow(this)">保存</a>
+                <a class="op-link" style="color:#f87171;" onclick="cancelConfigRow(this)">取消</a>
+            </td>
+        `;
+        tr.querySelector('.config-input-name').focus();
+    }
+
+    function deleteConfigRow(index) {
+        if (confirm('确定要删除该固废大类配置吗？')) {
+            categoryConfigList.splice(index, 1);
+            renderConfigTable();
+            renderCategoryOptions(); // 更新下拉选项
+        }
+    }
+
+    // ===== 页面加载 =====
+    window.onload = function() {
+        init();
+    };
+</script>
+
+</body>
+</html>
