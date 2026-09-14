@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - 环保治理设施台账</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+        .plain-btn {
+            background: white;
+            color: #475569;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .plain-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+        .filter-label {
+            font-size: 14px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .filter-input::placeholder { color: #9ca3af; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+
+        /* 表格样式 */
+        table.ledger-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table.ledger-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+            background-color: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        table.ledger-table td {
+            font-size: 12px;
+            color: #334155;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        table.ledger-table tbody tr { transition: background 0.15s; }
+        table.ledger-table tbody tr:hover { background: #f8fafc; }
+
+        .op-cell { text-align: center; }
+        .op-link {
+            font-size: 13px;
+            color: #3b82f6;
+            margin-right: 14px;
+            transition: color 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .op-link:hover { color: #2563eb; }
+        .op-link.danger { color: #f87171; }
+        .op-link.danger:hover { color: #ef4444; }
+        .op-link:last-child { margin-right: 0; }
+
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-size-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 26px 6px 10px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+        .jump-input {
+            width: 44px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            outline: none;
+        }
+        .jump-input:focus { border-color: #3b82f6; }
+
+        /* 自定义滚动条 */
+        .table-scroll {
+            overflow-x: auto;
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .table-scroll::-webkit-scrollbar { height: 8px; }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 8px;
+            width: 720px;
+            max-width: 95vw;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: modalIn 0.2s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-size: 20px;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #475569; }
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 20px;
+        }
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-item.full-width {
+            grid-column: span 2;
+        }
+        .form-label {
+            font-size: 13px;
+            color: #374151;
+            font-weight: 500;
+        }
+        .form-label .required {
+            color: #ef4444;
+            margin-right: 3px;
+        }
+        .form-control {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #374151;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+        .form-control.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 8px 22px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-confirm {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 22px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover { background: #2563eb; }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="max-w-[1800px] mx-auto space-y-4">
+
+    <!-- 环保治理设施台账 -->
+    <section class="card p-6">
+        <!-- 标题 + 操作按钮 -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">环保治理设施台账</h2>
+            <div class="flex items-center gap-3">
+                <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
+                <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
+                <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
+                <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+            <!-- 基地 -->
+            <div class="flex items-center gap-2">
+                <label class="filter-label">基地：</label>
+                <select class="filter-input filter-select w-40">
+                    <option value="">全部基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <!-- 关键字 -->
+            <div class="flex items-center gap-2">
+                <label class="filter-label">关键字：</label>
+                <input type="text" placeholder="排放口编号/排气筒名称/位置/设施名称" class="filter-input w-72">
+            </div>
+            <!-- 污染因子 -->
+            <div class="flex items-center gap-2">
+                <label class="filter-label">污染物因子：</label>
+                <select class="filter-input filter-select w-40">
+                    <option value="">全部因子</option>
+                    <option>非甲烷总烃</option>
+                    <option>氮氧化物</option>
+                    <option>二氧化硫</option>
+                    <option>颗粒物</option>
+                </select>
+            </div>
+            <!-- 建设完成时间：月份选择 -->
+            <div class="flex items-center gap-2">
+                <label class="filter-label">建设完成时间：</label>
+                <input type="month" class="filter-input w-40" value="2023-10">
+                <span class="text-slate-400 text-sm">-</span>
+                <input type="month" class="filter-input w-40" value="2023-10">
+            </div>
+            <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn">重置</button>
+        </div>
+
+        <!-- 台账列表 -->
+        <div class="table-scroll">
+            <table class="ledger-table" style="min-width: 3200px;">
+                <thead>
+                    <tr>
+                        <th>基地</th>
+                        <th>排放口编号</th>
+                        <th>排气筒名称</th>
+                        <th>位置</th>
+                        <th>排气筒高度(m)</th>
+                        <th>排气筒直径(m)</th>
+                        <th>废气/废水处理设施名称</th>
+                        <th>废气/废水来源</th>
+                        <th>污染物因子</th>
+                        <th>排放浓度(mg/m³)</th>
+                        <th>处理工艺</th>
+                        <th>建设完成时间</th>
+                        <th>设施投入费用(万元)</th>
+                        <th>设施建设单位</th>
+                        <th>设计处理风量(m³/h) / 水量(t/d)</th>
+                        <th>活性炭填装量(m³)</th>
+                        <th>活性炭更换周期</th>
+                        <th>活性炭进气温度</th>
+                        <th>活性炭排气温度</th>
+                        <th>吸附进气温度</th>
+                        <th>吸附排气温度</th>
+                        <th>脱附温度</th>
+                        <th>催化剂量</th>
+                        <th>风机功率</th>
+                        <th>风机台数</th>
+                        <th>备注</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerTbody">
+                    <!-- 1. DA015 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA015</td>
+                        <td>1#排气筒（前工序搅拌废气）</td>
+                        <td>CM1前工序15米钢平台</td>
+                        <td>25</td>
+                        <td>0.5</td>
+                        <td>前工序搅拌真空泵废气处理设施</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>冷凝+碱洗+活性炭吸附</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>7200</td>
+                        <td>1.8</td>
+                        <td>1年</td>
+                        <td>35</td>
+                        <td>32</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>7.5kw</td>
+                        <td>2</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 2. DA014 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA014</td>
+                        <td>2#排气筒（1#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 3. DA004 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA004</td>
+                        <td>3#排气筒（2#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 4. DA008 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA008</td>
+                        <td>4#排气筒（3#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 5. DA010 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA010</td>
+                        <td>5#排气筒（4#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 6. DA007 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA007</td>
+                        <td>6#排气筒（5#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 7. DA011 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA011</td>
+                        <td>7#排气筒（6#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 8. DA001 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA001</td>
+                        <td>8#排气筒（7#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 9. DA006 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA006</td>
+                        <td>9#排气筒（8#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 10. DA009 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA009</td>
+                        <td>10#排气筒（9#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 11. DA003 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA003</td>
+                        <td>11#排气筒（10#阳极涂布废气）</td>
+                        <td>CM1前工序15米钢平台（3层）</td>
+                        <td>25</td>
+                        <td>1.4</td>
+                        <td>\</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>\</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>74726</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 12. DA012 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA012</td>
+                        <td>12#排气筒（1#阴极涂布废气）</td>
+                        <td>水洗塔区</td>
+                        <td>25</td>
+                        <td>0.9</td>
+                        <td>1#水洗塔</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>二级冷凝回收+二级水喷淋</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>33538</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 13. DA005 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA005</td>
+                        <td>13#排气筒（2#阴极涂布废气）</td>
+                        <td>水洗塔区</td>
+                        <td>25</td>
+                        <td>0.9</td>
+                        <td>2#水洗塔</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>二级冷凝回收+二级水喷淋</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>33538</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 14. DA002 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA002</td>
+                        <td>14#排气筒（3#阴极涂布废气）</td>
+                        <td>水洗塔区</td>
+                        <td>25</td>
+                        <td>0.9</td>
+                        <td>3#水洗塔</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>二级冷凝回收+二级水喷淋</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>33538</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 15. DA013 -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA013</td>
+                        <td>15#排气筒（4#阴极涂布废气）</td>
+                        <td>水洗塔区</td>
+                        <td>25</td>
+                        <td>0.95</td>
+                        <td>4#水洗塔</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>二级冷凝回收+二级水喷淋</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>39168</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 16. DA019 (氮氧化物) -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA019</td>
+                        <td>16#排气筒（烘干、一次注液）</td>
+                        <td>成品仓库顶</td>
+                        <td>35</td>
+                        <td>1.7</td>
+                        <td>烘干、一次注液</td>
+                        <td>/</td>
+                        <td>氮氧化物</td>
+                        <td>240</td>
+                        <td>静电除油+碱洗+除雾+</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>39500</td>
+                        <td>6.6</td>
+                        <td>1年</td>
+                        <td>32</td>
+                        <td>28</td>
+                        <td>32</td>
+                        <td>29</td>
+                        <td>95</td>
+                        <td>0.2m³</td>
+                        <td>75kw</td>
+                        <td>2</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 17. DA019 (二氧化硫) -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA019</td>
+                        <td>16#排气筒（烘干、一次注液）</td>
+                        <td>成品仓库顶</td>
+                        <td>35</td>
+                        <td>1.7</td>
+                        <td>烘干、一次注液</td>
+                        <td>/</td>
+                        <td>二氧化硫</td>
+                        <td>550</td>
+                        <td>静电除油+碱洗+除雾+</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>39500</td>
+                        <td>6.6</td>
+                        <td>1年</td>
+                        <td>32</td>
+                        <td>28</td>
+                        <td>32</td>
+                        <td>29</td>
+                        <td>95</td>
+                        <td>0.2m³</td>
+                        <td>75kw</td>
+                        <td>2</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 18. DA019 (颗粒物) -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA019</td>
+                        <td>16#排气筒（烘干、一次注液、二次注液废气）</td>
+                        <td>成品仓库顶</td>
+                        <td>35</td>
+                        <td>1.7</td>
+                        <td>注液、化成分容真空泵废气处理</td>
+                        <td>/</td>
+                        <td>颗粒物</td>
+                        <td>30</td>
+                        <td>冷凝+滤筒除油+一级碱洗+二级碱洗+水洗+除</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>8000</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>30kw</td>
+                        <td>2</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                    <!-- 19. DA019 (非甲烷总烃) -->
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>DA019</td>
+                        <td>16#排气筒（烘干、一次注液、二次注液废气）</td>
+                        <td>成品仓库顶</td>
+                        <td>35</td>
+                        <td>1.7</td>
+                        <td>注液、化成分容真空泵废气处理</td>
+                        <td>/</td>
+                        <td>非甲烷总烃</td>
+                        <td>50</td>
+                        <td>冷凝+滤筒除油+一级碱洗+二级碱洗+水洗+除</td>
+                        <td>2023年10月</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>8000</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td>30kw</td>
+                        <td>2</td>
+                        <td></td>
+                        <td class="op-cell"><a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">共 19 条数据</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="page-size-select">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+                <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
+                <span class="text-sm text-slate-500 ml-2">跳至</span>
+                <input type="text" class="jump-input" value="1">
+                <span class="text-sm text-slate-500">/ 1 页</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- 编辑/新增弹窗 -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">编辑环保治理设施</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="editForm" class="form-grid" onsubmit="return false;">
+                <!-- 基地：下拉框 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>基地</label>
+                    <select class="form-control form-select" name="基地">
+                        <option value="">请选择基地</option>
+                        <option>厦门基地</option>
+                        <option>重庆基地</option>
+                        <option>菏泽基地</option>
+                    </select>
+                </div>
+                <!-- 排放口编号 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>排放口编号</label>
+                    <input type="text" class="form-control" name="排放口编号" placeholder="请输入排放口编号">
+                </div>
+                <!-- 排气筒名称 -->
+                <div class="form-item full-width">
+                    <label class="form-label"><span class="required">*</span>排气筒名称</label>
+                    <input type="text" class="form-control" name="排气筒名称" placeholder="请输入排气筒名称">
+                </div>
+                <!-- 位置 -->
+                <div class="form-item full-width">
+                    <label class="form-label"><span class="required">*</span>位置</label>
+                    <input type="text" class="form-control" name="位置" placeholder="请输入位置">
+                </div>
+                <!-- 排气筒高度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>排气筒高度(m)</label>
+                    <input type="text" class="form-control" name="排气筒高度" placeholder="请输入排气筒高度">
+                </div>
+                <!-- 排气筒直径 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>排气筒直径(m)</label>
+                    <input type="text" class="form-control" name="排气筒直径" placeholder="请输入排气筒直径">
+                </div>
+                <!-- 废气/废水处理设施名称 -->
+                <div class="form-item full-width">
+                    <label class="form-label"><span class="required">*</span>废气/废水处理设施名称</label>
+                    <input type="text" class="form-control" name="废气/废水处理设施名称" placeholder="请输入设施名称">
+                </div>
+                <!-- 废气/废水来源 -->
+                <div class="form-item full-width">
+                    <label class="form-label"><span class="required">*</span>废气/废水来源</label>
+                    <input type="text" class="form-control" name="废气/废水来源" placeholder="请输入废气/废水来源">
+                </div>
+                <!-- 污染因子：下拉框 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>污染因子</label>
+                    <select class="form-control form-select" name="污染因子">
+                        <option value="">请选择污染因子</option>
+                        <option>非甲烷总烃</option>
+                        <option>氮氧化物</option>
+                        <option>二氧化硫</option>
+                        <option>颗粒物</option>
+                    </select>
+                </div>
+                <!-- 排放浓度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>排放浓度(mg/m³)</label>
+                    <input type="text" class="form-control" name="排放浓度" placeholder="请输入排放浓度">
+                </div>
+                <!-- 处理工艺 -->
+                <div class="form-item full-width">
+                    <label class="form-label"><span class="required">*</span>处理工艺</label>
+                    <input type="text" class="form-control" name="处理工艺" placeholder="请输入处理工艺">
+                </div>
+                <!-- 建设完成时间：月份选择 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>建设完成时间</label>
+                    <input type="month" class="form-control" name="建设完成时间">
+                </div>
+                <!-- 设施投入费用 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>设施投入费用(万元)</label>
+                    <input type="text" class="form-control" name="设施投入费用" placeholder="请输入设施投入费用">
+                </div>
+                <!-- 设施建设单位 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>设施建设单位</label>
+                    <input type="text" class="form-control" name="设施建设单位" placeholder="请输入设施建设单位">
+                </div>
+                <!-- 设计处理风量 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>设计处理风量(m³/h) / 水量(t/d)</label>
+                    <input type="text" class="form-control" name="设计处理风量" placeholder="请输入设计处理风量/水量">
+                </div>
+                <!-- 活性炭填装量 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>活性炭填装量(m³)</label>
+                    <input type="text" class="form-control" name="活性炭填装量" placeholder="请输入活性炭填装量">
+                </div>
+                <!-- 活性炭更换周期 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>活性炭更换周期</label>
+                    <input type="text" class="form-control" name="活性炭更换周期" placeholder="请输入更换周期">
+                </div>
+                <!-- 活性炭进气温度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>活性炭进气温度</label>
+                    <input type="text" class="form-control" name="活性炭进气温度" placeholder="请输入进气温度">
+                </div>
+                <!-- 活性炭排气温度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>活性炭排气温度</label>
+                    <input type="text" class="form-control" name="活性炭排气温度" placeholder="请输入排气温度">
+                </div>
+                <!-- 吸附进气温度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>吸附进气温度</label>
+                    <input type="text" class="form-control" name="吸附进气温度" placeholder="请输入吸附进气温度">
+                </div>
+                <!-- 吸附排气温度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>吸附排气温度</label>
+                    <input type="text" class="form-control" name="吸附排气温度" placeholder="请输入吸附排气温度">
+                </div>
+                <!-- 脱附温度 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>脱附温度</label>
+                    <input type="text" class="form-control" name="脱附温度" placeholder="请输入脱附温度">
+                </div>
+                <!-- 催化剂量 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>催化剂量</label>
+                    <input type="text" class="form-control" name="催化剂量" placeholder="请输入催化剂量">
+                </div>
+                <!-- 风机功率 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>风机功率</label>
+                    <input type="text" class="form-control" name="风机功率" placeholder="请输入风机功率">
+                </div>
+                <!-- 风机台数 -->
+                <div class="form-item">
+                    <label class="form-label"><span class="required">*</span>风机台数</label>
+                    <input type="text" class="form-control" name="风机台数" placeholder="请输入风机台数">
+                </div>
+                <!-- 备注 -->
+                <div class="form-item full-width">
+                    <label class="form-label">备注</label>
+                    <input type="text" class="form-control" name="备注" placeholder="请输入备注">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn-confirm" onclick="saveData()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============ 字段映射 ============
+    const fieldMap = [
+        { index: 0, name: '基地' },
+        { index: 1, name: '排放口编号' },
+        { index: 2, name: '排气筒名称' },
+        { index: 3, name: '位置' },
+        { index: 4, name: '排气筒高度' },
+        { index: 5, name: '排气筒直径' },
+        { index: 6, name: '废气/废水处理设施名称' },
+        { index: 7, name: '废气/废水来源' },
+        { index: 8, name: '污染因子' },
+        { index: 9, name: '排放浓度' },
+        { index: 10, name: '处理工艺' },
+        { index: 11, name: '建设完成时间' },
+        { index: 12, name: '设施投入费用' },
+        { index: 13, name: '设施建设单位' },
+        { index: 14, name: '设计处理风量' },
+        { index: 15, name: '活性炭填装量' },
+        { index: 16, name: '活性炭更换周期' },
+        { index: 17, name: '活性炭进气温度' },
+        { index: 18, name: '活性炭排气温度' },
+        { index: 19, name: '吸附进气温度' },
+        { index: 20, name: '吸附排气温度' },
+        { index: 21, name: '脱附温度' },
+        { index: 22, name: '催化剂量' },
+        { index: 23, name: '风机功率' },
+        { index: 24, name: '风机台数' },
+        { index: 25, name: '备注' }
+    ];
+
+    let currentEditRow = null;
+    let isAddMode = false;
+
+    // 获取表单元素
+    const editModal = document.getElementById('editModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const editForm = document.getElementById('editForm');
+
+    // 清空表单
+    function clearForm() {
+        const inputs = editForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.value = '';
+            input.classList.remove('error');
+        });
+    }
+
+    // 打开编辑弹窗
+    function openEditModal(row) {
+        currentEditRow = row;
+        isAddMode = false;
+        modalTitle.textContent = '编辑环保治理设施';
+        clearForm();
+
+        const cells = row.querySelectorAll('td');
+        fieldMap.forEach(field => {
+            const input = editForm.querySelector(`[name="${field.name}"]`);
+            if (!input) return;
+            let value = cells[field.index] ? cells[field.index].textContent.trim() : '';
+
+            // 建设完成时间特殊处理："2023年10月" → "2023-10"
+            if (field.name === '建设完成时间') {
+                if (value) {
+                    const match = value.match(/(\d{4})年(\d{1,2})月/);
+                    if (match) {
+                        value = `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+                    }
+                }
+            }
+
+            input.value = value;
+        });
+
+        editModal.classList.add('active');
+    }
+
+    // 打开新增弹窗
+    function openAddModal() {
+        currentEditRow = null;
+        isAddMode = true;
+        modalTitle.textContent = '新增环保治理设施';
+        clearForm();
+        editModal.classList.add('active');
+    }
+
+    // 关闭弹窗
+    function closeModal() {
+        editModal.classList.remove('active');
+        currentEditRow = null;
+        isAddMode = false;
+    }
+
+    // 保存（编辑 / 新增）
+    function saveData() {
+        const inputs = editForm.querySelectorAll('input, select');
+        let hasError = false;
+
+        // 校验所有必填
+        inputs.forEach(input => {
+            input.classList.remove('error');
+            if (!input.value || !input.value.trim()) {
+                input.classList.add('error');
+                hasError = true;
+            }
+        });
+
+        if (hasError) {
+            alert('请填写所有必填字段！');
+            return;
+        }
+
+        if (isAddMode) {
+            // 新增：创建新行追加到表格末尾
+            const tbody = document.getElementById('ledgerTbody');
+            const newRow = document.createElement('tr');
+
+            fieldMap.forEach(field => {
+                const input = editForm.querySelector(`[name="${field.name}"]`);
+                let value = input.value.trim();
+
+                // 建设完成时间格式转换："2023-10" → "2023年10月"
+                if (field.name === '建设完成时间') {
+                    const match = value.match(/(\d{4})-(\d{1,2})/);
+                    if (match) {
+                        value = `${match[1]}年${parseInt(match[2], 10)}月`;
+                    }
+                }
+
+                const td = document.createElement('td');
+                td.textContent = value;
+                newRow.appendChild(td);
+            });
+
+            // 添加操作列
+            const opTd = document.createElement('td');
+            opTd.className = 'op-cell';
+            opTd.innerHTML = '<a href="javascript:void(0)" class="op-link edit-btn">编辑</a><a href="javascript:void(0)" class="op-link danger delete-btn">删除</a>';
+            newRow.appendChild(opTd);
+
+            tbody.appendChild(newRow);
+            closeModal();
+            alert('新增成功！');
+        } else {
+            // 编辑：更新当前行
+            if (!currentEditRow) return;
+            const cells = currentEditRow.querySelectorAll('td');
+            fieldMap.forEach(field => {
+                const input = editForm.querySelector(`[name="${field.name}"]`);
+                let value = input.value.trim();
+
+                if (field.name === '建设完成时间') {
+                    const match = value.match(/(\d{4})-(\d{1,2})/);
+                    if (match) {
+                        value = `${match[1]}年${parseInt(match[2], 10)}月`;
+                    }
+                }
+
+                if (cells[field.index]) {
+                    cells[field.index].textContent = value;
+                }
+            });
+
+            closeModal();
+        }
+    }
+
+    // 事件委托：编辑 / 删除
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('edit-btn')) {
+            const row = e.target.closest('tr');
+            if (row) openEditModal(row);
+        }
+        if (e.target.classList.contains('delete-btn')) {
+            if (confirm('确定要删除该条记录吗？')) {
+                const row = e.target.closest('tr');
+                if (row) row.remove();
+            }
+        }
+    });
+
+    // 点击遮罩关闭
+    editModal.addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // ESC 关闭
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+
+</body>
+</html>

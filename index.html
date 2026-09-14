@@ -18,7 +18,7 @@
         .menu-item-active { background-color: #2563eb; color: #ffffff; }
         .menu-item-active:hover { background-color: #1d4ed8; }
         .submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .submenu.open { max-height: 3000px; transition: max-height 0.5s ease-in; }
+        .submenu.open { max-height: 5000px; transition: max-height 0.5s ease-in; }
         .arrow-rotate { transition: transform 0.3s ease; }
         .arrow-rotate.rotated { transform: rotate(90deg); }
         #desc-drawer { transition: transform 0.3s ease; transform: translateX(100%); }
@@ -106,9 +106,10 @@
 
 <script>
 // ================= 菜单数据 =================
-// 格式: [名称, 图标, 路径/子菜单, id(可选)]
+// 父级菜单格式：[名称, 图标, 子菜单] 或 [名称, 子菜单]
+// 叶子菜单格式：[名称, 路径] 或 [名称, 路径, id]
 const menuData = [
-   ["EHS驾驶舱总览", "01应急管理/dashboard-overview.html", "dashboard-home"],
+    ["EHS驾驶舱总览", "01应急管理/dashboard-overview.html", "dashboard-home"],
     ["应急管理", "fa-bell", [
         ["值班记录", "01应急管理/值班记录.html"],
         ["今日排班", "01应急管理/今日排班.html"],
@@ -212,7 +213,20 @@ const menuData = [
         ["环境监控看板", "07环保检测预警/环境监控看板.html"],
         ["根因分析任务", "07环保检测预警/根因分析任务.html"],
         ["环境因素识别与跟踪", "07环保检测预警/环境因素识别与跟踪.html"],
-        ["化学品使用记录", "07环保检测预警/化学品使用记录.html"]
+        ["化学品使用记录", "07环保检测预警/化学品使用记录.html"],
+        ["环境信息台账", [
+            ["1环保治理设施台账", "07环保检测预警/环境信息台账/01环保治理设施台账.html"],
+            ["2原辅料台账", "07环保检测预警/环境信息台账/02原辅料台账.html"],
+            ["3能耗统计表", "07环保检测预警/环境信息台账/03能耗统计表.html"],
+            ["4废气治理设施运行工况", "07环保检测预警/环境信息台账/04废气治理设施运行工况.html"],
+            ["5废气治理设施运行费用", "07环保检测预警/环境信息台账/05废气治理设施运行费用.html"],
+            ["6废水排放量", "07环保检测预警/环境信息台账/06废水排放量.html"],
+            ["7废水治理设施运行费用", "07环保检测预警/环境信息台账/07废水治理设施运行费用.html"],
+            ["8一般工业固废统计", "07环保检测预警/环境信息台账/08一般工业固废统计.html"],
+            ["9危险废物统计", "07环保检测预警/环境信息台账/09危险废物统计.html"],
+            ["10产能统计", "07环保检测预警/环境信息台账/10产能统计.html"],
+            ["11生活垃圾及厨余垃圾", "07环保检测预警/环境信息台账/11生活垃圾及厨余垃圾.html"]
+        ]]
     ]],
     ["合规有效性管理", "fa-file-contract", [
         ["证件管理", [
@@ -239,13 +253,6 @@ const menuData = [
             ["年度合规性评价报告", "08合规有效性管理/法律法规/年度合规性评价报告.html"]
         ]]
     ]],
-    ["考核管理", "fa-clipboard-check", [
-        ["集团EHS审核", [
-            ["集团EHS审核记录", "10考核管理/集团EHS审核/集团EHS审核记录.html"],
-            ["整改任务", "10考核管理/集团EHS审核/整改任务.html"],
-            ["审核清单配置", "10考核管理/集团EHS审核/审核清单配置.html"]
-        ]],
-
     ["EHS仪表盘", "fa-gauge-high", [
         ["应急事件总览", "09EHS仪表盘/应急事件总览.html"],
         ["隐患统计看板", "09EHS仪表盘/隐患统计看板.html"],
@@ -255,7 +262,12 @@ const menuData = [
         ["集团EHS审核看板", "09EHS仪表盘/集团EHS审核看板.html"],
         ["组织考核看板", "09EHS仪表盘/组织考核看板.html"]
     ]],
-
+    ["考核管理", "fa-clipboard-check", [
+        ["集团EHS审核", [
+            ["集团EHS审核记录", "10考核管理/集团EHS审核/集团EHS审核记录.html"],
+            ["整改任务", "10考核管理/集团EHS审核/整改任务.html"],
+            ["审核清单配置", "10考核管理/集团EHS审核/审核清单配置.html"]
+        ]],
         ["安全环保综合指数", [
             ["考核模型", [
                 ["生产安全事件", "10考核管理/安全环保综合指数/考核模型/生产安全事件.html"],
@@ -326,10 +338,10 @@ const menuData = [
         ["用户基地配置", "11系统管理/用户基地配置.html"]
     ]],
     ["安全责任书", "15安全责任书/安全责任书.html"],
-    ["EHS变更台账", "fa-list-check", "12EHS变更台账/EHS变更台账.html"],
-    ["意见反馈", "fa-comment-dots", "13意见反馈/意见反馈.html"],
-    ["操作日志", "fa-history", "14操作日志/操作日志.html"],
-    ["Hiro EHS", "fa-robot", "14操作日志/HiroEHS.html"]
+    ["EHS变更台账", "12EHS变更台账/EHS变更台账.html"],
+    ["意见反馈", "13意见反馈/意见反馈.html"],
+    ["操作日志", "14操作日志/操作日志.html"],
+    ["Hiro EHS", "14操作日志/HiroEHS.html"]
 ];
 
 // ================= 渲染菜单 =================
@@ -338,19 +350,33 @@ const sidebarMenu = document.getElementById('sidebar-menu');
 function renderMenu(items, level = 0) {
     let html = '';
     items.forEach(item => {
-        const hasChildren = Array.isArray(item[2]); // 第三个元素是数组，说明有子菜单
+        const name = item[0];
+        let hasChildren = false;
+        let icon = '';
+        let children = [];
+
+        // 兼容两种父级菜单格式：
+        // 1. [名称, 图标, 子菜单] → item[2] 是数组
+        // 2. [名称, 子菜单]       → item[1] 是数组
+        if (Array.isArray(item[2])) {
+            hasChildren = true;
+            icon = item[1];
+            children = item[2];
+        } else if (Array.isArray(item[1])) {
+            hasChildren = true;
+            children = item[1];
+        }
+
         const paddingLeft = 12 + (level * 12);
 
         if (hasChildren) {
-            // 父级菜单：格式 [name, icon, children]
-            const [name, icon, children] = item;
             html += `
                 <div class="menu-group">
                     <div class="menu-item flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors" 
                          style="padding-left: ${paddingLeft}px"
                          onclick="toggleSubmenu(this)">
                         <div class="flex items-center">
-                            ${level === 0 ? `<i class="fa-solid ${icon} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
+                            ${level === 0 && icon ? `<i class="fa-solid ${icon} w-5 text-center mr-2 text-gray-400"></i>` : `<i class="fa-solid fa-circle text-[4px] w-5 text-center mr-2 text-gray-500"></i>`}
                             <span>${name}</span>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-500 arrow-rotate"></i>
@@ -359,10 +385,8 @@ function renderMenu(items, level = 0) {
                 </div>
             `;
         } else {
-            // 叶子节点：格式 [name, path] 或 [name, path, id]
-            const name = item[0];
             const path = item[1];
-            const id = item[2]; // 可选
+            const id = item[2] && typeof item[2] === 'string' ? item[2] : '';
             html += `
                 <div class="menu-item flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-[#1e293b] text-sm transition-colors"
                      style="padding-left: ${paddingLeft}px"

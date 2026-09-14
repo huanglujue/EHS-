@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - 原辅料消耗信息统计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+        .plain-btn {
+            background: white;
+            color: #475569;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .plain-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+        .filter-label {
+            font-size: 14px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .filter-input::placeholder { color: #9ca3af; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+        table.schedule-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.schedule-table td {
+            font-size: 12px;
+            color: #334155;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+        table.schedule-table tbody tr { transition: background 0.15s; }
+        table.schedule-table tbody tr:hover { background: #f8fafc; }
+        .op-link {
+            font-size: 13px;
+            color: #3b82f6;
+            margin-right: 14px;
+            transition: color 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .op-link:hover { color: #2563eb; }
+        .op-link.danger { color: #f87171; }
+        .op-link.danger:hover { color: #ef4444; }
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-size-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 26px 6px 10px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+        .jump-input {
+            width: 44px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            outline: none;
+        }
+        .jump-input:focus { border-color: #3b82f6; }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 8px;
+            width: 680px;
+            max-width: 90vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: modalIn 0.2s ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-size: 18px;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #475569; }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label {
+            width: 100px;
+            text-align: right;
+            padding-right: 16px;
+            font-size: 14px;
+            color: #374151;
+            flex-shrink: 0;
+        }
+        .form-label .required {
+            color: #ef4444;
+            margin-right: 4px;
+        }
+        .form-control {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-confirm {
+            background: #3b82f6;
+            color: white;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover { background: #2563eb; }
+
+        /* 推送规则弹窗特有 */
+        .rule-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .rule-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .rule-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rule-section-title i {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+        }
+        .input-inline {
+            width: 60px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #374151;
+            outline: none;
+        }
+        .input-inline:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .base-config-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        .base-config-row:last-child { margin-bottom: 0; }
+        .base-config-row label {
+            width: 90px;
+            font-size: 13px;
+            color: #475569;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .base-config-row .tag-input-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 4px 8px;
+            background: white;
+            min-height: 36px;
+            flex-wrap: wrap;
+        }
+        .base-config-row .tag-input-wrap:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .tag-input-wrap .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #bfdbfe;
+        }
+        .tag-input-wrap .tag .remove {
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            color: #60a5fa;
+        }
+        .tag-input-wrap .tag .remove:hover { color: #ef4444; }
+        .tag-input-wrap input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: #374151;
+            flex: 1;
+            min-width: 80px;
+            padding: 4px 0;
+            background: transparent;
+        }
+        .tag-input-wrap input::placeholder { color: #9ca3af; }
+        .hint-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+            padding-left: 102px;
+        }
+
+        /* 新增/编辑弹窗的网格布局 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 24px;
+        }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="max-w-[1500px] mx-auto space-y-4">
+
+    <!-- 原辅料消耗信息统计 -->
+    <section class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">原辅料消耗信息统计</h2>
+            <div class="flex items-center gap-3">
+                <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
+                <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
+                <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
+                <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
+                <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
+
+            </div>
+        </div>
+
+        <!-- 筛选栏 -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+            <div class="flex items-center gap-2">
+                <label class="filter-label">基地：</label>
+                <select class="filter-input filter-select w-44">
+                    <option value="">全部基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">月份：</label>
+                <input type="month" class="filter-input w-40" value="2025-01">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">产品类别：</label>
+                <select class="filter-input filter-select w-44">
+                    <option value="">全部类别</option>
+                    <option>314电芯</option>
+                    <option>1175电芯</option>
+                </select>
+            </div>
+            <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn">重置</button>
+        </div>
+
+        <!-- 列表 -->
+        <div class="overflow-x-auto">
+            <table class="w-full schedule-table">
+                <thead>
+                    <tr>
+                        <th>基地</th>
+                        <th>月份</th>
+                        <th>产品类别</th>
+                        <th>石墨 (T)</th>
+                        <th>磷酸铁锂 (T)</th>
+                        <th>水性粘结剂 (T)</th>
+                        <th>增塑剂 (T)</th>
+                        <th>乙炔黑 (T)</th>
+                        <th>NMP (T)</th>
+                        <th>电解液 (T)</th>
+                        <th>铜箔 (T)</th>
+                        <th>铝箔 (T)</th>
+                        <th>PVDF (T)</th>
+                        <th>SBR (T)</th>
+                        <th>CMC (T)</th>
+                        <th>勃姆石 (T)</th>
+                        <th>氢氧化钙 (T)</th>
+                        <th>聚丙烯酸酯 (T)</th>
+                        <th>表面活性剂 (T)</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>2025年1月</td>
+                        <td>314电芯</td>
+                        <td>16</td>
+                        <td>21</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>10</td>
+                        <td>3</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>重庆基地</td>
+                        <td>2025年2月</td>
+                        <td>1175电芯</td>
+                        <td>53</td>
+                        <td>113</td>
+                        <td>15</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>39</td>
+                        <td>36</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>厦门基地</td>
+                        <td>2025年1月</td>
+                        <td>314电芯</td>
+                        <td>12</td>
+                        <td>18</td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>8</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>菏泽基地</td>
+                        <td>2025年3月</td>
+                        <td>1175电芯</td>
+                        <td>60</td>
+                        <td>120</td>
+                        <td>18</td>
+                        <td>2</td>
+                        <td>1.5</td>
+                        <td>42</td>
+                        <td>38</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页器 -->
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">共 24 条数据</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="page-size-select">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+                <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn">2</button>
+                <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
+                <span class="text-sm text-slate-500 ml-2">跳至</span>
+                <input type="text" class="jump-input" value="1">
+                <span class="text-sm text-slate-500">/ 2 页</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ========== 新增/编辑弹窗 ========== -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">新增原辅料消耗</h3>
+            <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- 第一行：基地、月份 -->
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>基地</label>
+                <select class="form-control form-select" id="fieldBase">
+                    <option value="">请选择基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>月份</label>
+                <input type="month" class="form-control" id="fieldMonth" value="2025-01">
+            </div>
+            <!-- 第二行：产品类别 -->
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>产品类别</label>
+                <select class="form-control form-select" id="fieldCategory">
+                    <option value="">请选择产品类别</option>
+                    <option>314电芯</option>
+                    <option>1175电芯</option>
+
+                </select>
+            </div>
+            <!-- 第三行开始：数据字段，每行2个 -->
+            <div class="form-grid">
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>石墨 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldGraphite" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>磷酸铁锂 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldLFP" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>水性粘结剂 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldBinder" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>增塑剂 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldPlasticizer" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>乙炔黑 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldAcetylene" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>NMP (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldNMP" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>电解液 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldElectrolyte" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>铜箔 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldCopper" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>铝箔 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldAluminum" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>PVDF (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldPVDF" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>SBR (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldSBR" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>CMC (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldCMC" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>勃姆石 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldBoehmite" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>氢氧化钙 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldCalcium" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>聚丙烯酸酯 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldPolyacrylate" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>表面活性剂 (T)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldSurfactant" placeholder="请输入" value="0">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+            <button class="btn-confirm" onclick="saveData()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 推送规则弹窗 ========== -->
+<div class="modal-overlay" id="pushModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>推送规则设置</h3>
+            <button class="modal-close" onclick="closeModal('pushModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- 推送时间 -->
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-clock"></i>推送时间</div>
+                <div style="display:flex; align-items:center; gap:8px; padding-left:24px;">
+                    <span style="font-size:14px;color:#475569;">每月</span>
+                    <input type="number" class="input-inline" id="pushDay" value="1" min="1" max="31">
+                    <span style="font-size:14px;color:#475569;">号推送飞书消息提醒</span>
+                </div>
+                <div class="hint-text" style="padding-left:24px;margin-top:8px;">
+                    系统将在每月指定日期上午 09:00 自动发送飞书消息提醒各基地相关人员导入/录入上月数据。
+                </div>
+            </div>
+
+            <!-- 各基地接收人员配置 -->
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-users"></i>各基地接收人员配置</div>
+                <div class="base-config-row">
+                    <label>厦门基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-xiamen">
+                        <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>重庆基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-chongqing">
+                        <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+     
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>菏泽基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-heze">
+                        <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('pushModal')">取消</button>
+            <button class="btn-confirm" onclick="savePushRule()">保存规则</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== 弹窗开关 =====
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    // 点击遮罩关闭
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // ===== 新增/编辑弹窗 =====
+    let editingRow = null;
+
+    function openAddModal() {
+        editingRow = null;
+        document.getElementById('modalTitle').textContent = '新增原辅料消耗';
+        // 重置表单
+        document.getElementById('fieldBase').value = '';
+        document.getElementById('fieldMonth').value = '2025-01';
+        document.getElementById('fieldCategory').value = '';
+        const fields = ['fieldGraphite','fieldLFP','fieldBinder','fieldPlasticizer','fieldAcetylene','fieldNMP','fieldElectrolyte',
+                        'fieldCopper','fieldAluminum','fieldPVDF','fieldSBR','fieldCMC','fieldBoehmite','fieldCalcium','fieldPolyacrylate','fieldSurfactant'];
+        fields.forEach(function(id) { document.getElementById(id).value = '0'; });
+        openModal('addModal');
+    }
+
+    function openEditModal(el) {
+        editingRow = el.closest('tr');
+        document.getElementById('modalTitle').textContent = '编辑原辅料消耗';
+        // 从行中读取数据填充
+        const cells = editingRow.querySelectorAll('td');
+        const base = cells[0].textContent.trim();
+        const monthText = cells[1].textContent.trim(); // 如 "2025年1月"
+        const category = cells[2].textContent.trim();
+
+        // 解析月份为 yyyy-MM
+        let monthVal = '';
+        const match = monthText.match(/(\d{4})年(\d{1,2})月/);
+        if (match) {
+            monthVal = match[1] + '-' + match[2].padStart(2, '0');
+        }
+        document.getElementById('fieldBase').value = base;
+        document.getElementById('fieldMonth').value = monthVal;
+        document.getElementById('fieldCategory').value = category;
+
+        // 数值字段映射：第3列开始是石墨 (T) 对应索引3
+        const fieldMap = [
+            { id: 'fieldGraphite', idx: 3 },
+            { id: 'fieldLFP', idx: 4 },
+            { id: 'fieldBinder', idx: 5 },
+            { id: 'fieldPlasticizer', idx: 6 },
+            { id: 'fieldAcetylene', idx: 7 },
+            { id: 'fieldNMP', idx: 8 },
+            { id: 'fieldElectrolyte', idx: 9 },
+            { id: 'fieldCopper', idx: 10 },
+            { id: 'fieldAluminum', idx: 11 },
+            { id: 'fieldPVDF', idx: 12 },
+            { id: 'fieldSBR', idx: 13 },
+            { id: 'fieldCMC', idx: 14 },
+            { id: 'fieldBoehmite', idx: 15 },
+            { id: 'fieldCalcium', idx: 16 },
+            { id: 'fieldPolyacrylate', idx: 17 },
+            { id: 'fieldSurfactant', idx: 18 }
+        ];
+        fieldMap.forEach(function(item) {
+            const val = cells[item.idx].textContent.trim();
+            document.getElementById(item.id).value = val === '' ? '0' : val;
+        });
+
+        openModal('addModal');
+    }
+
+    function saveData() {
+        // 简单校验
+        const base = document.getElementById('fieldBase').value;
+        const month = document.getElementById('fieldMonth').value;
+        const category = document.getElementById('fieldCategory').value;
+        if (!base) { alert('请选择基地'); return; }
+        if (!month) { alert('请选择月份'); return; }
+        if (!category) { alert('请选择产品类别'); return; }
+
+        // 将月份转换为 "2025年1月" 格式
+        const [y, m] = month.split('-');
+        const monthDisplay = y + '年' + parseInt(m) + '月';
+
+        // 收集数值
+        const fieldMap = [
+            'fieldGraphite','fieldLFP','fieldBinder','fieldPlasticizer','fieldAcetylene','fieldNMP','fieldElectrolyte',
+            'fieldCopper','fieldAluminum','fieldPVDF','fieldSBR','fieldCMC','fieldBoehmite','fieldCalcium','fieldPolyacrylate','fieldSurfactant'
+        ];
+        const vals = fieldMap.map(function(id) {
+            let v = document.getElementById(id).value.trim();
+            return v === '' ? '0' : v;
+        });
+
+        if (editingRow) {
+            // 编辑：更新行
+            const cells = editingRow.querySelectorAll('td');
+            cells[0].textContent = base;
+            cells[1].textContent = monthDisplay;
+            cells[2].textContent = category;
+            vals.forEach(function(v, i) {
+                cells[3 + i].textContent = v;
+            });
+        } else {
+            // 新增：创建新行
+            const tbody = document.querySelector('.schedule-table tbody');
+            const tr = document.createElement('tr');
+            let html = '<td>' + base + '</td>';
+            html += '<td>' + monthDisplay + '</td>';
+            html += '<td>' + category + '</td>';
+            vals.forEach(function(v) { html += '<td>' + v + '</td>'; });
+            html += '<td class="text-center">';
+            html += '<a class="op-link" onclick="openEditModal(this)">编辑</a>';
+            html += '<a class="op-link danger" onclick="deleteRow(this)">删除</a>';
+            html += '</td>';
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+        closeModal('addModal');
+    }
+
+    function deleteRow(el) {
+        if (confirm('确定要删除该条记录吗？')) {
+            el.closest('tr').remove();
+        }
+    }
+
+    // ===== 推送规则弹窗 =====
+    function openPushModal() {
+        openModal('pushModal');
+    }
+
+    // 标签添加
+    function addTag(event, input) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const val = input.value.trim();
+            if (!val) return;
+            const wrap = input.closest('.tag-input-wrap');
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.innerHTML = val + ' <span class="remove" onclick="removeTag(this)">&times;</span>';
+            wrap.insertBefore(tag, input);
+            input.value = '';
+        }
+    }
+    function removeTag(el) {
+        el.closest('.tag').remove();
+    }
+
+    function savePushRule() {
+        const day = document.getElementById('pushDay').value;
+        if (!day || day < 1 || day > 31) {
+            alert('请输入有效的日期（1-31）');
+            return;
+        }
+        // 收集各基地接收人员
+        const bases = ['xiamen', 'chongqing', 'heze'];
+        const names = ['厦门基地', '重庆基地', '菏泽基地'];
+        let result = '推送规则已保存：\n每月 ' + day + ' 号推送\n';
+        bases.forEach(function(b, i) {
+            const wrap = document.getElementById('tagWrap-' + b);
+            const tags = wrap.querySelectorAll('.tag');
+            const arr = [];
+            tags.forEach(function(t) { arr.push(t.textContent.replace('×','').trim()); });
+            result += names[i] + '接收人：' + (arr.length ? arr.join('、') : '（未配置）') + '\n';
+        });
+        alert(result);
+        closeModal('pushModal');
+    }
+</script>
+
+</body>
+</html>
