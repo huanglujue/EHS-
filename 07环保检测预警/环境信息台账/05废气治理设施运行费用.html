@@ -208,7 +208,7 @@
             width: 700px;
         }
         .modal-box.wide {
-            width: 1100px;
+            width: 1150px;
         }
         @keyframes modalIn {
             from { opacity: 0; transform: scale(0.96); }
@@ -537,7 +537,7 @@
                 </select>
             </div>
             <div class="flex items-center gap-2">
-                <label class="filter-label">环保设施：</label>
+                <label class="filter-label">排放口/设施：</label>
                 <input type="text" class="filter-input w-52" id="filterFacility" placeholder="输入搜索">
             </div>
             <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
@@ -553,7 +553,7 @@
                         <th rowspan="2">排放口/设施</th>
                         <th colspan="5">本月消耗</th>
                         <th colspan="5">本月单价</th>
-                        <th colspan="5">本月运行费用（元）</th>
+                        <th colspan="6">本月运行费用（元）</th>
                         <th rowspan="2">操作</th>
                     </tr>
                     <tr>
@@ -572,9 +572,10 @@
                         <th>液碱添加费用</th>
                         <th>活性炭添加费用</th>
                         <th>天然气费用</th>
+                        <th>总费用</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     <tr>
                         <td style="text-align:left;">重庆基地</td>
                         <td style="text-align:left;">2026年1月</td>
@@ -594,6 +595,7 @@
                         <td>2969280.00</td>
                         <td>62500.00</td>
                         <td>2176.00</td>
+                        <td>3031451.60</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -618,6 +620,7 @@
                         <td>3104160.00</td>
                         <td>66000.00</td>
                         <td>2289.60</td>
+                        <td>3176241.44</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -642,6 +645,7 @@
                         <td>6576480.00</td>
                         <td>143000.00</td>
                         <td>4864.00</td>
+                        <td>6731448.48</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -666,6 +670,7 @@
                         <td>7958400.00</td>
                         <td>162500.00</td>
                         <td>5696.00</td>
+                        <td>8145980.00</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -690,6 +695,7 @@
                         <td>8882400.00</td>
                         <td>184000.00</td>
                         <td>6433.60</td>
+                        <td>9094287.60</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -714,6 +720,7 @@
                         <td>8630400.00</td>
                         <td>176000.00</td>
                         <td>6256.00</td>
+                        <td>8834474.25</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -738,6 +745,7 @@
                         <td>9054000.00</td>
                         <td>185000.00</td>
                         <td>6512.00</td>
+                        <td>9267465.40</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -762,6 +770,7 @@
                         <td>9121200.00</td>
                         <td>192500.00</td>
                         <td>6784.00</td>
+                        <td>9344053.00</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -786,6 +795,7 @@
                         <td>9308400.00</td>
                         <td>196000.00</td>
                         <td>6681.60</td>
+                        <td>9533179.00</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -810,6 +820,7 @@
                         <td>9322800.00</td>
                         <td>197500.00</td>
                         <td>6736.00</td>
+                        <td>9547474.50</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -834,6 +845,7 @@
                         <td>9082800.00</td>
                         <td>190000.00</td>
                         <td>6592.00</td>
+                        <td>9302490.40</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -858,6 +870,7 @@
                         <td>9247200.00</td>
                         <td>194000.00</td>
                         <td>6704.00</td>
+                        <td>9471511.50</td>
                         <td class="text-center">
                             <a class="op-link" onclick="openEditModal(this)">编辑</a>
                             <a class="op-link danger" onclick="deleteRow(this)">删除</a>
@@ -954,7 +967,7 @@
                 </div>
             </div>
 
-            <div class="section-subtitle">本月单价（取当前配置值，可编辑）</div>
+            <div class="section-subtitle">本月单价（按基地配置，可编辑）</div>
             <div class="form-grid-3">
                 <div class="form-row">
                     <label class="form-label">水单价 (元/吨)</label>
@@ -1000,6 +1013,10 @@
                     <label class="form-label">天然气费用</label>
                     <input type="text" class="form-control" id="fieldGasCost" disabled placeholder="自动计算">
                 </div>
+                <div class="form-row">
+                    <label class="form-label">总费用</label>
+                    <input type="text" class="form-control" id="fieldTotalCost" disabled placeholder="自动计算">
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -1036,6 +1053,7 @@
                     <div class="tag-input-wrap" id="tagWrap-xiamen">
                         <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        
 
                     </div>
                 </div>
@@ -1043,7 +1061,8 @@
                     <label>重庆基地</label>
                     <div class="tag-input-wrap" id="tagWrap-chongqing">
                         <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                     
+                       
+
                     </div>
                 </div>
                 <div class="base-config-row">
@@ -1051,7 +1070,8 @@
                     <div class="tag-input-wrap" id="tagWrap-heze">
                         <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                    
+                      
+
                     </div>
                 </div>
             </div>
@@ -1063,38 +1083,46 @@
     </div>
 </div>
 
-<!-- ========== 单价配置弹窗 ========== -->
+<!-- ========== 单价配置弹窗（按基地） ========== -->
 <div class="modal-overlay" id="unitPriceModal">
-    <div class="modal-box narrow">
+    <div class="modal-box">
         <div class="modal-header">
             <h3>单价配置</h3>
             <button class="modal-close" onclick="closeModal('unitPriceModal')">&times;</button>
         </div>
         <div class="modal-body">
+            <div class="flex items-center gap-2 mb-4">
+                <label style="font-size:13px;color:#475569;">选择基地：</label>
+                <select class="form-control form-select" id="unitPriceBase" style="width:180px;" onchange="renderUnitPriceForm()">
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
             <div class="limit-grid">
                 <div class="limit-item">
                     <label>水单价 (元/吨)</label>
-                    <input type="number" step="0.01" id="unitWaterPrice" value="3.50">
+                    <input type="number" step="0.01" id="unitWaterPrice">
                 </div>
                 <div class="limit-item">
                     <label>电单价 (元/度)</label>
-                    <input type="number" step="0.01" id="unitElecPrice" value="0.80">
+                    <input type="number" step="0.01" id="unitElecPrice">
                 </div>
                 <div class="limit-item">
                     <label>液碱单价 (元/吨)</label>
-                    <input type="number" step="0.01" id="unitAlkaliPrice" value="1200.00">
+                    <input type="number" step="0.01" id="unitAlkaliPrice">
                 </div>
                 <div class="limit-item">
                     <label>活性炭单价 (元/吨)</label>
-                    <input type="number" step="0.01" id="unitCarbonPrice" value="5000.00">
+                    <input type="number" step="0.01" id="unitCarbonPrice">
                 </div>
                 <div class="limit-item">
                     <label>天然气单价 (元/m³)</label>
-                    <input type="number" step="0.01" id="unitGasPrice" value="3.20">
+                    <input type="number" step="0.01" id="unitGasPrice">
                 </div>
             </div>
             <div class="hint-text" style="padding-left:0;margin-top:12px;">
-                修改单价后，仅新增数据时自动带出最新配置值；编辑历史数据时保留原单价。
+                修改单价后，新增或编辑数据时，本月单价将按所选基地自动带出最新配置值。
             </div>
         </div>
         <div class="modal-footer">
@@ -1105,44 +1133,60 @@
 </div>
 
 <script>
-    // 全局单价配置
+    // 按基地的单价配置
     let unitPrices = {
-        water: 3.50,
-        elec: 0.80,
-        alkali: 1200.00,
-        carbon: 5000.00,
-        gas: 3.20
+        '厦门基地': { water: 3.20, elec: 0.75, alkali: 1150.00, carbon: 4800.00, gas: 3.10 },
+        '重庆基地': { water: 3.50, elec: 0.80, alkali: 1200.00, carbon: 5000.00, gas: 3.20 },
+        '菏泽基地': { water: 3.30, elec: 0.78, alkali: 1180.00, carbon: 4900.00, gas: 3.15 }
     };
 
-    // 应用当前配置单价到表单（用于新增）
+    // 应用当前基地的单价到表单
     function applyUnitPricesToForm() {
-        document.getElementById('fieldWaterPrice').value = unitPrices.water.toFixed(2);
-        document.getElementById('fieldElecPrice').value = unitPrices.elec.toFixed(2);
-        document.getElementById('fieldAlkaliPrice').value = unitPrices.alkali.toFixed(2);
-        document.getElementById('fieldCarbonPrice').value = unitPrices.carbon.toFixed(2);
-        document.getElementById('fieldGasPrice').value = unitPrices.gas.toFixed(2);
+        const base = document.getElementById('fieldBase').value || '重庆基地';
+        const p = unitPrices[base] || unitPrices['重庆基地'];
+        document.getElementById('fieldWaterPrice').value = p.water.toFixed(2);
+        document.getElementById('fieldElecPrice').value = p.elec.toFixed(2);
+        document.getElementById('fieldAlkaliPrice').value = p.alkali.toFixed(2);
+        document.getElementById('fieldCarbonPrice').value = p.carbon.toFixed(2);
+        document.getElementById('fieldGasPrice').value = p.gas.toFixed(2);
     }
 
-    // 计算费用（使用表单中的单价）
+    // 计算费用（含总费用）
     function calculateCosts() {
-        const water = parseFloat(document.getElementById('fieldWater').value) || 0;
-        const elec = parseFloat(document.getElementById('fieldElec').value) || 0;
-        const alkali = parseFloat(document.getElementById('fieldAlkali').value) || 0;
-        const carbon = parseFloat(document.getElementById('fieldCarbon').value) || 0;
-        const gas = parseFloat(document.getElementById('fieldGas').value) || 0;
+        const getVal = id => parseFloat(document.getElementById(id).value) || 0;
 
-        const waterPrice = parseFloat(document.getElementById('fieldWaterPrice').value) || 0;
-        const elecPrice = parseFloat(document.getElementById('fieldElecPrice').value) || 0;
-        const alkaliPrice = parseFloat(document.getElementById('fieldAlkaliPrice').value) || 0;
-        const carbonPrice = parseFloat(document.getElementById('fieldCarbonPrice').value) || 0;
-        const gasPrice = parseFloat(document.getElementById('fieldGasPrice').value) || 0;
+        const water = getVal('fieldWater');
+        const elec = getVal('fieldElec');
+        const alkali = getVal('fieldAlkali');
+        const carbon = getVal('fieldCarbon');
+        const gas = getVal('fieldGas');
 
-        document.getElementById('fieldWaterCost').value = (water * waterPrice).toFixed(2);
-        document.getElementById('fieldElecCost').value = (elec * elecPrice).toFixed(2);
-        document.getElementById('fieldAlkaliCost').value = (alkali * alkaliPrice).toFixed(2);
-        document.getElementById('fieldCarbonCost').value = (carbon * carbonPrice).toFixed(2);
-        document.getElementById('fieldGasCost').value = (gas * gasPrice).toFixed(2);
+        const waterPrice = getVal('fieldWaterPrice');
+        const elecPrice = getVal('fieldElecPrice');
+        const alkaliPrice = getVal('fieldAlkaliPrice');
+        const carbonPrice = getVal('fieldCarbonPrice');
+        const gasPrice = getVal('fieldGasPrice');
+
+        const waterCost = water * waterPrice;
+        const elecCost = elec * elecPrice;
+        const alkaliCost = alkali * alkaliPrice;
+        const carbonCost = carbon * carbonPrice;
+        const gasCost = gas * gasPrice;
+        const totalCost = waterCost + elecCost + alkaliCost + carbonCost + gasCost;
+
+        document.getElementById('fieldWaterCost').value = waterCost.toFixed(2);
+        document.getElementById('fieldElecCost').value = elecCost.toFixed(2);
+        document.getElementById('fieldAlkaliCost').value = alkaliCost.toFixed(2);
+        document.getElementById('fieldCarbonCost').value = carbonCost.toFixed(2);
+        document.getElementById('fieldGasCost').value = gasCost.toFixed(2);
+        document.getElementById('fieldTotalCost').value = totalCost.toFixed(2);
     }
+
+    // 基地切换时重新带出单价
+    document.getElementById('fieldBase').addEventListener('change', function() {
+        applyUnitPricesToForm();
+        calculateCosts();
+    });
 
     // 监听消耗和单价字段变化
     ['fieldWater','fieldElec','fieldAlkali','fieldCarbon','fieldGas',
@@ -1178,7 +1222,6 @@
         document.getElementById('fieldAlkali').value = '0';
         document.getElementById('fieldCarbon').value = '0';
         document.getElementById('fieldGas').value = '0';
-        // 新增时取当前配置的单价
         applyUnitPricesToForm();
         calculateCosts();
         openModal('addModal');
@@ -1196,7 +1239,6 @@
         document.getElementById('fieldAlkali').value = cells[5].textContent.trim() || '0';
         document.getElementById('fieldCarbon').value = cells[6].textContent.trim() || '0';
         document.getElementById('fieldGas').value = cells[7].textContent.trim() || '0';
-        // 编辑时取当前配置的单价（不使用行内历史单价）
         applyUnitPricesToForm();
         calculateCosts();
         openModal('addModal');
@@ -1206,26 +1248,28 @@
         const base = document.getElementById('fieldBase').value;
         const month = document.getElementById('fieldMonth').value;
         const facility = document.getElementById('fieldFacility').value.trim();
+        if (!base) { alert('请选择基地'); return; }
+        if (!month) { alert('请选择月份'); return; }
+        if (!facility) { alert('请输入排放口/设施'); return; }
+
         const water = document.getElementById('fieldWater').value.trim() || '0';
         const elec = document.getElementById('fieldElec').value.trim() || '0';
         const alkali = document.getElementById('fieldAlkali').value.trim() || '0';
         const carbon = document.getElementById('fieldCarbon').value.trim() || '0';
         const gas = document.getElementById('fieldGas').value.trim() || '0';
 
-        if (!base) { alert('请选择基地'); return; }
-        if (!month) { alert('请选择月份'); return; }
-        if (!facility) { alert('请输入排放口/设施'); return; }
-
         const waterPrice = document.getElementById('fieldWaterPrice').value;
         const elecPrice = document.getElementById('fieldElecPrice').value;
         const alkaliPrice = document.getElementById('fieldAlkaliPrice').value;
         const carbonPrice = document.getElementById('fieldCarbonPrice').value;
         const gasPrice = document.getElementById('fieldGasPrice').value;
+
         const waterCost = document.getElementById('fieldWaterCost').value;
         const elecCost = document.getElementById('fieldElecCost').value;
         const alkaliCost = document.getElementById('fieldAlkaliCost').value;
         const carbonCost = document.getElementById('fieldCarbonCost').value;
         const gasCost = document.getElementById('fieldGasCost').value;
+        const totalCost = document.getElementById('fieldTotalCost').value;
 
         if (editingRow) {
             const cells = editingRow.querySelectorAll('td');
@@ -1247,6 +1291,7 @@
             cells[15].textContent = alkaliCost;
             cells[16].textContent = carbonCost;
             cells[17].textContent = gasCost;
+            cells[18].textContent = totalCost;
         } else {
             const tbody = document.querySelector('#dataTable tbody');
             const tr = document.createElement('tr');
@@ -1268,6 +1313,7 @@
             html += '<td>' + alkaliCost + '</td>';
             html += '<td>' + carbonCost + '</td>';
             html += '<td>' + gasCost + '</td>';
+            html += '<td>' + totalCost + '</td>';
             html += '<td class="text-center">';
             html += '<a class="op-link" onclick="openEditModal(this)">编辑</a>';
             html += '<a class="op-link danger" onclick="deleteRow(this)">删除</a>';
@@ -1311,46 +1357,41 @@
             alert('请输入有效的日期（1-31）');
             return;
         }
-        const bases = ['xiamen', 'chongqing', 'heze'];
-        const names = ['厦门基地', '重庆基地', '菏泽基地'];
-        let result = '推送规则已保存：\n每月 ' + day + ' 号推送飞书消息提醒\n';
-        bases.forEach(function(b, i) {
-            const wrap = document.getElementById('tagWrap-' + b);
-            const tags = wrap.querySelectorAll('.tag');
-            const arr = [];
-            tags.forEach(function(t) { arr.push(t.textContent.replace('×','').trim()); });
-            result += names[i] + '接收人：' + (arr.length ? arr.join('、') : '（未配置）') + '\n';
-        });
-        alert(result);
+        alert('推送规则已保存：每月 ' + day + ' 号推送飞书消息提醒');
         closeModal('pushModal');
     }
 
+    // 单价配置
     function openUnitPriceModal() {
-        document.getElementById('unitWaterPrice').value = unitPrices.water;
-        document.getElementById('unitElecPrice').value = unitPrices.elec;
-        document.getElementById('unitAlkaliPrice').value = unitPrices.alkali;
-        document.getElementById('unitCarbonPrice').value = unitPrices.carbon;
-        document.getElementById('unitGasPrice').value = unitPrices.gas;
+        document.getElementById('unitPriceBase').value = '厦门基地';
+        renderUnitPriceForm();
         openModal('unitPriceModal');
     }
 
+    function renderUnitPriceForm() {
+        const base = document.getElementById('unitPriceBase').value;
+        const p = unitPrices[base] || { water:0, elec:0, alkali:0, carbon:0, gas:0 };
+        document.getElementById('unitWaterPrice').value = p.water;
+        document.getElementById('unitElecPrice').value = p.elec;
+        document.getElementById('unitAlkaliPrice').value = p.alkali;
+        document.getElementById('unitCarbonPrice').value = p.carbon;
+        document.getElementById('unitGasPrice').value = p.gas;
+    }
+
     function saveUnitPriceConfig() {
-        const water = parseFloat(document.getElementById('unitWaterPrice').value) || 0;
-        const elec = parseFloat(document.getElementById('unitElecPrice').value) || 0;
-        const alkali = parseFloat(document.getElementById('unitAlkaliPrice').value) || 0;
-        const carbon = parseFloat(document.getElementById('unitCarbonPrice').value) || 0;
-        const gas = parseFloat(document.getElementById('unitGasPrice').value) || 0;
-        unitPrices.water = water;
-        unitPrices.elec = elec;
-        unitPrices.alkali = alkali;
-        unitPrices.carbon = carbon;
-        unitPrices.gas = gas;
-        // 若弹窗正打开，同步更新表单单价
+        const base = document.getElementById('unitPriceBase').value;
+        unitPrices[base] = {
+            water: parseFloat(document.getElementById('unitWaterPrice').value) || 0,
+            elec: parseFloat(document.getElementById('unitElecPrice').value) || 0,
+            alkali: parseFloat(document.getElementById('unitAlkaliPrice').value) || 0,
+            carbon: parseFloat(document.getElementById('unitCarbonPrice').value) || 0,
+            gas: parseFloat(document.getElementById('unitGasPrice').value) || 0
+        };
         if (document.getElementById('addModal').classList.contains('active')) {
             applyUnitPricesToForm();
             calculateCosts();
         }
-        alert('单价配置已保存');
+        alert(base + ' 单价配置已保存');
         closeModal('unitPriceModal');
     }
 </script>

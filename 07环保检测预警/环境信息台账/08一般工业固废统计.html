@@ -410,7 +410,7 @@
             margin-top: 4px;
         }
 
-        /* 固废大类配置表格 */
+        /* 固废配置表格 */
         .config-table {
             width: 100%;
             border-collapse: collapse;
@@ -452,7 +452,7 @@
             <div class="flex items-center gap-3 flex-wrap">
                 <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
                 <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
-                <button class="plain-btn" onclick="openCategoryConfigModal()"><i class="fas fa-gear text-xs"></i>固废大类配置</button>
+                <button class="plain-btn" onclick="openConfigModal()"><i class="fas fa-gear text-xs"></i>固废配置</button>
                 <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
                 <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
                 <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
@@ -601,7 +601,10 @@
             </div>
             <div class="form-row">
                 <label class="form-label"><span class="required">*</span>固废名称</label>
-                <input type="text" class="form-control" id="fieldName" placeholder="请输入固废名称">
+                <select class="form-control form-select" id="fieldName">
+                    <option value="">请先选择固废大类</option>
+                    <!-- 动态填充 -->
+                </select>
             </div>
             <div class="form-row">
                 <label class="form-label"><span class="required">*</span>处置量 (t)</label>
@@ -642,14 +645,16 @@
                     <div class="tag-input-wrap" id="tagWrap-xiamen">
                         <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-        
+                     
+
                     </div>
                 </div>
                 <div class="base-config-row">
                     <label>重庆基地</label>
                     <div class="tag-input-wrap" id="tagWrap-chongqing">
                         <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-             
+                       
+
                     </div>
                 </div>
                 <div class="base-config-row">
@@ -657,7 +662,8 @@
                     <div class="tag-input-wrap" id="tagWrap-heze">
                         <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
-                  
+                        
+
                     </div>
                 </div>
             </div>
@@ -669,25 +675,26 @@
     </div>
 </div>
 
-<!-- ========== 固废大类配置弹窗 ========== -->
-<div class="modal-overlay" id="categoryConfigModal">
-    <div class="modal-box">
+<!-- ========== 固废配置弹窗 ========== -->
+<div class="modal-overlay" id="configModal">
+    <div class="modal-box" style="width: 800px;">
         <div class="modal-header">
-            <h3>固废大类配置</h3>
-            <button class="modal-close" onclick="closeModal('categoryConfigModal')">&times;</button>
+            <h3>固废配置</h3>
+            <button class="modal-close" onclick="closeModal('configModal')">&times;</button>
         </div>
         <div class="modal-body">
             <div style="margin-bottom: 15px;">
-                <button class="primary-btn" style="padding: 5px 14px; font-size: 12px;" onclick="addCategoryRow()">
+                <button class="primary-btn" style="padding: 5px 14px; font-size: 12px;" onclick="addConfigRow()">
                     <i class="fas fa-plus text-xs"></i>新增
                 </button>
             </div>
             <table class="config-table" id="configTable">
                 <thead>
                     <tr>
-                        <th style="width: 40%;">固废大类</th>
-                        <th style="width: 40%;">固废大类代码</th>
-                        <th style="width: 20%; text-align: center;">操作</th>
+                        <th style="width: 25%;">固废大类</th>
+                        <th style="width: 25%;">固废大类代码</th>
+                        <th style="width: 25%;">固废名称</th>
+                        <th style="width: 25%; text-align: center;">操作</th>
                     </tr>
                 </thead>
                 <tbody id="configTableBody">
@@ -696,21 +703,36 @@
             </table>
         </div>
         <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('categoryConfigModal')">关闭</button>
+            <button class="btn-cancel" onclick="closeModal('configModal')">关闭</button>
         </div>
     </div>
 </div>
 
 <script>
     // ===== 全局数据 =====
-    // 固废大类配置数据
-    let categoryConfigList = [
-        { name: '废塑料', code: '900-003-S17' },
-        { name: '废木材', code: '900-009-S17' },
-        { name: '废纸', code: '900-005-S17' },
-        { name: '废电池及电池废料', code: '900-012-S17' },
-        { name: '污泥', code: '900-099-S07' },
-        { name: '其他工业生产过程中产生的固体废物', code: '900-099-S59' }
+    // 固废配置数据 (包含固废大类、固废大类代码、固废名称)
+    let configList = [
+        { category: '废塑料', code: '900-003-S17', name: '塑料类' },
+        { category: '废塑料', code: '900-003-S17', name: '缠绕膜' },
+        { category: '废塑料', code: '900-003-S17', name: '吨袋' },
+        { category: '废塑料', code: '900-003-S17', name: '泡沫' },
+        { category: '废木材', code: '900-009-S17', name: '木制品' },
+        { category: '废纸', code: '900-005-S17', name: '纸皮' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '极片/极耳' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '报废电芯' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '顶盖/顶贴片' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '滑石粉' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '磷酸铁锂' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '铝制品' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '铜制品' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '石墨/导电碳' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: 'PVDF/勃姆石' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: '阴极浆料' },
+        { category: '废电池及电池废料', code: '900-012-S17', name: 'NMP废液（外部售卖）' },
+        { category: '污泥', code: '900-099-S07', name: '阳极浆料' },
+        { category: '污泥', code: '900-099-S07', name: '废水处理污泥' },
+        { category: '其他工业生产过程中产生的固体废物', code: '900-099-S59', name: '前工序沾染物' },
+        { category: '其他工业生产过程中产生的固体废物', code: '900-099-S59', name: '垃圾' }
     ];
 
     // 表格数据
@@ -784,18 +806,21 @@
     function renderCategoryOptions() {
         const select = document.getElementById('fieldCategory');
         const querySelect = document.getElementById('queryCategory');
-        // 保留第一个默认选项
+        // 获取所有不重复的固废大类
+        const categories = [...new Set(configList.map(item => item.category))];
+        
         select.innerHTML = '<option value="">请选择固废大类</option>';
         querySelect.innerHTML = '<option value="">全部大类</option>';
-        categoryConfigList.forEach(function(item) {
+        
+        categories.forEach(function(cat) {
             const opt = document.createElement('option');
-            opt.value = item.name;
-            opt.textContent = item.name;
+            opt.value = cat;
+            opt.textContent = cat;
             select.appendChild(opt);
 
             const opt2 = document.createElement('option');
-            opt2.value = item.name;
-            opt2.textContent = item.name;
+            opt2.value = cat;
+            opt2.textContent = cat;
             querySelect.appendChild(opt2);
         });
     }
@@ -826,7 +851,7 @@
         document.getElementById('fieldDisposal').value = '';
         document.getElementById('fieldCategory').value = '';
         document.getElementById('fieldCategoryCode').value = '';
-        document.getElementById('fieldName').value = '';
+        document.getElementById('fieldName').innerHTML = '<option value="">请先选择固废大类</option>';
         document.getElementById('fieldQuantity').value = '0';
         openModal('addModal');
     }
@@ -841,23 +866,58 @@
         document.getElementById('fieldDisposal').value = row.disposal;
         document.getElementById('fieldCategory').value = row.category;
         document.getElementById('fieldCategoryCode').value = row.code;
+        
+        // 渲染固废名称下拉选项
+        renderNameOptions(row.category);
         document.getElementById('fieldName').value = row.name;
+        
         document.getElementById('fieldQuantity').value = row.quantity;
         openModal('addModal');
     }
 
-    // 固废大类改变时自动带出代码
+    // 固废大类改变时自动带出代码，并更新固废名称下拉
     function handleCategoryChange() {
-        const selectedName = document.getElementById('fieldCategory').value;
+        const selectedCategory = document.getElementById('fieldCategory').value;
         const codeInput = document.getElementById('fieldCategoryCode');
-        const found = categoryConfigList.find(function(item) {
-            return item.name === selectedName;
+        
+        // 找出该大类对应的代码
+        const found = configList.find(function(item) {
+            return item.category === selectedCategory;
         });
         if (found) {
             codeInput.value = found.code;
         } else {
             codeInput.value = '';
         }
+        
+        // 更新固废名称下拉
+        renderNameOptions(selectedCategory);
+    }
+
+    // 根据固废大类渲染固废名称下拉选项
+    function renderNameOptions(category) {
+        const nameSelect = document.getElementById('fieldName');
+        nameSelect.innerHTML = '<option value="">请选择固废名称</option>';
+        
+        if (!category) {
+            nameSelect.innerHTML = '<option value="">请先选择固废大类</option>';
+            return;
+        }
+        
+        // 筛选出该大类下所有的固废名称
+        const names = configList
+            .filter(item => item.category === category)
+            .map(item => item.name);
+        
+        // 去重
+        const uniqueNames = [...new Set(names)];
+        
+        uniqueNames.forEach(function(name) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            nameSelect.appendChild(opt);
+        });
     }
 
     function saveData() {
@@ -877,7 +937,7 @@
         if (!disposal) { alert('请选择处置方式及去向'); return; }
         if (!category) { alert('请选择固废大类'); return; }
         if (!code) { alert('固废大类代码不能为空'); return; }
-        if (!name) { alert('请输入固废名称'); return; }
+        if (!name) { alert('请选择固废名称'); return; }
         if (quantity < 0) { alert('处置量不能为负数'); return; }
 
         const newRow = { base, month, factory, disposal, category, code, name, quantity };
@@ -999,20 +1059,21 @@
         closeModal('pushModal');
     }
 
-    // ===== 固废大类配置弹窗 =====
-    function openCategoryConfigModal() {
+    // ===== 固废配置弹窗 =====
+    function openConfigModal() {
         renderConfigTable();
-        openModal('categoryConfigModal');
+        openModal('configModal');
     }
 
     function renderConfigTable() {
         const tbody = document.getElementById('configTableBody');
         tbody.innerHTML = '';
-        categoryConfigList.forEach(function(item, index) {
+        configList.forEach(function(item, index) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><span class="config-name-display">${item.name}</span></td>
-                <td><span class="config-code-display">${item.code}</span></td>
+                <td>${item.category}</td>
+                <td>${item.code}</td>
+                <td>${item.name}</td>
                 <td style="text-align:center;">
                     <a class="op-link" onclick="editConfigRow(${index})">编辑</a>
                     <a class="op-link danger" onclick="deleteConfigRow(${index})">删除</a>
@@ -1022,14 +1083,15 @@
         });
     }
 
-    function addCategoryRow() {
+    function addConfigRow() {
         // 直接在列表中新增一行，处于编辑状态
         const tbody = document.getElementById('configTableBody');
         const tr = document.createElement('tr');
         tr.className = 'editing-row';
         tr.innerHTML = `
-            <td><input type="text" placeholder="请输入固废大类" class="config-input-name"></td>
+            <td><input type="text" placeholder="请输入固废大类" class="config-input-category"></td>
             <td><input type="text" placeholder="请输入固废大类代码" class="config-input-code"></td>
+            <td><input type="text" placeholder="请输入固废名称" class="config-input-name"></td>
             <td style="text-align:center;">
                 <a class="op-link" onclick="saveConfigRow(this)">保存</a>
                 <a class="op-link" style="color:#f87171;" onclick="cancelConfigRow(this)">取消</a>
@@ -1037,28 +1099,33 @@
         `;
         tbody.appendChild(tr);
         // 聚焦到第一个输入框
-        tr.querySelector('.config-input-name').focus();
+        tr.querySelector('.config-input-category').focus();
     }
 
     function saveConfigRow(el) {
         const tr = el.closest('tr');
-        const nameInput = tr.querySelector('.config-input-name');
+        const categoryInput = tr.querySelector('.config-input-category');
         const codeInput = tr.querySelector('.config-input-code');
-        const name = nameInput.value.trim();
+        const nameInput = tr.querySelector('.config-input-name');
+        
+        const category = categoryInput.value.trim();
         const code = codeInput.value.trim();
+        const name = nameInput.value.trim();
 
-        if (!name) { alert('请输入固废大类'); return; }
+        if (!category) { alert('请输入固废大类'); return; }
         if (!code) { alert('请输入固废大类代码'); return; }
+        if (!name) { alert('请输入固废名称'); return; }
 
         // 判断是新增还是编辑（通过是否有 data-index 属性判断）
         if (tr.dataset.index !== undefined) {
             // 编辑现有行
             const idx = parseInt(tr.dataset.index);
-            categoryConfigList[idx].name = name;
-            categoryConfigList[idx].code = code;
+            configList[idx].category = category;
+            configList[idx].code = code;
+            configList[idx].name = name;
         } else {
             // 新增行
-            categoryConfigList.push({ name, code });
+            configList.push({ category, code, name });
         }
 
         renderConfigTable();
@@ -1072,7 +1139,7 @@
 
     function editConfigRow(index) {
         // 将当前行替换为可编辑状态
-        const item = categoryConfigList[index];
+        const item = configList[index];
         const tbody = document.getElementById('configTableBody');
         const rows = tbody.querySelectorAll('tr');
         const tr = rows[index];
@@ -1080,19 +1147,20 @@
         tr.className = 'editing-row';
         tr.dataset.index = index;
         tr.innerHTML = `
-            <td><input type="text" class="config-input-name" value="${item.name}"></td>
+            <td><input type="text" class="config-input-category" value="${item.category}"></td>
             <td><input type="text" class="config-input-code" value="${item.code}"></td>
+            <td><input type="text" class="config-input-name" value="${item.name}"></td>
             <td style="text-align:center;">
                 <a class="op-link" onclick="saveConfigRow(this)">保存</a>
                 <a class="op-link" style="color:#f87171;" onclick="cancelConfigRow(this)">取消</a>
             </td>
         `;
-        tr.querySelector('.config-input-name').focus();
+        tr.querySelector('.config-input-category').focus();
     }
 
     function deleteConfigRow(index) {
-        if (confirm('确定要删除该固废大类配置吗？')) {
-            categoryConfigList.splice(index, 1);
+        if (confirm('确定要删除该固废配置吗？')) {
+            configList.splice(index, 1);
             renderConfigTable();
             renderCategoryOptions(); // 更新下拉选项
         }

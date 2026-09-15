@@ -233,7 +233,7 @@
         }
         .form-row:last-child { margin-bottom: 0; }
         .form-label {
-            width: 120px;
+            width: 140px;
             text-align: right;
             padding-right: 16px;
             font-size: 14px;
@@ -421,7 +421,6 @@
             <div class="flex items-center gap-3 flex-wrap">
                 <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
                 <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
-                <button class="plain-btn" onclick="openWeightConfigModal()"><i class="fas fa-weight-scale text-xs"></i>重量配置</button>
                 <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
                 <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
                 <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
@@ -454,9 +453,7 @@
                     <tr>
                         <th>基地</th>
                         <th>月份</th>
-                        <th>生活垃圾（桶）</th>
                         <th>生活垃圾（吨）</th>
-                        <th>厨余垃圾（桶）</th>
                         <th>厨余垃圾（吨）</th>
                         <th class="text-center">操作</th>
                     </tr>
@@ -510,23 +507,12 @@
                 <input type="month" class="form-control" id="fieldMonth" value="2026-01">
             </div>
             <div class="form-row">
-                <label class="form-label"><span class="required">*</span>生活垃圾（桶）</label>
-                <input type="number" class="form-control" id="fieldLifeBucket" placeholder="请输入桶数" value="0" min="0">
+                <label class="form-label"><span class="required">*</span>生活垃圾（吨）</label>
+                <input type="number" step="0.001" class="form-control" id="fieldLifeTon" placeholder="请输入吨数" value="0.000" min="0">
             </div>
             <div class="form-row">
-                <label class="form-label">生活垃圾（吨）</label>
-                <input type="text" class="form-control" id="fieldLifeTon" value="0.00" disabled>
-            </div>
-            <div class="form-row">
-                <label class="form-label"><span class="required">*</span>厨余垃圾（桶）</label>
-                <input type="number" class="form-control" id="fieldKitchenBucket" placeholder="请输入桶数" value="0" min="0">
-            </div>
-            <div class="form-row">
-                <label class="form-label">厨余垃圾（吨）</label>
-                <input type="text" class="form-control" id="fieldKitchenTon" value="0.00" disabled>
-            </div>
-            <div class="hint-text" style="padding-left:120px;margin-top:4px;">
-                吨数根据重量配置自动计算（当前：生活垃圾 30kg/桶，厨余垃圾 75kg/桶）
+                <label class="form-label"><span class="required">*</span>厨余垃圾（吨）</label>
+                <input type="number" step="0.001" class="form-control" id="fieldKitchenTon" placeholder="请输入吨数" value="0.000" min="0">
             </div>
         </div>
         <div class="modal-footer">
@@ -563,12 +549,16 @@
                     <div class="tag-input-wrap" id="tagWrap-xiamen">
                         <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                      
+
                     </div>
                 </div>
                 <div class="base-config-row">
                     <label>重庆基地</label>
                     <div class="tag-input-wrap" id="tagWrap-chongqing">
                         <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                       
+
                     </div>
                 </div>
                 <div class="base-config-row">
@@ -576,6 +566,8 @@
                     <div class="tag-input-wrap" id="tagWrap-heze">
                         <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
                         <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        
+
                     </div>
                 </div>
             </div>
@@ -587,57 +579,18 @@
     </div>
 </div>
 
-<!-- ========== 重量配置弹窗 ========== -->
-<div class="modal-overlay" id="weightModal">
-    <div class="modal-box" style="width:480px;">
-        <div class="modal-header">
-            <h3>重量配置</h3>
-            <button class="modal-close" onclick="closeModal('weightModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="form-row">
-                <label class="form-label" style="width:120px;">生活垃圾</label>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="number" class="input-inline" id="weightLife" value="30" min="1" style="width:80px;">
-                    <span style="font-size:14px;color:#475569;">kg / 桶</span>
-                </div>
-            </div>
-            <div class="form-row">
-                <label class="form-label" style="width:120px;">厨余垃圾</label>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <input type="number" class="input-inline" id="weightKitchen" value="75" min="1" style="width:80px;">
-                    <span style="font-size:14px;color:#475569;">kg / 桶</span>
-                </div>
-            </div>
-            <div class="hint-text" style="padding-left:120px;margin-top:8px;">
-                修改后，新增/编辑记录时吨数将根据此配置自动重新计算。
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal('weightModal')">取消</button>
-            <button class="btn-confirm" onclick="saveWeightConfig()">保存配置</button>
-        </div>
-    </div>
-</div>
-
 <script>
     // ===== 全局数据 =====
-    // 重量配置（kg/桶）
-    let weightConfig = {
-        life: 30,
-        kitchen: 75
-    };
-
-    // 表格数据（基于截图1的重庆基地 2026年1-8月数据，吨数已按默认30/75计算）
+    // 表格数据（基于截图数据，吨数直接存储）
     let tableData = [
-        { base: '重庆基地', month: '2026-01', lifeBucket: 63, lifeTon: 1.89, kitchenBucket: 225, kitchenTon: 16.875 },
-        { base: '重庆基地', month: '2026-02', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-03', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-04', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-05', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-06', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-07', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 },
-        { base: '重庆基地', month: '2026-08', lifeBucket: 99, lifeTon: 2.97, kitchenBucket: 285, kitchenTon: 21.375 }
+        { base: '重庆基地', month: '2026-01', lifeTon: 1.89, kitchenTon: 16.875 },
+        { base: '重庆基地', month: '2026-02', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-03', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-04', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-05', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-06', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-07', lifeTon: 2.97, kitchenTon: 21.375 },
+        { base: '重庆基地', month: '2026-08', lifeTon: 2.97, kitchenTon: 21.375 }
     ];
 
     // 当前编辑的行索引
@@ -653,12 +606,6 @@
         document.getElementById('totalCount').textContent = tableData.length;
     }
 
-    // ===== 计算吨数 =====
-    function calcTon(bucket, type) {
-        const weight = type === 'life' ? weightConfig.life : weightConfig.kitchen;
-        return (bucket * weight) / 1000;
-    }
-
     // ===== 渲染表格 =====
     function renderTable() {
         const tbody = document.getElementById('tableBody');
@@ -668,9 +615,7 @@
             tr.innerHTML = `
                 <td>${row.base}</td>
                 <td>${formatMonth(row.month)}</td>
-                <td>${row.lifeBucket}</td>
                 <td>${row.lifeTon.toFixed(3)}</td>
-                <td>${row.kitchenBucket}</td>
                 <td>${row.kitchenTon.toFixed(3)}</td>
                 <td class="text-center">
                     <a class="op-link" onclick="openEditModal(${index})">编辑</a>
@@ -711,12 +656,8 @@
         document.getElementById('modalTitle').textContent = '新增垃圾统计记录';
         document.getElementById('fieldBase').value = '';
         document.getElementById('fieldMonth').value = '2026-01';
-        document.getElementById('fieldLifeBucket').value = 0;
         document.getElementById('fieldLifeTon').value = '0.000';
-        document.getElementById('fieldKitchenBucket').value = 0;
         document.getElementById('fieldKitchenTon').value = '0.000';
-        // 移除自动计算监听，重新绑定
-        bindAutoCalc();
         openModal('addModal');
     }
 
@@ -726,62 +667,27 @@
         document.getElementById('modalTitle').textContent = '编辑垃圾统计记录';
         document.getElementById('fieldBase').value = row.base;
         document.getElementById('fieldMonth').value = row.month;
-        document.getElementById('fieldLifeBucket').value = row.lifeBucket;
-        document.getElementById('fieldLifeTon').value = row.lifeTon.toFixed(3);
-        document.getElementById('fieldKitchenBucket').value = row.kitchenBucket;
-        document.getElementById('fieldKitchenTon').value = row.kitchenTon.toFixed(3);
-        bindAutoCalc();
+        document.getElementById('fieldLifeTon').value = row.lifeTon;
+        document.getElementById('fieldKitchenTon').value = row.kitchenTon;
         openModal('addModal');
-    }
-
-    // 自动计算吨数
-    function bindAutoCalc() {
-        // 先移除旧监听，避免重复
-        const lifeBucketInput = document.getElementById('fieldLifeBucket');
-        const kitchenBucketInput = document.getElementById('fieldKitchenBucket');
-        
-        // 克隆替换以清除所有监听器
-        const newLifeInput = lifeBucketInput.cloneNode(true);
-        const newKitchenInput = kitchenBucketInput.cloneNode(true);
-        lifeBucketInput.parentNode.replaceChild(newLifeInput, lifeBucketInput);
-        kitchenBucketInput.parentNode.replaceChild(newKitchenInput, kitchenBucketInput);
-
-        // 重新绑定事件
-        newLifeInput.addEventListener('input', function() {
-            const bucket = parseFloat(this.value) || 0;
-            const ton = calcTon(bucket, 'life');
-            document.getElementById('fieldLifeTon').value = ton.toFixed(3);
-        });
-        newKitchenInput.addEventListener('input', function() {
-            const bucket = parseFloat(this.value) || 0;
-            const ton = calcTon(bucket, 'kitchen');
-            document.getElementById('fieldKitchenTon').value = ton.toFixed(3);
-        });
-
-        // 触发一次计算，保证显示正确
-        newLifeInput.dispatchEvent(new Event('input'));
-        newKitchenInput.dispatchEvent(new Event('input'));
     }
 
     function saveData() {
         const base = document.getElementById('fieldBase').value;
         const month = document.getElementById('fieldMonth').value;
-        const lifeBucket = parseFloat(document.getElementById('fieldLifeBucket').value);
-        const kitchenBucket = parseFloat(document.getElementById('fieldKitchenBucket').value);
+        const lifeTon = parseFloat(document.getElementById('fieldLifeTon').value);
+        const kitchenTon = parseFloat(document.getElementById('fieldKitchenTon').value);
 
         // 校验
         if (!base) { alert('请选择基地'); return; }
         if (!month) { alert('请选择月份'); return; }
-        if (isNaN(lifeBucket) || lifeBucket < 0) { alert('请输入有效的生活垃圾桶数'); return; }
-        if (isNaN(kitchenBucket) || kitchenBucket < 0) { alert('请输入有效的厨余垃圾桶数'); return; }
-
-        const lifeTon = calcTon(lifeBucket, 'life');
-        const kitchenTon = calcTon(kitchenBucket, 'kitchen');
+        if (isNaN(lifeTon) || lifeTon < 0) { alert('请输入有效的生活垃圾吨数'); return; }
+        if (isNaN(kitchenTon) || kitchenTon < 0) { alert('请输入有效的厨余垃圾吨数'); return; }
 
         const newRow = {
             base, month,
-            lifeBucket, lifeTon,
-            kitchenBucket, kitchenTon
+            lifeTon: parseFloat(lifeTon.toFixed(3)),
+            kitchenTon: parseFloat(kitchenTon.toFixed(3))
         };
 
         if (editingIndex > -1) {
@@ -813,7 +719,8 @@
             return true;
         });
 
-        // 重新渲染表格        const tbody = document.getElementById('tableBody');
+        // 重新渲染表格
+        const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
         filtered.forEach(function(row, index) {
             const originalIndex = tableData.indexOf(row);
@@ -821,9 +728,7 @@
             tr.innerHTML = `
                 <td>${row.base}</td>
                 <td>${formatMonth(row.month)}</td>
-                <td>${row.lifeBucket}</td>
                 <td>${row.lifeTon.toFixed(3)}</td>
-                <td>${row.kitchenBucket}</td>
                 <td>${row.kitchenTon.toFixed(3)}</td>
                 <td class="text-center">
                     <a class="op-link" onclick="openEditModal(${originalIndex})">编辑</a>
@@ -882,33 +787,6 @@
         });
         alert(result);
         closeModal('pushModal');
-    }
-
-    // ===== 重量配置弹窗 =====
-    function openWeightConfigModal() {
-        document.getElementById('weightLife').value = weightConfig.life;
-        document.getElementById('weightKitchen').value = weightConfig.kitchen;
-        openModal('weightModal');
-    }
-
-    function saveWeightConfig() {
-        const life = parseFloat(document.getElementById('weightLife').value);
-        const kitchen = parseFloat(document.getElementById('weightKitchen').value);
-        if (isNaN(life) || life <= 0) { alert('请输入有效的生活垃圾重量'); return; }
-        if (isNaN(kitchen) || kitchen <= 0) { alert('请输入有效的厨余垃圾重量'); return; }
-        
-        weightConfig.life = life;
-        weightConfig.kitchen = kitchen;
-
-        // 重新计算所有已有数据的吨数
-        tableData.forEach(function(row) {
-            row.lifeTon = calcTon(row.lifeBucket, 'life');
-            row.kitchenTon = calcTon(row.kitchenBucket, 'kitchen');
-        });
-
-        renderTable();
-        closeModal('weightModal');
-        alert('重量配置已更新，所有记录的吨数已重新计算。');
     }
 
     // ===== 页面加载 =====

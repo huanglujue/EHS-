@@ -444,12 +444,27 @@
             </div>
             <div class="flex items-center gap-2">
                 <label class="filter-label">厂房：</label>
-                <select class="filter-input filter-select w-28" id="queryFactory">
+                <select class="filter-input filter-select w-28" id="queryFactory" onchange="handleQueryFactoryChange()">
                     <option value="">全部厂房</option>
                     <option>CM1</option>
                     <option>CM3</option>
                     <option>CM4</option>
                     <option>其他</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">拉线：</label>
+                <select class="filter-input filter-select w-28" id="queryLine">
+                    <option value="">全部拉线</option>
+                    <!-- 联动填充 -->
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">产品类别：</label>
+                <select class="filter-input filter-select w-32" id="queryProduct">
+                    <option value="">全部类别</option>
+                    <option>587Ah</option>
+                    <option>314Ah</option>
                 </select>
             </div>
             <button class="primary-btn" onclick="handleSearch()"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
@@ -464,6 +479,8 @@
                         <th>基地</th>
                         <th>月份</th>
                         <th>厂房</th>
+                        <th>拉线</th>
+                        <th>产品类别</th>
                         <th>产能 (Gwh)</th>
                         <th class="text-center">操作</th>
                     </tr>
@@ -518,12 +535,26 @@
             </div>
             <div class="form-row">
                 <label class="form-label"><span class="required">*</span>厂房</label>
-                <select class="form-control form-select" id="fieldFactory">
+                <select class="form-control form-select" id="fieldFactory" onchange="handleFieldFactoryChange()">
                     <option value="">请选择厂房</option>
                     <option>CM1</option>
                     <option>CM3</option>
                     <option>CM4</option>
                     <option>其他</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>拉线</label>
+                <select class="form-control form-select" id="fieldLine">
+                    <option value="">请先选择厂房</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="form-label"><span class="required">*</span>产品类别</label>
+                <select class="form-control form-select" id="fieldProduct">
+                    <option value="">请选择产品类别</option>
+                    <option>587Ah</option>
+                    <option>314Ah</option>
                 </select>
             </div>
             <div class="form-row">
@@ -591,20 +622,31 @@
 
 <script>
     // ===== 全局数据 =====
-    // 产能表格数据（根据截图1生成12条记录）
+    // 厂房与拉线的关联关系
+    const FACTORY_LINES = {
+        'CM1': ['L1', 'L2', 'L3'],
+        'CM3': ['L4', 'L5'],
+        'CM4': ['L6', 'L7', 'L8'],
+        '其他': ['L9', 'L10']
+    };
+
+    // 产品类别选项
+    const PRODUCT_CATEGORIES = ['587Ah', '314Ah'];
+
+    // 产能表格数据（根据截图1生成12条记录，并补充拉线与产品类别）
     let tableData = [
-        { base: '重庆基地', month: '2026-01', factory: 'CM1', capacity: 0.471 },
-        { base: '重庆基地', month: '2026-01', factory: 'CM3', capacity: 0.146 },
-        { base: '重庆基地', month: '2026-01', factory: 'CM4', capacity: 0.451 },
-        { base: '重庆基地', month: '2026-01', factory: '其他', capacity: 0.496 },
-        { base: '重庆基地', month: '2026-02', factory: 'CM1', capacity: 0.911 },
-        { base: '重庆基地', month: '2026-02', factory: 'CM3', capacity: 0.480 },
-        { base: '重庆基地', month: '2026-02', factory: 'CM4', capacity: 0.896 },
-        { base: '重庆基地', month: '2026-02', factory: '其他', capacity: 0.471 },
-        { base: '重庆基地', month: '2026-03', factory: 'CM1', capacity: 0.146 },
-        { base: '重庆基地', month: '2026-03', factory: 'CM3', capacity: 0.451 },
-        { base: '重庆基地', month: '2026-03', factory: 'CM4', capacity: 0.496 },
-        { base: '重庆基地', month: '2026-03', factory: '其他', capacity: 0.911 }
+        { base: '重庆基地', month: '2026-01', factory: 'CM1', line: 'L1', product: '587Ah', capacity: 0.471 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM3', line: 'L4', product: '314Ah', capacity: 0.146 },
+        { base: '重庆基地', month: '2026-01', factory: 'CM4', line: 'L6', product: '587Ah', capacity: 0.451 },
+        { base: '重庆基地', month: '2026-01', factory: '其他', line: 'L9', product: '314Ah', capacity: 0.496 },
+        { base: '重庆基地', month: '2026-02', factory: 'CM1', line: 'L2', product: '587Ah', capacity: 0.911 },
+        { base: '重庆基地', month: '2026-02', factory: 'CM3', line: 'L5', product: '314Ah', capacity: 0.480 },
+        { base: '重庆基地', month: '2026-02', factory: 'CM4', line: 'L7', product: '587Ah', capacity: 0.896 },
+        { base: '重庆基地', month: '2026-02', factory: '其他', line: 'L10', product: '314Ah', capacity: 0.471 },
+        { base: '重庆基地', month: '2026-03', factory: 'CM1', line: 'L3', product: '587Ah', capacity: 0.146 },
+        { base: '重庆基地', month: '2026-03', factory: 'CM3', line: 'L4', product: '314Ah', capacity: 0.451 },
+        { base: '重庆基地', month: '2026-03', factory: 'CM4', line: 'L8', product: '587Ah', capacity: 0.496 },
+        { base: '重庆基地', month: '2026-03', factory: '其他', line: 'L9', product: '314Ah', capacity: 0.911 }
     ];
 
     // 当前编辑的行索引
@@ -613,6 +655,8 @@
     // ===== 初始化 =====
     function init() {
         renderTable();
+        // 初始化查询条件中的拉线（根据当前厂房）
+        handleQueryFactoryChange();
     }
 
     // 更新总条数显示
@@ -630,6 +674,8 @@
                 <td>${row.base}</td>
                 <td>${formatMonth(row.month)}</td>
                 <td>${row.factory}</td>
+                <td>${row.line}</td>
+                <td>${row.product}</td>
                 <td>${row.capacity.toFixed(3)}</td>
                 <td class="text-center">
                     <a class="op-link" onclick="openEditModal(${index})">编辑</a>
@@ -664,6 +710,51 @@
         });
     });
 
+    // ===== 厂房-拉线联动逻辑 =====
+    // 查询条件联动
+    function handleQueryFactoryChange() {
+        const factory = document.getElementById('queryFactory').value;
+        const lineSelect = document.getElementById('queryLine');
+        lineSelect.innerHTML = '<option value="">全部拉线</option>';
+        if (factory && FACTORY_LINES[factory]) {
+            FACTORY_LINES[factory].forEach(function(line) {
+                const opt = document.createElement('option');
+                opt.value = line;
+                opt.textContent = line;
+                lineSelect.appendChild(opt);
+            });
+        } else {
+            // 未选厂房时，显示所有拉线
+            const allLines = new Set();
+            Object.values(FACTORY_LINES).forEach(function(arr) {
+                arr.forEach(function(l) { allLines.add(l); });
+            });
+            allLines.forEach(function(line) {
+                const opt = document.createElement('option');
+                opt.value = line;
+                opt.textContent = line;
+                lineSelect.appendChild(opt);
+            });
+        }
+    }
+
+    // 新增/编辑弹窗内联动
+    function handleFieldFactoryChange() {
+        const factory = document.getElementById('fieldFactory').value;
+        const lineSelect = document.getElementById('fieldLine');
+        lineSelect.innerHTML = '<option value="">请选择拉线</option>';
+        if (factory && FACTORY_LINES[factory]) {
+            FACTORY_LINES[factory].forEach(function(line) {
+                const opt = document.createElement('option');
+                opt.value = line;
+                opt.textContent = line;
+                lineSelect.appendChild(opt);
+            });
+        } else {
+            lineSelect.innerHTML = '<option value="">请先选择厂房</option>';
+        }
+    }
+
     // ===== 新增/编辑弹窗 =====
     function openAddModal() {
         editingIndex = -1;
@@ -671,6 +762,8 @@
         document.getElementById('fieldBase').value = '';
         document.getElementById('fieldMonth').value = '2026-01';
         document.getElementById('fieldFactory').value = '';
+        document.getElementById('fieldLine').innerHTML = '<option value="">请先选择厂房</option>';
+        document.getElementById('fieldProduct').value = '';
         document.getElementById('fieldCapacity').value = '0.000';
         openModal('addModal');
     }
@@ -682,6 +775,10 @@
         document.getElementById('fieldBase').value = row.base;
         document.getElementById('fieldMonth').value = row.month;
         document.getElementById('fieldFactory').value = row.factory;
+        // 先触发厂房联动，再设置拉线值
+        handleFieldFactoryChange();
+        document.getElementById('fieldLine').value = row.line;
+        document.getElementById('fieldProduct').value = row.product;
         document.getElementById('fieldCapacity').value = row.capacity;
         openModal('addModal');
     }
@@ -690,16 +787,20 @@
         const base = document.getElementById('fieldBase').value;
         const month = document.getElementById('fieldMonth').value;
         const factory = document.getElementById('fieldFactory').value;
+        const line = document.getElementById('fieldLine').value;
+        const product = document.getElementById('fieldProduct').value;
         const capacity = parseFloat(document.getElementById('fieldCapacity').value);
 
         // 校验
         if (!base) { alert('请选择基地'); return; }
         if (!month) { alert('请选择月份'); return; }
         if (!factory) { alert('请选择厂房'); return; }
+        if (!line) { alert('请选择拉线'); return; }
+        if (!product) { alert('请选择产品类别'); return; }
         if (isNaN(capacity)) { alert('请输入有效的产能'); return; }
         if (capacity < 0) { alert('产能不能为负数'); return; }
 
-        const newRow = { base, month, factory, capacity };
+        const newRow = { base, month, factory, line, product, capacity };
 
         if (editingIndex > -1) {
             // 编辑
@@ -725,12 +826,16 @@
         const base = document.getElementById('queryBase').value;
         const month = document.getElementById('queryMonth').value;
         const factory = document.getElementById('queryFactory').value;
+        const line = document.getElementById('queryLine').value;
+        const product = document.getElementById('queryProduct').value;
 
         // 前端过滤
         const filtered = tableData.filter(function(row) {
             if (base && row.base !== base) return false;
             if (month && row.month !== month) return false;
             if (factory && row.factory !== factory) return false;
+            if (line && row.line !== line) return false;
+            if (product && row.product !== product) return false;
             return true;
         });
 
@@ -744,6 +849,8 @@
                 <td>${row.base}</td>
                 <td>${formatMonth(row.month)}</td>
                 <td>${row.factory}</td>
+                <td>${row.line}</td>
+                <td>${row.product}</td>
                 <td>${row.capacity.toFixed(3)}</td>
                 <td class="text-center">
                     <a class="op-link" onclick="openEditModal(${originalIndex})">编辑</a>
@@ -759,6 +866,10 @@
         document.getElementById('queryBase').value = '';
         document.getElementById('queryMonth').value = '2026-01';
         document.getElementById('queryFactory').value = '';
+        document.getElementById('queryLine').innerHTML = '<option value="">全部拉线</option>';
+        document.getElementById('queryProduct').value = '';
+        // 重新填充全部拉线
+        handleQueryFactoryChange();
         renderTable();
     }
 
