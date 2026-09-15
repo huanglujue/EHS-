@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应急指挥系统 - 废气治理设施运行费用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .title-bar::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        .primary-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .primary-btn:hover { background: #2563eb; }
+        .plain-btn {
+            background: white;
+            color: #475569;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .plain-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+        .filter-label {
+            font-size: 14px;
+            color: #475569;
+            white-space: nowrap;
+        }
+        .filter-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .filter-input::placeholder { color: #9ca3af; }
+        .filter-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+        table.schedule-table {
+            width: 100%;
+            table-layout: auto;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        table.schedule-table th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: center;
+            padding: 8px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+            vertical-align: middle;
+            background: #f9fafb;
+        }
+        table.schedule-table td {
+            font-size: 12px;
+            color: #334155;
+            padding: 8px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+            text-align: center;
+        }
+        table.schedule-table tbody tr { transition: background 0.15s; }
+        table.schedule-table tbody tr:hover { background: #f8fafc; }
+        table.schedule-table th:nth-child(1),
+        table.schedule-table td:nth-child(1) { text-align: left; padding-left: 12px; }
+        table.schedule-table th:nth-child(2),
+        table.schedule-table td:nth-child(2) { text-align: left; }
+        table.schedule-table th:nth-child(3),
+        table.schedule-table td:nth-child(3) { text-align: left; }
+        .op-link {
+            font-size: 13px;
+            color: #3b82f6;
+            margin-right: 10px;
+            transition: color 0.2s;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .op-link:hover { color: #2563eb; }
+        .op-link.danger { color: #f87171; }
+        .op-link.danger:hover { color: #ef4444; }
+        .pager-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .pager-btn:hover:not(:disabled) { border-color: #93c5fd; color: #3b82f6; }
+        .pager-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .pager-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-size-select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 26px 6px 10px;
+            font-size: 13px;
+            color: #475569;
+            background: white;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            cursor: pointer;
+            outline: none;
+        }
+        .jump-input {
+            width: 44px;
+            height: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #475569;
+            outline: none;
+        }
+        .jump-input:focus { border-color: #3b82f6; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 8px;
+            width: 960px;
+            max-width: 95vw;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: modalIn 0.2s ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-box.narrow {
+            width: 700px;
+        }
+        .modal-box.wide {
+            width: 1100px;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 0;
+            flex-shrink: 0;
+        }
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            font-size: 18px;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #475569; }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .form-row:last-child { margin-bottom: 0; }
+        .form-label {
+            width: 130px;
+            text-align: right;
+            padding-right: 16px;
+            font-size: 13px;
+            color: #374151;
+            flex-shrink: 0;
+        }
+        .form-label .required {
+            color: #ef4444;
+            margin-right: 4px;
+        }
+        .form-control {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #374151;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239ca3af' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            cursor: pointer;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px 24px;
+            border-top: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { background: #e5e7eb; }
+        .btn-confirm {
+            background: #3b82f6;
+            color: white;
+            padding: 9px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover { background: #2563eb; }
+
+        .rule-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .rule-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .rule-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rule-section-title i {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+        .base-config-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+        .base-config-row:last-child { margin-bottom: 0; }
+        .base-config-row label {
+            width: 90px;
+            font-size: 13px;
+            color: #475569;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .base-config-row .tag-input-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 4px 8px;
+            background: white;
+            min-height: 36px;
+            flex-wrap: wrap;
+        }
+        .base-config-row .tag-input-wrap:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .tag-input-wrap .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #bfdbfe;
+        }
+        .tag-input-wrap .tag .remove {
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            color: #60a5fa;
+        }
+        .tag-input-wrap .tag .remove:hover { color: #ef4444; }
+        .tag-input-wrap input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            color: #374151;
+            flex: 1;
+            min-width: 80px;
+            padding: 4px 0;
+            background: transparent;
+        }
+        .tag-input-wrap input::placeholder { color: #9ca3af; }
+        .hint-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+            padding-left: 102px;
+        }
+        .input-inline {
+            width: 60px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            color: #374151;
+            outline: none;
+        }
+        .input-inline:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+
+        .limit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+            margin-top: 8px;
+        }
+        .limit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .limit-item label {
+            width: 130px;
+            font-size: 13px;
+            color: #475569;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .limit-item input {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: #374151;
+            outline: none;
+        }
+        .limit-item input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 24px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0 20px;
+        }
+        .section-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 12px 0 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 12px;
+        }
+        .inline-disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body class="text-slate-700 p-6">
+<main class="w-full mx-auto space-y-4">
+
+    <section class="card p-6 w-full">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="title-bar">废气治理设施运行费用</h2>
+            <div class="flex items-center gap-3 flex-wrap">
+                <button class="primary-btn" onclick="openAddModal()"><i class="fas fa-plus text-xs"></i>新增</button>
+                <button class="plain-btn" onclick="openPushModal()"><i class="fas fa-bell text-xs"></i>推送规则</button>
+                <button class="plain-btn" onclick="openUnitPriceModal()"><i class="fas fa-tags text-xs"></i>单价配置</button>
+                <button class="plain-btn"><i class="fas fa-file-arrow-down text-xs"></i>下载模板</button>
+                <button class="plain-btn"><i class="fas fa-file-import text-xs"></i>导入</button>
+                <button class="plain-btn"><i class="fas fa-download text-xs"></i>导出</button>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+            <div class="flex items-center gap-2">
+                <label class="filter-label">基地：</label>
+                <select class="filter-input filter-select w-40" id="filterBase">
+                    <option value="">全部基地</option>
+                    <option>厦门基地</option>
+                    <option>重庆基地</option>
+                    <option>菏泽基地</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">月份：</label>
+                <select class="filter-input filter-select w-40" id="filterMonth">
+                    <option value="">全部月份</option>
+                    <option>2026年1月</option>
+                    <option>2026年2月</option>
+                    <option>2026年3月</option>
+                    <option>2026年4月</option>
+                    <option>2026年5月</option>
+                    <option>2026年6月</option>
+                    <option>2026年7月</option>
+                    <option>2026年8月</option>
+                    <option>2026年9月</option>
+                    <option>2026年10月</option>
+                    <option>2026年11月</option>
+                    <option>2026年12月</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="filter-label">环保设施：</label>
+                <input type="text" class="filter-input w-52" id="filterFacility" placeholder="输入搜索">
+            </div>
+            <button class="primary-btn"><i class="fas fa-magnifying-glass text-xs"></i>查询</button>
+            <button class="plain-btn">重置</button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="schedule-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">基地</th>
+                        <th rowspan="2">月份</th>
+                        <th rowspan="2">排放口/设施</th>
+                        <th colspan="5">本月消耗</th>
+                        <th colspan="5">本月单价</th>
+                        <th colspan="5">本月运行费用（元）</th>
+                        <th rowspan="2">操作</th>
+                    </tr>
+                    <tr>
+                        <th>水 (吨)</th>
+                        <th>电 (度)</th>
+                        <th>液碱添加量 (吨)</th>
+                        <th>活性炭添加量 (吨)</th>
+                        <th>天然气 (m³)</th>
+                        <th>水单价 (元/吨)</th>
+                        <th>电单价 (元/度)</th>
+                        <th>液碱单价 (元/吨)</th>
+                        <th>活性炭单价 (元/吨)</th>
+                        <th>天然气单价 (元/m³)</th>
+                        <th>水费</th>
+                        <th>电费</th>
+                        <th>液碱添加费用</th>
+                        <th>活性炭添加费用</th>
+                        <th>天然气费用</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年1月</td>
+                        <td style="text-align:left;">1#排口（搅拌废气）</td>
+                        <td>1259.2</td>
+                        <td>3860.5</td>
+                        <td>2474.4</td>
+                        <td>12.5</td>
+                        <td>680.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>4407.20</td>
+                        <td>3088.40</td>
+                        <td>2969280.00</td>
+                        <td>62500.00</td>
+                        <td>2176.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年2月</td>
+                        <td style="text-align:left;">1#排口（搅拌废气）</td>
+                        <td>1307.2</td>
+                        <td>4020.8</td>
+                        <td>2586.8</td>
+                        <td>13.2</td>
+                        <td>715.5</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>4575.20</td>
+                        <td>3216.64</td>
+                        <td>3104160.00</td>
+                        <td>66000.00</td>
+                        <td>2289.60</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年3月</td>
+                        <td style="text-align:left;">2#排口（1#阳极涂布）</td>
+                        <td>2864.0</td>
+                        <td>8850.6</td>
+                        <td>5480.4</td>
+                        <td>28.6</td>
+                        <td>1520.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>10024.00</td>
+                        <td>7080.48</td>
+                        <td>6576480.00</td>
+                        <td>143000.00</td>
+                        <td>4864.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年4月</td>
+                        <td style="text-align:left;">2#排口（1#阳极涂布）</td>
+                        <td>3248.0</td>
+                        <td>10020.0</td>
+                        <td>6632.0</td>
+                        <td>32.5</td>
+                        <td>1780.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>11368.00</td>
+                        <td>8016.00</td>
+                        <td>7958400.00</td>
+                        <td>162500.00</td>
+                        <td>5696.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年5月</td>
+                        <td style="text-align:left;">3#排口（2#阳极涂布）</td>
+                        <td>3596.0</td>
+                        <td>11085.0</td>
+                        <td>7402.0</td>
+                        <td>36.8</td>
+                        <td>2010.5</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>12586.00</td>
+                        <td>8868.00</td>
+                        <td>8882400.00</td>
+                        <td>184000.00</td>
+                        <td>6433.60</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年6月</td>
+                        <td style="text-align:left;">3#排口（2#阳极涂布）</td>
+                        <td>3655.5</td>
+                        <td>11280.0</td>
+                        <td>7192.0</td>
+                        <td>35.2</td>
+                        <td>1955.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>12794.25</td>
+                        <td>9024.00</td>
+                        <td>8630400.00</td>
+                        <td>176000.00</td>
+                        <td>6256.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年7月</td>
+                        <td style="text-align:left;">1#排口（搅拌废气）</td>
+                        <td>3678.0</td>
+                        <td>11350.5</td>
+                        <td>7545.0</td>
+                        <td>37.0</td>
+                        <td>2035.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>12873.00</td>
+                        <td>9080.40</td>
+                        <td>9054000.00</td>
+                        <td>185000.00</td>
+                        <td>6512.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年8月</td>
+                        <td style="text-align:left;">1#排口（搅拌废气）</td>
+                        <td>3950.0</td>
+                        <td>12180.0</td>
+                        <td>7601.0</td>
+                        <td>38.5</td>
+                        <td>2120.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>13825.00</td>
+                        <td>9744.00</td>
+                        <td>9121200.00</td>
+                        <td>192500.00</td>
+                        <td>6784.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年9月</td>
+                        <td style="text-align:left;">2#排口（1#阳极涂布）</td>
+                        <td>3702.0</td>
+                        <td>11425.5</td>
+                        <td>7757.0</td>
+                        <td>39.2</td>
+                        <td>2088.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>12957.00</td>
+                        <td>9140.40</td>
+                        <td>9308400.00</td>
+                        <td>196000.00</td>
+                        <td>6681.60</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年10月</td>
+                        <td style="text-align:left;">3#排口（2#阳极涂布）</td>
+                        <td>3931.0</td>
+                        <td>12100.0</td>
+                        <td>7769.0</td>
+                        <td>39.5</td>
+                        <td>2105.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>13758.50</td>
+                        <td>9680.00</td>
+                        <td>9322800.00</td>
+                        <td>197500.00</td>
+                        <td>6736.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年11月</td>
+                        <td style="text-align:left;">1#排口（搅拌废气）</td>
+                        <td>3868.0</td>
+                        <td>11950.5</td>
+                        <td>7569.0</td>
+                        <td>38.0</td>
+                        <td>2060.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>13538.00</td>
+                        <td>9560.40</td>
+                        <td>9082800.00</td>
+                        <td>190000.00</td>
+                        <td>6592.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">重庆基地</td>
+                        <td style="text-align:left;">2026年12月</td>
+                        <td style="text-align:left;">2#排口（1#阳极涂布）</td>
+                        <td>3945.0</td>
+                        <td>12250.0</td>
+                        <td>7706.0</td>
+                        <td>38.8</td>
+                        <td>2095.0</td>
+                        <td>3.50</td>
+                        <td>0.80</td>
+                        <td>1200.00</td>
+                        <td>5000.00</td>
+                        <td>3.20</td>
+                        <td>13807.50</td>
+                        <td>9800.00</td>
+                        <td>9247200.00</td>
+                        <td>194000.00</td>
+                        <td>6704.00</td>
+                        <td class="text-center">
+                            <a class="op-link" onclick="openEditModal(this)">编辑</a>
+                            <a class="op-link danger" onclick="deleteRow(this)">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between pt-4">
+            <div class="text-sm text-slate-500">共 12 条数据</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <select class="page-size-select">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                    <option>100 条/页</option>
+                </select>
+                <button class="pager-btn" disabled><i class="fas fa-angle-left text-xs"></i></button>
+                <button class="pager-btn active">1</button>
+                <button class="pager-btn">2</button>
+                <button class="pager-btn"><i class="fas fa-angle-right text-xs"></i></button>
+                <span class="text-sm text-slate-500 ml-2">跳至</span>
+                <input type="text" class="jump-input" value="1">
+                <span class="text-sm text-slate-500">/ 2 页</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ========== 新增/编辑弹窗 ========== -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box wide">
+        <div class="modal-header">
+            <h3 id="modalTitle">新增废气治理设施运行费用</h3>
+            <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-grid-2">
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>基地</label>
+                    <select class="form-control form-select" id="fieldBase">
+                        <option value="">请选择基地</option>
+                        <option>厦门基地</option>
+                        <option>重庆基地</option>
+                        <option>菏泽基地</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>月份</label>
+                    <select class="form-control form-select" id="fieldMonth">
+                        <option value="">请选择月份</option>
+                        <option>2026年1月</option>
+                        <option>2026年2月</option>
+                        <option>2026年3月</option>
+                        <option>2026年4月</option>
+                        <option>2026年5月</option>
+                        <option>2026年6月</option>
+                        <option>2026年7月</option>
+                        <option>2026年8月</option>
+                        <option>2026年9月</option>
+                        <option>2026年10月</option>
+                        <option>2026年11月</option>
+                        <option>2026年12月</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>排放口/设施</label>
+                    <input type="text" class="form-control" id="fieldFacility" placeholder="如：1#排口（搅拌废气）">
+                </div>
+            </div>
+
+            <div class="section-subtitle">本月消耗</div>
+            <div class="form-grid-3">
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>水 (吨)</label>
+                    <input type="number" step="0.1" class="form-control" id="fieldWater" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>电 (度)</label>
+                    <input type="number" step="0.1" class="form-control" id="fieldElec" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>液碱添加量 (吨)</label>
+                    <input type="number" step="0.1" class="form-control" id="fieldAlkali" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>活性炭添加量 (吨)</label>
+                    <input type="number" step="0.1" class="form-control" id="fieldCarbon" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>天然气 (m³)</label>
+                    <input type="number" step="0.1" class="form-control" id="fieldGas" placeholder="请输入" value="0">
+                </div>
+            </div>
+
+            <div class="section-subtitle">本月单价（取当前配置值，可编辑）</div>
+            <div class="form-grid-3">
+                <div class="form-row">
+                    <label class="form-label">水单价 (元/吨)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldWaterPrice" placeholder="自动带出">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">电单价 (元/度)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldElecPrice" placeholder="自动带出">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">液碱单价 (元/吨)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldAlkaliPrice" placeholder="自动带出">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">活性炭单价 (元/吨)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldCarbonPrice" placeholder="自动带出">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">天然气单价 (元/m³)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldGasPrice" placeholder="自动带出">
+                </div>
+            </div>
+
+            <div class="section-subtitle">本月运行费用（元）（自动计算）</div>
+            <div class="form-grid-3">
+                <div class="form-row">
+                    <label class="form-label">水费</label>
+                    <input type="text" class="form-control" id="fieldWaterCost" disabled placeholder="自动计算">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">电费</label>
+                    <input type="text" class="form-control" id="fieldElecCost" disabled placeholder="自动计算">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">液碱添加费用</label>
+                    <input type="text" class="form-control" id="fieldAlkaliCost" disabled placeholder="自动计算">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">活性炭添加费用</label>
+                    <input type="text" class="form-control" id="fieldCarbonCost" disabled placeholder="自动计算">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">天然气费用</label>
+                    <input type="text" class="form-control" id="fieldGasCost" disabled placeholder="自动计算">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+            <button class="btn-confirm" onclick="saveData()">确定</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 推送规则弹窗 ========== -->
+<div class="modal-overlay" id="pushModal">
+    <div class="modal-box narrow">
+        <div class="modal-header">
+            <h3>推送规则设置</h3>
+            <button class="modal-close" onclick="closeModal('pushModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-clock"></i>推送时间</div>
+                <div style="display:flex; align-items:center; gap:8px; padding-left:24px;">
+                    <span style="font-size:14px;color:#475569;">每月</span>
+                    <input type="number" class="input-inline" id="pushDay" value="1" min="1" max="31">
+                    <span style="font-size:14px;color:#475569;">号推送飞书消息提醒</span>
+                </div>
+                <div class="hint-text" style="padding-left:24px;margin-top:8px;">
+                    系统将在每月指定日期上午 09:00 自动发送飞书消息提醒各基地相关人员导入/录入上月数据。
+                </div>
+            </div>
+
+            <div class="rule-section">
+                <div class="rule-section-title"><i class="fas fa-users"></i>各基地接收人员配置</div>
+                <div class="base-config-row">
+                    <label>厦门基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-xiamen">
+                        <span class="tag">张三 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">李四 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>重庆基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-chongqing">
+                        <span class="tag">王五 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                     
+                    </div>
+                </div>
+                <div class="base-config-row">
+                    <label>菏泽基地</label>
+                    <div class="tag-input-wrap" id="tagWrap-heze">
+                        <span class="tag">赵六 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                        <span class="tag">孙七 <span class="remove" onclick="removeTag(this)">&times;</span></span>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('pushModal')">取消</button>
+            <button class="btn-confirm" onclick="savePushRule()">保存规则</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 单价配置弹窗 ========== -->
+<div class="modal-overlay" id="unitPriceModal">
+    <div class="modal-box narrow">
+        <div class="modal-header">
+            <h3>单价配置</h3>
+            <button class="modal-close" onclick="closeModal('unitPriceModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="limit-grid">
+                <div class="limit-item">
+                    <label>水单价 (元/吨)</label>
+                    <input type="number" step="0.01" id="unitWaterPrice" value="3.50">
+                </div>
+                <div class="limit-item">
+                    <label>电单价 (元/度)</label>
+                    <input type="number" step="0.01" id="unitElecPrice" value="0.80">
+                </div>
+                <div class="limit-item">
+                    <label>液碱单价 (元/吨)</label>
+                    <input type="number" step="0.01" id="unitAlkaliPrice" value="1200.00">
+                </div>
+                <div class="limit-item">
+                    <label>活性炭单价 (元/吨)</label>
+                    <input type="number" step="0.01" id="unitCarbonPrice" value="5000.00">
+                </div>
+                <div class="limit-item">
+                    <label>天然气单价 (元/m³)</label>
+                    <input type="number" step="0.01" id="unitGasPrice" value="3.20">
+                </div>
+            </div>
+            <div class="hint-text" style="padding-left:0;margin-top:12px;">
+                修改单价后，仅新增数据时自动带出最新配置值；编辑历史数据时保留原单价。
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('unitPriceModal')">取消</button>
+            <button class="btn-confirm" onclick="saveUnitPriceConfig()">保存配置</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 全局单价配置
+    let unitPrices = {
+        water: 3.50,
+        elec: 0.80,
+        alkali: 1200.00,
+        carbon: 5000.00,
+        gas: 3.20
+    };
+
+    // 应用当前配置单价到表单（用于新增）
+    function applyUnitPricesToForm() {
+        document.getElementById('fieldWaterPrice').value = unitPrices.water.toFixed(2);
+        document.getElementById('fieldElecPrice').value = unitPrices.elec.toFixed(2);
+        document.getElementById('fieldAlkaliPrice').value = unitPrices.alkali.toFixed(2);
+        document.getElementById('fieldCarbonPrice').value = unitPrices.carbon.toFixed(2);
+        document.getElementById('fieldGasPrice').value = unitPrices.gas.toFixed(2);
+    }
+
+    // 计算费用（使用表单中的单价）
+    function calculateCosts() {
+        const water = parseFloat(document.getElementById('fieldWater').value) || 0;
+        const elec = parseFloat(document.getElementById('fieldElec').value) || 0;
+        const alkali = parseFloat(document.getElementById('fieldAlkali').value) || 0;
+        const carbon = parseFloat(document.getElementById('fieldCarbon').value) || 0;
+        const gas = parseFloat(document.getElementById('fieldGas').value) || 0;
+
+        const waterPrice = parseFloat(document.getElementById('fieldWaterPrice').value) || 0;
+        const elecPrice = parseFloat(document.getElementById('fieldElecPrice').value) || 0;
+        const alkaliPrice = parseFloat(document.getElementById('fieldAlkaliPrice').value) || 0;
+        const carbonPrice = parseFloat(document.getElementById('fieldCarbonPrice').value) || 0;
+        const gasPrice = parseFloat(document.getElementById('fieldGasPrice').value) || 0;
+
+        document.getElementById('fieldWaterCost').value = (water * waterPrice).toFixed(2);
+        document.getElementById('fieldElecCost').value = (elec * elecPrice).toFixed(2);
+        document.getElementById('fieldAlkaliCost').value = (alkali * alkaliPrice).toFixed(2);
+        document.getElementById('fieldCarbonCost').value = (carbon * carbonPrice).toFixed(2);
+        document.getElementById('fieldGasCost').value = (gas * gasPrice).toFixed(2);
+    }
+
+    // 监听消耗和单价字段变化
+    ['fieldWater','fieldElec','fieldAlkali','fieldCarbon','fieldGas',
+     'fieldWaterPrice','fieldElecPrice','fieldAlkaliPrice','fieldCarbonPrice','fieldGasPrice'].forEach(function(id){
+        document.getElementById(id).addEventListener('input', calculateCosts);
+        document.getElementById(id).addEventListener('change', calculateCosts);
+    });
+
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    let editingRow = null;
+
+    function openAddModal() {
+        editingRow = null;
+        document.getElementById('modalTitle').textContent = '新增废气治理设施运行费用';
+        document.getElementById('fieldBase').value = '';
+        document.getElementById('fieldMonth').value = '';
+        document.getElementById('fieldFacility').value = '';
+        document.getElementById('fieldWater').value = '0';
+        document.getElementById('fieldElec').value = '0';
+        document.getElementById('fieldAlkali').value = '0';
+        document.getElementById('fieldCarbon').value = '0';
+        document.getElementById('fieldGas').value = '0';
+        // 新增时取当前配置的单价
+        applyUnitPricesToForm();
+        calculateCosts();
+        openModal('addModal');
+    }
+
+    function openEditModal(el) {
+        editingRow = el.closest('tr');
+        document.getElementById('modalTitle').textContent = '编辑废气治理设施运行费用';
+        const cells = editingRow.querySelectorAll('td');
+        document.getElementById('fieldBase').value = cells[0].textContent.trim();
+        document.getElementById('fieldMonth').value = cells[1].textContent.trim();
+        document.getElementById('fieldFacility').value = cells[2].textContent.trim();
+        document.getElementById('fieldWater').value = cells[3].textContent.trim() || '0';
+        document.getElementById('fieldElec').value = cells[4].textContent.trim() || '0';
+        document.getElementById('fieldAlkali').value = cells[5].textContent.trim() || '0';
+        document.getElementById('fieldCarbon').value = cells[6].textContent.trim() || '0';
+        document.getElementById('fieldGas').value = cells[7].textContent.trim() || '0';
+        // 编辑时取当前配置的单价（不使用行内历史单价）
+        applyUnitPricesToForm();
+        calculateCosts();
+        openModal('addModal');
+    }
+
+    function saveData() {
+        const base = document.getElementById('fieldBase').value;
+        const month = document.getElementById('fieldMonth').value;
+        const facility = document.getElementById('fieldFacility').value.trim();
+        const water = document.getElementById('fieldWater').value.trim() || '0';
+        const elec = document.getElementById('fieldElec').value.trim() || '0';
+        const alkali = document.getElementById('fieldAlkali').value.trim() || '0';
+        const carbon = document.getElementById('fieldCarbon').value.trim() || '0';
+        const gas = document.getElementById('fieldGas').value.trim() || '0';
+
+        if (!base) { alert('请选择基地'); return; }
+        if (!month) { alert('请选择月份'); return; }
+        if (!facility) { alert('请输入排放口/设施'); return; }
+
+        const waterPrice = document.getElementById('fieldWaterPrice').value;
+        const elecPrice = document.getElementById('fieldElecPrice').value;
+        const alkaliPrice = document.getElementById('fieldAlkaliPrice').value;
+        const carbonPrice = document.getElementById('fieldCarbonPrice').value;
+        const gasPrice = document.getElementById('fieldGasPrice').value;
+        const waterCost = document.getElementById('fieldWaterCost').value;
+        const elecCost = document.getElementById('fieldElecCost').value;
+        const alkaliCost = document.getElementById('fieldAlkaliCost').value;
+        const carbonCost = document.getElementById('fieldCarbonCost').value;
+        const gasCost = document.getElementById('fieldGasCost').value;
+
+        if (editingRow) {
+            const cells = editingRow.querySelectorAll('td');
+            cells[0].textContent = base;
+            cells[1].textContent = month;
+            cells[2].textContent = facility;
+            cells[3].textContent = water;
+            cells[4].textContent = elec;
+            cells[5].textContent = alkali;
+            cells[6].textContent = carbon;
+            cells[7].textContent = gas;
+            cells[8].textContent = waterPrice;
+            cells[9].textContent = elecPrice;
+            cells[10].textContent = alkaliPrice;
+            cells[11].textContent = carbonPrice;
+            cells[12].textContent = gasPrice;
+            cells[13].textContent = waterCost;
+            cells[14].textContent = elecCost;
+            cells[15].textContent = alkaliCost;
+            cells[16].textContent = carbonCost;
+            cells[17].textContent = gasCost;
+        } else {
+            const tbody = document.querySelector('#dataTable tbody');
+            const tr = document.createElement('tr');
+            let html = '<td style="text-align:left;">' + base + '</td>';
+            html += '<td style="text-align:left;">' + month + '</td>';
+            html += '<td style="text-align:left;">' + facility + '</td>';
+            html += '<td>' + water + '</td>';
+            html += '<td>' + elec + '</td>';
+            html += '<td>' + alkali + '</td>';
+            html += '<td>' + carbon + '</td>';
+            html += '<td>' + gas + '</td>';
+            html += '<td>' + waterPrice + '</td>';
+            html += '<td>' + elecPrice + '</td>';
+            html += '<td>' + alkaliPrice + '</td>';
+            html += '<td>' + carbonPrice + '</td>';
+            html += '<td>' + gasPrice + '</td>';
+            html += '<td>' + waterCost + '</td>';
+            html += '<td>' + elecCost + '</td>';
+            html += '<td>' + alkaliCost + '</td>';
+            html += '<td>' + carbonCost + '</td>';
+            html += '<td>' + gasCost + '</td>';
+            html += '<td class="text-center">';
+            html += '<a class="op-link" onclick="openEditModal(this)">编辑</a>';
+            html += '<a class="op-link danger" onclick="deleteRow(this)">删除</a>';
+            html += '</td>';
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+        }
+        closeModal('addModal');
+    }
+
+    function deleteRow(el) {
+        if (confirm('确定要删除该条记录吗？')) {
+            el.closest('tr').remove();
+        }
+    }
+
+    function openPushModal() {
+        openModal('pushModal');
+    }
+
+    function addTag(event, input) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const val = input.value.trim();
+            if (!val) return;
+            const wrap = input.closest('.tag-input-wrap');
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.innerHTML = val + ' <span class="remove" onclick="removeTag(this)">&times;</span>';
+            wrap.insertBefore(tag, input);
+            input.value = '';
+        }
+    }
+    function removeTag(el) {
+        el.closest('.tag').remove();
+    }
+
+    function savePushRule() {
+        const day = document.getElementById('pushDay').value;
+        if (!day || day < 1 || day > 31) {
+            alert('请输入有效的日期（1-31）');
+            return;
+        }
+        const bases = ['xiamen', 'chongqing', 'heze'];
+        const names = ['厦门基地', '重庆基地', '菏泽基地'];
+        let result = '推送规则已保存：\n每月 ' + day + ' 号推送飞书消息提醒\n';
+        bases.forEach(function(b, i) {
+            const wrap = document.getElementById('tagWrap-' + b);
+            const tags = wrap.querySelectorAll('.tag');
+            const arr = [];
+            tags.forEach(function(t) { arr.push(t.textContent.replace('×','').trim()); });
+            result += names[i] + '接收人：' + (arr.length ? arr.join('、') : '（未配置）') + '\n';
+        });
+        alert(result);
+        closeModal('pushModal');
+    }
+
+    function openUnitPriceModal() {
+        document.getElementById('unitWaterPrice').value = unitPrices.water;
+        document.getElementById('unitElecPrice').value = unitPrices.elec;
+        document.getElementById('unitAlkaliPrice').value = unitPrices.alkali;
+        document.getElementById('unitCarbonPrice').value = unitPrices.carbon;
+        document.getElementById('unitGasPrice').value = unitPrices.gas;
+        openModal('unitPriceModal');
+    }
+
+    function saveUnitPriceConfig() {
+        const water = parseFloat(document.getElementById('unitWaterPrice').value) || 0;
+        const elec = parseFloat(document.getElementById('unitElecPrice').value) || 0;
+        const alkali = parseFloat(document.getElementById('unitAlkaliPrice').value) || 0;
+        const carbon = parseFloat(document.getElementById('unitCarbonPrice').value) || 0;
+        const gas = parseFloat(document.getElementById('unitGasPrice').value) || 0;
+        unitPrices.water = water;
+        unitPrices.elec = elec;
+        unitPrices.alkali = alkali;
+        unitPrices.carbon = carbon;
+        unitPrices.gas = gas;
+        // 若弹窗正打开，同步更新表单单价
+        if (document.getElementById('addModal').classList.contains('active')) {
+            applyUnitPricesToForm();
+            calculateCosts();
+        }
+        alert('单价配置已保存');
+        closeModal('unitPriceModal');
+    }
+</script>
+
+</body>
+</html>
