@@ -57,7 +57,6 @@
 
   .header-right { display: flex; align-items: center; gap: 12px; }
 
-  /* 基地勾选框（顶栏） */
   .base-checkbox-group-header {
     display: flex; align-items: center; gap: 2px;
     background: #f1f5f9; border-radius: 6px; padding: 3px;
@@ -131,22 +130,6 @@
     margin-left: 4px;
   }
 
-  /* 图表级基地勾选框 */
-  .base-checkbox-group {
-    display: flex; align-items: center; gap: 12px; margin-left: auto;
-    background: #fff; padding: 4px 12px; border-radius: 6px;
-    border: 1px solid #e2e8f0;
-  }
-  .base-checkbox-group label {
-    display: flex; align-items: center; gap: 4px;
-    font-size: 12px; color: #475569; cursor: pointer;
-    user-select: none;
-  }
-  .base-checkbox-group input[type="checkbox"] {
-    accent-color: #2563eb; width: 14px; height: 14px; cursor: pointer;
-  }
-
-  /* Tooltip 提示 */
   .help-tip-wrap { position: relative; display: inline-flex; align-items: center; }
   .help-tip-btn {
     font-size: 11px; color: #2563eb; cursor: pointer;
@@ -208,16 +191,6 @@
   }
   .help-tip-content .tip-body .note i { color: #3b82f6; margin-right: 4px; }
   .help-tip-content .tip-body strong { color: #1e293b; }
-  .help-tip-content .tip-body .pending {
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: 6px;
-    padding: 8px 12px;
-    color: #92400e;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-  .help-tip-content .tip-body .pending i { color: #f59e0b; margin-right: 4px; }
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 16px; }
@@ -229,13 +202,12 @@
   .card-header {
     display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
   }
-  .card-title { font-size: 13px; font-weight: 600; color: #475569; }
+  .card-title { font-size: 13px; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 4px; }
   .card-badge {
     font-size: 11px; color: #94a3b8; background: #f8fafc;
     padding: 2px 8px; border-radius: 4px; border: 1px solid #e2e8f0;
   }
   .chart-box { width: 100%; height: 320px; }
-  .chart-box-sm { width: 100%; height: 260px; }
   .chart-box-gauge { width: 100%; height: 140px; }
 
   .base-kpi-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
@@ -263,7 +235,6 @@
   .base-kpi-unit { font-size: 12px; color: #94a3b8; font-weight: 400; }
   .base-kpi-yoy-inline { font-size: 13px; font-weight: 700; }
 
-  /* 危废卡片样式：按基地分行展示 */
   .hazard-row {
     display: flex;
     align-items: stretch;
@@ -307,7 +278,6 @@
   .hazard-card .hc-value .unit { font-size: 9px; color: #94a3b8; font-weight: 400; }
   .hazard-card .hc-yoy-inline { font-size: 11px; font-weight: 700; }
 
-  /* 排放浓度卡片（按基地+排放口合并，一行6个） */
   .conc-card-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -337,16 +307,11 @@
   .conc-card .cc-pollutant-row .cc-pvalue.over { color: #ef4444; }
   .conc-card .cc-pollutant-row .cc-pvalue .unit { font-size: 8px; color: #94a3b8; font-weight: 400; }
 
-  .over-limit { color: #ef4444 !important; font-weight: 700; background: #fef2f2; border-radius: 3px; padding: 2px 6px; }
-
   .footer {
     text-align: center; font-size: 11px; color: #94a3b8;
     margin-top: 24px; padding: 16px; border-top: 1px solid #e2e8f0; background: #fff;
   }
 
-  .hidden { display: none !important; }
-
-  /* 废水仪表盘 6个一行 */
   .gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
   .gauge-item {
     background: #fff; border-radius: 8px; padding: 4px 2px 6px 2px;
@@ -358,8 +323,22 @@
   .gauge-item .gauge-values span { color: #1e293b; font-weight: 600; }
   .gauge-item .gauge-values .sep { color: #cbd5e1; margin: 0 2px; }
 
-  /* 废气仪表盘 6个一行 */
-  .air-gauge-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
+  .air-gauge-group { margin-bottom: 16px; }
+  .air-gauge-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .air-gauge-row-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #1e293b;
+    margin-bottom: 6px;
+  }
+  .air-gauge-row-label .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .air-gauge-row-label .dot.xiamen { background: #3b82f6; }
+  .air-gauge-row-label .dot.chongqing { background: #22c55e; }
+  .air-gauge-row-label .dot.heze { background: #f59e0b; }
   .air-gauge-item {
     background: #fff; border-radius: 8px; padding: 6px 4px 8px 4px;
     border: 1px solid #e2e8f0; text-align: center; min-width: 0;
@@ -377,7 +356,6 @@
 </head>
 <body>
 
-<!-- 顶部栏（按截图样式） -->
 <div class="header-bar">
   <div class="header-left">
     <div class="header-title">环境信息看板</div>
@@ -402,65 +380,63 @@
 
 <div class="main-content">
 
-  <!-- ==================== 废水板块 ==================== -->
+  <!-- ==================== 废水板块（工业废水） ==================== -->
   <div class="section-header">
     <div class="section-title">
       <div class="icon-box" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-water"></i></div>
-      废水板块
+      废水板块（工业废水）
     </div>
   </div>
 
-  <!-- 1 & 4. 今年废水累计产生量（柱状图） + 近5年废水排放强度（条形图） -->
   <div class="grid-2" style="margin-bottom: 16px;">
     <div class="card">
       <div class="card-header">
-        <span class="card-title">今年废水累计产生量</span>
+        <span class="card-title">今年废水累计产生量
+          <span class="help-tip-wrap">
+            <span class="help-tip-btn" data-tip="help-wastewater-total"><i class="fas fa-info-circle"></i> 查看说明</span>
+            <div class="help-tip-content" id="tip-help-wastewater-total">
+              <div class="tip-header">
+                <div class="tip-title"><span class="idx-badge">1</span> 今年废水累计产生量</div>
+                <button class="tip-close" onclick="closeTip('tip-help-wastewater-total')"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="tip-body">
+                <p><strong>统计口径：</strong>统计“6废水排放量”中今年每月各基地下各排放口“废水排放总量（吨）”之和。</p>
+                <div class="formula">今年废水累计产生量 = Σ（今年每月该基地各排放口“废水排放总量（吨）”之和）</div>
+                <div class="note"><i class="fas fa-info-circle"></i> 数据来源：“6废水排放量”表；统计范围：本年度1月至上月。仅展示勾选基地数据。</div>
+              </div>
+            </div>
+          </span>
+        </span>
         <span class="card-badge">吨</span>
       </div>
       <div id="chart-wastewater-total-bar" class="chart-box"></div>
-      <div style="margin-top: 8px; text-align: right;">
-        <span class="help-tip-wrap">
-          <span class="help-tip-btn" data-tip="help-wastewater-total"><i class="fas fa-info-circle"></i> 查看说明</span>
-          <div class="help-tip-content" id="tip-help-wastewater-total">
-            <div class="tip-header">
-              <div class="tip-title"><span class="idx-badge">1</span> 今年废水累计产生量</div>
-              <button class="tip-close" onclick="closeTip('tip-help-wastewater-total')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="tip-body">
-              <p><strong>统计口径：</strong>统计“6废水排放量”中今年每月该基地下各排放口“废水排放总量（吨）”之和。</p>
-              <div class="formula">今年废水累计产生量 = Σ（今年每月该基地各排放口“废水排放总量（吨）”之和）</div>
-              <div class="note"><i class="fas fa-info-circle"></i> 数据来源：“6废水排放量”表；统计范围：本年度1月至当前月。仅展示勾选基地数据。</div>
-            </div>
-          </div>
-        </span>
-      </div>
     </div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">近5年废水排放强度</span>
+        <span class="card-title">近5年废水排放强度
+          <span class="help-tip-wrap">
+            <span class="help-tip-btn" data-tip="help-wastewater-history"><i class="fas fa-info-circle"></i> 查看说明</span>
+            <div class="help-tip-content" id="tip-help-wastewater-history">
+              <div class="tip-header">
+                <div class="tip-title"><span class="idx-badge">4</span> 近5年废水排放强度</div>
+                <button class="tip-close" onclick="closeTip('tip-help-wastewater-history')"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="tip-body">
+                <p><strong>统计口径：</strong>分别计算各基地近5年（含今年）的年度废水排放强度。</p>
+                <div class="formula">年度废水排放强度 = 年度废水排放量 ÷ 年度产能</div>
+                <div class="formula">年度废水排放量 ，取“6废水排放量”中全年每月该基地下各排放口“废水排放总量（吨）”之和。</div>
+                <div class="formula">年度产能 ，取“10产能统计”中全年该基地下所有“产能(MWh)”之和。</div>
+                <div class="note"><i class="fas fa-info-circle"></i> 用于观察各基地废水排放强度的长期变化趋势。展示各基地近5个年度数据。仅展示勾选基地数据。</div>
+              </div>
+            </div>
+          </span>
+        </span>
         <span class="card-badge">吨/MWh</span>
       </div>
       <div id="chart-wastewater-history" class="chart-box"></div>
-      <div style="margin-top: 8px; text-align: right;">
-        <span class="help-tip-wrap">
-          <span class="help-tip-btn" data-tip="help-wastewater-history"><i class="fas fa-info-circle"></i> 查看说明</span>
-          <div class="help-tip-content" id="tip-help-wastewater-history">
-            <div class="tip-header">
-              <div class="tip-title"><span class="idx-badge">4</span> 近5年废水排放强度</div>
-              <button class="tip-close" onclick="closeTip('tip-help-wastewater-history')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="tip-body">
-              <p><strong>统计口径：</strong>按今年废水排放强度的统计逻辑，分别计算各基地近5年（含今年）的废水排放强度。</p>
-              <div class="formula">年度废水排放强度 = 当年废水排放量 ÷ 当年产能</div>
-              <div class="note"><i class="fas fa-info-circle"></i> 用于观察各基地废水排放强度的长期变化趋势。展示各基地近5个年度数据。仅展示勾选基地数据。</div>
-            </div>
-          </div>
-        </span>
-      </div>
     </div>
   </div>
 
-  <!-- 2. 上月废水排放强度（卡片：同比数据在数值边上） -->
   <div class="sub-header">
     <span class="sub-index">2</span>
     <span class="sub-title">上月废水排放强度</span>
@@ -507,16 +483,10 @@
     </div>
   </div>
 
-  <!-- 5. 今年吨水处理成本月趋势（柱状图 + 基地勾选框） -->
   <div class="sub-header">
     <span class="sub-index">5</span>
     <span class="sub-title">今年吨水处理成本月趋势</span>
     <span class="sub-unit">元/吨</span>
-    <div class="base-checkbox-group" id="cost-base-checkbox">
-      <label><input type="checkbox" value="xiamen" checked> 厦门基地</label>
-      <label><input type="checkbox" value="chongqing" checked> 重庆基地</label>
-      <label><input type="checkbox" value="heze" checked> 菏泽基地</label>
-    </div>
     <span class="help-tip-wrap">
       <span class="help-tip-btn" data-tip="help-water-cost"><i class="fas fa-info-circle"></i> 查看说明</span>
       <div class="help-tip-content" id="tip-help-water-cost">
@@ -529,7 +499,7 @@
           <div class="formula">每月吨水处理成本 = 每月废水处理费用 ÷ 每月废水处理量</div>
           <p><strong>废水处理费用：</strong>取“7废水治理设施运行费用”中该基地各排放口总费用之和。</p>
           <p><strong>废水处理量：</strong>取“6废水排放量”中“废水处理量（吨）”。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 统计各基地今年1月至上月各月吨水处理成本，柱状图展示；可勾选基地筛选显示。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 统计各基地今年1月至上月各月吨水处理成本，柱状图展示；由顶部勾选框统一控制显示基地。</div>
         </div>
       </div>
     </span>
@@ -542,16 +512,10 @@
     <div id="chart-water-cost-trend" class="chart-box"></div>
   </div>
 
-  <!-- 6. 上月废水指标排放情况（原先2×2网格布局） -->
   <div class="sub-header">
     <span class="sub-index">6</span>
     <span class="sub-title">上月废水指标排放情况</span>
     <span class="sub-unit">mg/L</span>
-    <div class="base-checkbox-group" id="pollutant-base-checkbox">
-      <label><input type="checkbox" value="xiamen" checked> 厦门基地</label>
-      <label><input type="checkbox" value="chongqing" checked> 重庆基地</label>
-      <label><input type="checkbox" value="heze" checked> 菏泽基地</label>
-    </div>
     <span class="help-tip-wrap">
       <span class="help-tip-btn" data-tip="help-wastewater-indicator"><i class="fas fa-info-circle"></i> 查看说明</span>
       <div class="help-tip-content" id="tip-help-wastewater-indicator">
@@ -563,7 +527,7 @@
           <p><strong>统计口径：</strong>取“12每日废水出水数据”中上月每日各基地排放数据。</p>
           <p>指标包含：COD、氨氮、总氮、总磷。</p>
           <div class="formula">逐日排放曲线：展示上月1号至月底各基地每日排放浓度（mg/L）</div>
-          <div class="note"><i class="fas fa-info-circle"></i> 红色虚线为法规限值，用于判断每日排放是否超标。可勾选基地筛选显示。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 红色虚线为法规限值，用于判断每日排放是否超标。由顶部勾选框统一控制显示基地。</div>
         </div>
       </div>
     </span>
@@ -605,7 +569,6 @@
     </div>
   </div>
 
-  <!-- 7. 污染物排放总量占用情况（仪表盘 + 数值，一行6个） -->
   <div class="sub-header">
     <span class="sub-index">7</span>
     <span class="sub-title">污染物排放总量占用情况</span>
@@ -627,9 +590,7 @@
       </div>
     </span>
   </div>
-  <div class="gauge-grid" id="gauge-group">
-    <!-- 6个仪表盘由JS动态生成 -->
-  </div>
+  <div class="gauge-grid" id="gauge-group"></div>
 
   <!-- ==================== 固废板块 ==================== -->
   <div class="section-header">
@@ -639,59 +600,55 @@
     </div>
   </div>
 
-  <!-- 1 & 2. 近5年危废产生总量（条形图） + 近5年各基地危废产生强度（曲线图） -->
   <div class="grid-2" style="margin-bottom: 16px;">
     <div class="card">
       <div class="card-header">
-        <span class="card-title">近5年危废产生总量</span>
+        <span class="card-title">近5年危废产生总量
+          <span class="help-tip-wrap">
+            <span class="help-tip-btn" data-tip="help-hazardous-total"><i class="fas fa-info-circle"></i> 查看说明</span>
+            <div class="help-tip-content" id="tip-help-hazardous-total">
+              <div class="tip-header">
+                <div class="tip-title"><span class="idx-badge">1</span> 近5年危废产生总量</div>
+                <button class="tip-close" onclick="closeTip('tip-help-hazardous-total')"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="tip-body">
+                <p><strong>统计口径：</strong>按各基地取“9危险废物统计”中各年度所有记录中“处置量(t)”之和。</p>
+                <div class="formula">近5年危废产生总量 = Σ（各年度该基地所有危废“处置量(t)”之和）</div>
+                <div class="note"><i class="fas fa-info-circle"></i> 单位：吨；条形图展示各基地近5年数据，仅展示勾选基地数据。</div>
+              </div>
+            </div>
+          </span>
+        </span>
         <span class="card-badge">吨</span>
       </div>
       <div id="chart-hazardous-total-bar" class="chart-box"></div>
-      <div style="margin-top: 8px; text-align: right;">
-        <span class="help-tip-wrap">
-          <span class="help-tip-btn" data-tip="help-hazardous-total"><i class="fas fa-info-circle"></i> 查看说明</span>
-          <div class="help-tip-content" id="tip-help-hazardous-total">
-            <div class="tip-header">
-              <div class="tip-title"><span class="idx-badge">1</span> 近5年危废产生总量</div>
-              <button class="tip-close" onclick="closeTip('tip-help-hazardous-total')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="tip-body">
-              <p><strong>统计口径：</strong>按各基地取“9危险废物统计”中各年度所有记录中“处置量(t)”之和。</p>
-              <div class="formula">近5年危废产生总量 = Σ（各年度该基地所有危废“处置量(t)”之和）</div>
-              <div class="note"><i class="fas fa-info-circle"></i> 单位：吨；条形图展示各基地近5年数据，参照近5年废水排放强度样式。仅展示勾选基地数据。</div>
-            </div>
-          </div>
-        </span>
-      </div>
     </div>
     <div class="card">
       <div class="card-header">
-        <span class="card-title">近5年各基地危废产生强度</span>
+        <span class="card-title">近5年各基地危废产生强度
+          <span class="help-tip-wrap">
+            <span class="help-tip-btn" data-tip="help-hazardous-history"><i class="fas fa-info-circle"></i> 查看说明</span>
+            <div class="help-tip-content" id="tip-help-hazardous-history">
+              <div class="tip-header">
+                <div class="tip-title"><span class="idx-badge">2</span> 近5年各基地危废产生强度</div>
+                <button class="tip-close" onclick="closeTip('tip-help-hazardous-history')"><i class="fas fa-times"></i></button>
+              </div>
+              <div class="tip-body">
+                <p><strong>统计口径：</strong>统计近5年各基地年度产废强度。</p>
+                <div class="formula">年度产废强度 = 全年危废处置量 ÷ 全年产能</div>
+                <p><strong>全年危废处置量：</strong>取“9危险废物统计”中全年该基地下所有危废“处置量(t)”之和。</p>
+                <p><strong>全年产能：</strong>取“10产能统计”中全年该基地下所有“产能(MWh)”之和。</p>
+                <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；曲线图展示各基地近5年变化趋势，横坐标为年份，纵坐标为产生强度。仅展示勾选基地数据。</div>
+              </div>
+            </div>
+          </span>
+        </span>
         <span class="card-badge">吨/MWh</span>
       </div>
       <div id="chart-hazardous-history" class="chart-box"></div>
-      <div style="margin-top: 8px; text-align: right;">
-        <span class="help-tip-wrap">
-          <span class="help-tip-btn" data-tip="help-hazardous-history"><i class="fas fa-info-circle"></i> 查看说明</span>
-          <div class="help-tip-content" id="tip-help-hazardous-history">
-            <div class="tip-header">
-              <div class="tip-title"><span class="idx-badge">2</span> 近5年各基地危废产生强度</div>
-              <button class="tip-close" onclick="closeTip('tip-help-hazardous-history')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="tip-body">
-              <p><strong>统计口径：</strong>统计近5年各基地年度产废强度。</p>
-              <div class="formula">年度产废强度 = 全年危废处置量 ÷ 全年产能</div>
-              <p><strong>全年危废处置量：</strong>取“9危险废物统计”中全年该基地下所有危废“处置量(t)”之和。</p>
-              <p><strong>全年产能：</strong>取“10产能统计”中全年该基地下所有“产能(MWh)”之和。</p>
-              <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；曲线图展示各基地近5年变化趋势，横坐标为年份，纵坐标为产生强度。仅展示勾选基地数据。</div>
-            </div>
-          </div>
-        </span>
-      </div>
     </div>
   </div>
 
-  <!-- 3. 今年各类危废产生量（柱状图） -->
   <div class="sub-header">
     <span class="sub-index">3</span>
     <span class="sub-title">今年各类危废产生量</span>
@@ -720,7 +677,6 @@
     <div id="chart-hazardous-type-bar" class="chart-box"></div>
   </div>
 
-  <!-- 4. 各类危废上月产生强度（按基地分行展示，每行7个卡片） -->
   <div class="sub-header">
     <span class="sub-index">4</span>
     <span class="sub-title">各类危废上月产生强度（同比上一个月增长百分比）</span>
@@ -738,16 +694,13 @@
           <p><strong>上月危废处置量：</strong>取“9危险废物统计”中上月该基地下该类危废“处置量(t)”之和。</p>
           <p><strong>上月产能：</strong>取“10产能统计”中上月该基地所有“产能(MWh)”之和。</p>
           <div class="formula">同比增长 =（上月产生强度 - 上上月产生强度）÷ 上上月产生强度 × 100%</div>
-          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；按基地分行展示，每行左侧显示基地名称，右侧7个卡片展示各类危废产生强度及同比数据。仅统计产生危废的厂房有产能的处置量。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；按基地分行展示，每行左侧显示基地名称，右侧7个卡片展示各类危废产生强度及同比数据。仅统计产生危废的厂房有产能的处置量。不受顶部基地选择控制，始终展示全部三个基地。</div>
         </div>
       </div>
     </span>
   </div>
-  <div id="hazard-intensity-card-group">
-    <!-- 卡片由JS动态生成 -->
-  </div>
+  <div id="hazard-intensity-card-group"></div>
 
-  <!-- 5. 上月各基地产废强度（卡片形式展示，同比在数值右侧） -->
   <div class="sub-header">
     <span class="sub-index">5</span>
     <span class="sub-title">上月各基地产废强度</span>
@@ -764,16 +717,13 @@
           <div class="formula">上月产废强度 = 上月危废处置量 ÷ 上月产能</div>
           <p><strong>上月危废处置量：</strong>取“9危险废物统计”中上月该基地所有危废“处置量(t)”之和。</p>
           <p><strong>上月产能：</strong>取“10产能统计”中上月该基地所有“产能(MWh)”之和。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；卡片形式展示各基地上月产废强度数值 + 同比上上月增长/下降百分比。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；卡片形式展示各基地上月产废强度数值 + 同比上上月增长/下降百分比。不受顶部基地选择控制，始终展示全部三个基地。</div>
         </div>
       </div>
     </span>
   </div>
-  <div class="base-kpi-group" id="base-intensity-card-group">
-    <!-- 卡片由JS动态生成 -->
-  </div>
+  <div class="base-kpi-group" id="base-intensity-card-group"></div>
 
-  <!-- 6. 今年各月各厂房危废产废强度（三个并排柱状图） -->
   <div class="sub-header">
     <span class="sub-index">6</span>
     <span class="sub-title">今年各月各厂房危废产废强度</span>
@@ -790,7 +740,7 @@
           <div class="formula">月度产废强度 = 当月该厂房危废处置量 ÷ 当月该厂房产能</div>
           <p><strong>当月危废处置量：</strong>取“9危险废物统计”中当月该基地下该厂房所有危废“处置量(t)”之和。</p>
           <p><strong>当月产能：</strong>取“10产能统计”中当月该基地下该厂房“产能(MWh)”之和。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；分三个基地分别展示柱状图，横坐标为月份，柱状按该基地下各厂房展示。仅统计产生危废的厂房有产能的处置量。仅展示勾选基地数据。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；分三个基地分别展示柱状图，横坐标为月份，柱状按该基地下各厂房展示。仅统计产生危废的厂房有产能的处置量。不受顶部基地选择控制，始终展示全部三个基地。</div>
         </div>
       </div>
     </span>
@@ -818,7 +768,7 @@
     </div>
   </div>
 
-  <!-- 1. 今年各类污染物排放占用情况（仪表盘，一行6个） -->
+  <!-- 1. 今年各类污染物排放占用情况（三行显示，一个基地一行，每行4个仪表盘） -->
   <div class="sub-header">
     <span class="sub-index">1</span>
     <span class="sub-title">今年各类污染物排放占用情况</span>
@@ -835,16 +785,90 @@
           <div class="formula">占用情况 = 截止上月排放量 ÷ 允许排放量</div>
           <p><strong>截止上月排放量：</strong>取“4废气治理设施运行工况”中今年所有记录对应污染物“排放量（kg）”。</p>
           <p><strong>允许排放量：</strong>取“13污染物允许排放量”中对应污染物“排污许可运行排放量（kg）”。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 仪表盘展示，一个基地一个污染物一个图表，共12个图表，一行6个显示；下方同时展示具体数值。</div>
-        </div>
+               </div>
       </div>
     </span>
   </div>
-  <div class="air-gauge-grid" id="air-gauge-group">
-    <!-- 12个仪表盘由JS动态生成 -->
+
+  <!-- 废气仪表盘：三行结构，每行一个基地，每行4个 -->
+  <div class="air-gauge-group" id="air-gauge-group">
+    <!-- 厦门基地 -->
+    <div class="air-gauge-row-label"><span class="dot xiamen"></span>厦门基地</div>
+    <div class="air-gauge-row">
+      <div class="air-gauge-item">
+        <div id="air-gauge-xiamen-非甲烷总烃" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NMHC</strong></div>
+        <div class="gauge-values" id="air-gauge-values-xiamen-非甲烷总烃"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-xiamen-氮氧化物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NOx</strong></div>
+        <div class="gauge-values" id="air-gauge-values-xiamen-氮氧化物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-xiamen-颗粒物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>PM</strong></div>
+        <div class="gauge-values" id="air-gauge-values-xiamen-颗粒物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-xiamen-二氧化硫" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>SO2</strong></div>
+        <div class="gauge-values" id="air-gauge-values-xiamen-二氧化硫"></div>
+      </div>
+    </div>
+
+    <!-- 重庆基地 -->
+    <div class="air-gauge-row-label"><span class="dot chongqing"></span>重庆基地</div>
+    <div class="air-gauge-row">
+      <div class="air-gauge-item">
+        <div id="air-gauge-chongqing-非甲烷总烃" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NMHC</strong></div>
+        <div class="gauge-values" id="air-gauge-values-chongqing-非甲烷总烃"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-chongqing-氮氧化物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NOx</strong></div>
+        <div class="gauge-values" id="air-gauge-values-chongqing-氮氧化物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-chongqing-颗粒物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>PM</strong></div>
+        <div class="gauge-values" id="air-gauge-values-chongqing-颗粒物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-chongqing-二氧化硫" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>SO2</strong></div>
+        <div class="gauge-values" id="air-gauge-values-chongqing-二氧化硫"></div>
+      </div>
+    </div>
+
+    <!-- 菏泽基地 -->
+    <div class="air-gauge-row-label"><span class="dot heze"></span>菏泽基地</div>
+    <div class="air-gauge-row">
+      <div class="air-gauge-item">
+        <div id="air-gauge-heze-非甲烷总烃" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NMHC</strong></div>
+        <div class="gauge-values" id="air-gauge-values-heze-非甲烷总烃"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-heze-氮氧化物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>NOx</strong></div>
+        <div class="gauge-values" id="air-gauge-values-heze-氮氧化物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-heze-颗粒物" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>PM</strong></div>
+        <div class="gauge-values" id="air-gauge-values-heze-颗粒物"></div>
+      </div>
+      <div class="air-gauge-item">
+        <div id="air-gauge-heze-二氧化硫" class="chart-box-gauge"></div>
+        <div class="gauge-label"><strong>SO2</strong></div>
+        <div class="gauge-values" id="air-gauge-values-heze-二氧化硫"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- 2. 上月各类污染物排放浓度（按基地+排放口合并的卡片，一行6个） -->
+  <!-- 2. 上月各类污染物排放浓度 -->
   <div class="sub-header">
     <span class="sub-index">2</span>
     <span class="sub-title">上月各类污染物排放浓度</span>
@@ -860,16 +884,14 @@
           <p><strong>统计口径：</strong>展示上月各类污染物各排口排放浓度。</p>
           <p><strong>排放浓度：</strong>取“4废气治理设施运行工况”中今年所有记录对应污染物“排放浓度(mg/m³)”。</p>
           <p><strong>排放口：</strong>仅展示需统计的排放口数据（排放口在数据字典中配置，配置排放口名称及是否需要统计）。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 卡片形式展示，按基地+排放口合并同类项，一行展示6个排放口，展示数据包括：基地、排放口、各污染物排放浓度。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 卡片形式展示，展示数据包括：基地、排放口名称、该排放口各污染物排放浓度。</div>
         </div>
       </div>
     </span>
   </div>
-  <div class="conc-card-grid" id="air-concentration-card-group">
-    <!-- 卡片由JS动态生成 -->
-  </div>
+  <div class="conc-card-grid" id="air-concentration-card-group"></div>
 
-  <!-- 3. 各厂房非甲烷总烃上月产生强度（三个并排柱状图） -->
+  <!-- 3. 各厂房非甲烷总烃上月产生强度 -->
   <div class="sub-header">
     <span class="sub-index">3</span>
     <span class="sub-title">各厂房非甲烷总烃上月产生强度</span>
@@ -886,7 +908,7 @@
           <div class="formula">产生强度 = 各厂房非甲烷总烃上月排放量 ÷ 各厂房上月产能</div>
           <p><strong>各厂房非甲烷总烃排放量：</strong>取“4废气治理设施运行工况”中上月该厂房“排放量（kg）”。</p>
           <p><strong>各厂房上月产能：</strong>取“10产能统计”该厂房“产能 (Mwh)”。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 单位：kg/MWh；一个基地一个柱状图展示，横坐标厂房，纵坐标产生强度，三个柱状图并排展示，各占页面1/3。无产能的厂房不需要计算产生强度。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 单位：kg/MWh；无产能的厂房不需要计算产生强度。</div>
         </div>
       </div>
     </span>
@@ -906,7 +928,7 @@
     </div>
   </div>
 
-  <!-- 4. 近5年各类污染物排放强度（三个条形图并排） -->
+  <!-- 4. 近5年各类污染物排放强度 -->
   <div class="sub-header">
     <span class="sub-index">4</span>
     <span class="sub-title">近5年各类污染物排放强度</span>
@@ -923,7 +945,7 @@
           <div class="formula">排放强度 = 全年排放量 ÷ 全年产能</div>
           <p><strong>全年排放量：</strong>取“4废气治理设施运行工况”中全年该基地下所有需统计排放口对应污染物“排放量（kg）”之和。</p>
           <p><strong>全年产能：</strong>取“10产能统计”中全年该基地下所有“产能(MWh)”之和。</p>
-          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh；一个基地一个条形图展示，条形图纵轴年份，条形展示非甲烷总烃、氮氧化物、颗粒物、二氧化硫排放强度。三个条形图并排展示。注意排放量仅统计需要统计的排口数据。</div>
+          <div class="note"><i class="fas fa-info-circle"></i> 单位：吨/MWh</div>
         </div>
       </div>
     </span>
@@ -973,13 +995,8 @@ document.addEventListener('click', function(e) {
 });
 
 // ==================== 全局勾选状态 ====================
-// 顶栏勾选状态：group 表示集团（全选），heze/xiamen/chongqing 表示单个基地
-let headerSelectedBases = ['xiamen', 'chongqing', 'heze']; // 默认全选
+let headerSelectedBases = ['xiamen', 'chongqing', 'heze'];
 let headerIsGroup = true;
-
-// 图表级勾选状态
-let selectedCostBases = ['xiamen', 'chongqing', 'heze'];
-let selectedPollutantBases = ['xiamen', 'chongqing', 'heze'];
 
 // ==================== 数据配置 ====================
 const dataConfig = {
@@ -1170,16 +1187,16 @@ const dataConfig = {
     ],
     airNMHCByFactory: {
       xiamen: {
-        workshops: ['电芯厂房A', '电芯厂房B', '电芯厂房C'],
-        values: [0.007, 0.006, 0.005]
+        workshops: ['CM1', 'CM3', 'CM4', '其他'],
+        values: [0.007, 0.006, 0.005, 0.003]
       },
       chongqing: {
-        workshops: ['电芯厂房A', '电芯厂房B', '电芯厂房C'],
-        values: [0.009, 0.008, 0.007]
+        workshops: ['CM1', 'CM3', 'CM4', '其他'],
+        values: [0.009, 0.008, 0.007, 0.004]
       },
       heze: {
-        workshops: ['电芯厂房A', '电芯厂房B', '电芯厂房C'],
-        values: [0.006, 0.005, 0.004]
+        workshops: ['CM1', 'CM3', 'CM4', '其他'],
+        values: [0.006, 0.005, 0.004, 0.002]
       }
     },
     airHistoryByBase: {
@@ -1253,18 +1270,15 @@ function initCharts() {
     });
   });
   
-  // 废气仪表盘（12个，一行6个）
-  const airGaugeGroup = document.getElementById('air-gauge-group');
+  // 废气仪表盘：静态DOM已存在，直接初始化
   const pollutants = ['非甲烷总烃', '氮氧化物', '颗粒物', '二氧化硫'];
   bases.forEach(b => {
     pollutants.forEach(p => {
-      const div = document.createElement('div');
-      div.className = 'air-gauge-item';
       const chartId = `air-gauge-${b}-${p}`;
-      const shortName = p === '非甲烷总烃' ? 'NMHC' : (p === '氮氧化物' ? 'NOx' : (p === '颗粒物' ? 'PM' : 'SO2'));
-      div.innerHTML = `<div id="${chartId}" class="chart-box-gauge"></div><div class="gauge-label">${baseNames[b]} · <strong>${shortName}</strong></div><div class="gauge-values" id="air-gauge-values-${b}-${p}"></div>`;
-      airGaugeGroup.appendChild(div);
-      airGaugeCharts[chartId] = echarts.init(document.getElementById(chartId));
+      const el = document.getElementById(chartId);
+      if (el) {
+        airGaugeCharts[chartId] = echarts.init(el);
+      }
     });
   });
   
@@ -1288,7 +1302,7 @@ function renderAll() {
   updateAirHistoryByBase();
 }
 
-// ==================== 获取当前勾选的基地（顶栏） ====================
+// ==================== 获取当前勾选的基地 ====================
 function getActiveBases() {
   return headerSelectedBases;
 }
@@ -1324,7 +1338,6 @@ function updateWastewaterCharts() {
   const colors = { xiamen: '#3b82f6', chongqing: '#22c55e', heze: '#f59e0b' };
   const totalData = dataConfig.group.bases;
 
-  // 今年废水累计产生量柱状图
   const barData = activeBases.map(b => ({
     name: baseNames[b],
     value: totalData[b].wastewaterTotal,
@@ -1343,7 +1356,6 @@ function updateWastewaterCharts() {
     }]
   }, true);
 
-  // 近5年废水排放强度条形图
   const hist = dataConfig.group.wastewaterHistory;
   const series = [];
   activeBases.forEach(key => {
@@ -1498,7 +1510,6 @@ function updateHazardousCharts() {
   const baseNames = { xiamen: '厦门基地', chongqing: '重庆基地', heze: '菏泽基地' };
   const colors = { xiamen: '#3b82f6', chongqing: '#22c55e', heze: '#f59e0b' };
 
-  // 1. 近5年危废产生总量（条形图）
   const totalHist = dataConfig.group.hazardousTotalHistory;
   const totalSeries = [];
   activeBases.forEach(key => {
@@ -1519,7 +1530,6 @@ function updateHazardousCharts() {
     series: totalSeries
   }, true);
 
-  // 2. 近5年各基地危废产生强度（曲线图）
   const hist = dataConfig.group.hazardousHistory;
   const lineSeries = [];
   activeBases.forEach(key => {
@@ -1545,7 +1555,6 @@ function updateHazardousCharts() {
   }, true);
 }
 
-// 3. 今年各类危废产生量（柱状图）
 function updateHazardousTypeBar() {
   const activeBases = getActiveBases();
   const typeData = dataConfig.group.hazardousTypeYear;
@@ -1574,16 +1583,13 @@ function updateHazardousTypeBar() {
   }, true);
 }
 
-// 4 & 5. 卡片渲染
 function updateHazardousCards() {
-  const activeBases = getActiveBases();
-  // 4. 各类危废上月产生强度卡片（按基地分行，每行7个卡片）
   const cardGroup = document.getElementById('hazard-intensity-card-group');
   cardGroup.innerHTML = '';
   const types = dataConfig.group.hazardousIntensityCard.types;
   const baseNames = { xiamen: '厦门基地', chongqing: '重庆基地', heze: '菏泽基地' };
   
-  activeBases.forEach(b => {
+  ['xiamen', 'chongqing', 'heze'].forEach(b => {
     const row = document.createElement('div');
     row.className = 'hazard-row';
     const label = document.createElement('div');
@@ -1613,10 +1619,9 @@ function updateHazardousCards() {
     cardGroup.appendChild(row);
   });
 
-  // 5. 上月各基地产废强度卡片
   const baseCardGroup = document.getElementById('base-intensity-card-group');
   baseCardGroup.innerHTML = '';
-  activeBases.forEach(b => {
+  ['xiamen', 'chongqing', 'heze'].forEach(b => {
     const item = dataConfig.group.baseIntensityCard[b];
     const yoy = item.yoy;
     const yoyClass = yoy > 0 ? 'yoy-up' : (yoy < 0 ? 'yoy-down' : 'yoy-flat');
@@ -1634,29 +1639,15 @@ function updateHazardousCards() {
   });
 }
 
-// 6. 今年各月各厂房危废产废强度（按勾选基地动态展示）
 function updateFactoryMonthIntensity() {
-  const activeBases = getActiveBases();
   const data = dataConfig.group.factoryMonthIntensityByBase;
   const months = data.months;
   const workshops = data.workshops;
   const chartMap = { xiamen: charts.factoryMonthXiamen, chongqing: charts.factoryMonthChongqing, heze: charts.factoryMonthHeze };
-  const cardMap = { xiamen: 'chart-factory-month-xiamen', chongqing: 'chart-factory-month-chongqing', heze: 'chart-factory-month-heze' };
-  const containerMap = { xiamen: 'factory-month-intensity-group' };
   const workshopColors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
 
-  // 控制三个卡片的显示/隐藏
-  const group = document.getElementById('factory-month-intensity-group');
-  group.innerHTML = '';
-  activeBases.forEach(b => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const baseNames = { xiamen: '厦门基地', chongqing: '重庆基地', heze: '菏泽基地' };
-    card.innerHTML = `<div class="card-header"><span class="card-title">${baseNames[b]}</span><span class="card-badge">吨/MWh</span></div><div id="${cardMap[b]}" class="chart-box"></div>`;
-    group.appendChild(card);
-    // 重新初始化图表
-    if (chartMap[b]) { chartMap[b].dispose(); }
-    chartMap[b] = echarts.init(document.getElementById(cardMap[b]));
+  ['xiamen', 'chongqing', 'heze'].forEach(b => {
+    const chart = chartMap[b];
     const series = [];
     workshops.forEach((w, i) => {
       series.push({
@@ -1668,7 +1659,7 @@ function updateFactoryMonthIntensity() {
         label: { show: true, position: 'top', fontSize: 8, color: '#475569' }
       });
     });
-    chartMap[b].setOption({
+    chart.setOption({
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       legend: { data: workshops, right: 5, top: 0, textStyle: { color: '#64748b', fontSize: 9 }, itemWidth: 10, itemHeight: 6 },
       grid: { left: '12%', right: '5%', bottom: '10%', top: '22%' },
@@ -1681,7 +1672,6 @@ function updateFactoryMonthIntensity() {
 
 // ==================== 废气图表 ====================
 
-// 1. 今年各类污染物排放占用情况（仪表盘12个，一行6个）
 function updateAirGauges() {
   const data = dataConfig.group.airEmissionGauge;
   const colors = { xiamen: '#3b82f6', chongqing: '#22c55e', heze: '#f59e0b' };
@@ -1738,7 +1728,6 @@ function updateAirGauges() {
   });
 }
 
-// 2. 上月各类污染物排放浓度（按基地+排放口合并的卡片，一行6个）
 function updateAirConcentrationCards() {
   const group = document.getElementById('air-concentration-card-group');
   group.innerHTML = '';
@@ -1767,7 +1756,6 @@ function updateAirConcentrationCards() {
   });
 }
 
-// 3. 各厂房非甲烷总烃上月产生强度（三个柱状图）
 function updateAirNMHCByFactory() {
   const data = dataConfig.group.airNMHCByFactory;
   const colors = { xiamen: '#3b82f6', chongqing: '#22c55e', heze: '#f59e0b' };
@@ -1791,7 +1779,6 @@ function updateAirNMHCByFactory() {
   });
 }
 
-// 4. 近5年各类污染物排放强度（三个条形图）
 function updateAirHistoryByBase() {
   const data = dataConfig.group.airHistoryByBase;
   const years = data.years;
@@ -1833,17 +1820,14 @@ function refreshData(btn) {
 
 // ==================== 事件绑定 ====================
 document.addEventListener('DOMContentLoaded', function() {
-  // 顶栏基地勾选框
   const headerCheckboxes = document.querySelectorAll('#header-base-checkbox input[type="checkbox"]');
   headerCheckboxes.forEach(cb => {
     cb.addEventListener('change', function() {
       const value = this.value;
       if (value === 'group') {
-        // 集团勾选/取消
         if (this.checked) {
           headerSelectedBases = ['xiamen', 'chongqing', 'heze'];
           headerIsGroup = true;
-          // 勾选所有单个基地
           document.querySelectorAll('#header-base-checkbox input[type="checkbox"]').forEach(c => {
             if (c.value !== 'group') c.checked = true;
           });
@@ -1855,17 +1839,14 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       } else {
-        // 单个基地勾选/取消
         const checkedBases = Array.from(document.querySelectorAll('#header-base-checkbox input[type="checkbox"]:not([value="group"]):checked')).map(c => c.value);
         headerSelectedBases = checkedBases;
-        // 更新集团勾选状态
         const groupCb = document.querySelector('#header-base-checkbox input[value="group"]');
         if (groupCb) {
           groupCb.checked = checkedBases.length === 3;
         }
         headerIsGroup = checkedBases.length === 3;
       }
-      // 更新标签样式
       document.querySelectorAll('#header-base-checkbox label').forEach(label => {
         const cb = label.querySelector('input');
         if (cb && cb.checked) {
@@ -1878,30 +1859,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // 图表级勾选框（吨水处理成本）
-  document.querySelectorAll('#cost-base-checkbox input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function() {
-      selectedCostBases = Array.from(document.querySelectorAll('#cost-base-checkbox input:checked')).map(el => el.value);
-      updateWaterCostTrend();
-    });
-  });
-
-  // 图表级勾选框（废水指标排放）
-  document.querySelectorAll('#pollutant-base-checkbox input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function() {
-      selectedPollutantBases = Array.from(document.querySelectorAll('#pollutant-base-checkbox input:checked')).map(el => el.value);
-      updatePollutantCharts();
-    });
-  });
-
-  // 年份选择
   document.getElementById('yearSelect').addEventListener('change', function() {
     console.log('年份切换为：', this.value);
-    // 可根据年份重新加载数据
   });
 });
 
-// 初始化
 initCharts();
 
 window.addEventListener('resize', () => {
