@@ -548,6 +548,7 @@
                         <th rowspan="2">月份</th>
                         <th rowspan="2">排放口</th>
                         <th rowspan="2">废水排放总量<br>(吨)</th>
+                        <th rowspan="2">废水处理量<br>(吨)</th>
                         <th colspan="3">COD</th>
                         <th colspan="3">氨氮</th>
                         <th colspan="3">总氮</th>
@@ -580,6 +581,7 @@
                         <td style="text-align:left;">2024年1月</td>
                         <td style="text-align:left;">生产废水排口 DW001</td>
                         <td>917</td>
+                        <td>850</td>
                         <td>27</td>
                         <td>150</td>
                         <td>24.76</td>
@@ -605,6 +607,7 @@
                         <td style="text-align:left;">2024年2月</td>
                         <td style="text-align:left;">生产废水排口 DW001</td>
                         <td>1096</td>
+                        <td>1020</td>
                         <td>27</td>
                         <td>150</td>
                         <td>29.59</td>
@@ -631,6 +634,7 @@
                         <td style="text-align:left;">2024年3月</td>
                         <td style="text-align:left;">生活污水排口 DW002</td>
                         <td>500</td>
+                        <td>480</td>
                         <td>/</td>
                         <td></td>
                         <td></td>
@@ -718,6 +722,10 @@
                 <div class="form-row">
                     <label class="form-label"><span class="required">*</span>废水排放总量 (吨)</label>
                     <input type="number" step="0.01" class="form-control" id="fieldTotalWater" placeholder="请输入" value="0">
+                </div>
+                <div class="form-row">
+                    <label class="form-label"><span class="required">*</span>废水处理量 (吨)</label>
+                    <input type="number" step="0.01" class="form-control" id="fieldTreatedWater" placeholder="请输入" value="0">
                 </div>
             </div>
 
@@ -1012,6 +1020,7 @@
         document.getElementById('fieldMonth').value = '';
         document.getElementById('fieldOutlet').value = '';
         document.getElementById('fieldTotalWater').value = '0';
+        document.getElementById('fieldTreatedWater').value = '0';
         document.getElementById('fieldCOD').value = '0';
         document.getElementById('fieldAmmonia').value = '0';
         document.getElementById('fieldTN').value = '0';
@@ -1030,17 +1039,18 @@
         document.getElementById('fieldMonth').value = cells[1].textContent.trim();
         document.getElementById('fieldOutlet').value = cells[2].textContent.trim();
         document.getElementById('fieldTotalWater').value = cells[3].textContent.trim() || '0';
+        document.getElementById('fieldTreatedWater').value = cells[4].textContent.trim() || '0';
         
         // COD
-        document.getElementById('fieldCOD').value = cells[4].textContent.trim() || '0';
+        document.getElementById('fieldCOD').value = cells[5].textContent.trim() || '0';
         // 氨氮
-        document.getElementById('fieldAmmonia').value = cells[7].textContent.trim() || '0';
+        document.getElementById('fieldAmmonia').value = cells[8].textContent.trim() || '0';
         // 总氮
-        document.getElementById('fieldTN').value = cells[10].textContent.trim() || '0';
+        document.getElementById('fieldTN').value = cells[11].textContent.trim() || '0';
         // 总磷
-        document.getElementById('fieldTP').value = cells[13].textContent.trim() || '0';
+        document.getElementById('fieldTP').value = cells[14].textContent.trim() || '0';
         // 悬浮物
-        document.getElementById('fieldSS').value = cells[16].textContent.trim() || '0';
+        document.getElementById('fieldSS').value = cells[17].textContent.trim() || '0';
 
         applyLimitsToForm();
         calculateAutoFields();
@@ -1060,6 +1070,7 @@
         const month = document.getElementById('fieldMonth').value;
         const outlet = document.getElementById('fieldOutlet').value.trim();
         const totalWater = document.getElementById('fieldTotalWater').value.trim() || '0';
+        const treatedWater = document.getElementById('fieldTreatedWater').value.trim() || '0';
         
         const cod = document.getElementById('fieldCOD').value.trim() || '0';
         const codLimit = document.getElementById('fieldCODLimit').value;
@@ -1092,6 +1103,7 @@
         html += '<td style="text-align:left;">' + month + '</td>';
         html += '<td style="text-align:left;">' + outlet + '</td>';
         html += '<td>' + totalWater + '</td>';
+        html += '<td>' + treatedWater + '</td>';
         // COD
         html += '<td>' + cod + '</td>';
         html += '<td>' + codLimit + '</td>';
